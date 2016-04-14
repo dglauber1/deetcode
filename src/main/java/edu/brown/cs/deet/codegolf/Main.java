@@ -52,14 +52,7 @@ public class Main {
     OptionParser parser = new OptionParser();
 
     parser.accepts("gui");
-    OptionSpec<File> fileSpec = parser.nonOptions().ofType(File.class);
     OptionSet options = parser.parse(args);
-
-    db = options.valueOf(fileSpec);
-    if (db == null) {
-      System.out.println("ERROR: Please specify a star file");
-      System.exit(1);
-    }
 
     if (options.has("gui")) {
       runSparkServer();
@@ -95,7 +88,7 @@ public class Main {
     @Override
     public ModelAndView handle(Request req, Response res) {
       Map<String, Object> variables =
-          ImmutableMap.of("title", "Stars: Query the database", "db", db);
+        ImmutableMap.of("title", "Stars: Query the database", "db", db);
       return new ModelAndView(variables, "query.ftl");
     }
   }
