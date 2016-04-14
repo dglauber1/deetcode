@@ -36,7 +36,6 @@ import spark.TemplateViewRoute;
 import spark.ExceptionHandler;
 import spark.template.freemarker.FreeMarkerEngine;
 
-
 public class Main {
   public static void main(String[] args) {
     new Main(args).run();
@@ -65,7 +64,7 @@ public class Main {
     if (options.has("gui")) {
       runSparkServer();
     } else {
-      // Process commands
+      REPL.run();
     }
   }
 
@@ -75,7 +74,8 @@ public class Main {
     try {
       config.setDirectoryForTemplateLoading(templates);
     } catch (IOException ioe) {
-      System.out.printf("ERROR: Unable use %s for template loading.\n", templates);
+      System.out.printf("ERROR: Unable use %s for template loading.\n",
+        templates);
       System.exit(1);
     }
     return new FreeMarkerEngine(config);
@@ -95,12 +95,10 @@ public class Main {
     @Override
     public ModelAndView handle(Request req, Response res) {
       Map<String, Object> variables =
-        ImmutableMap.of("title", "Stars: Query the database",
-                        "db", db);
+          ImmutableMap.of("title", "Stars: Query the database", "db", db);
       return new ModelAndView(variables, "query.ftl");
     }
   }
-
 
   private static class ExceptionPrinter implements ExceptionHandler {
     @Override
@@ -115,6 +113,5 @@ public class Main {
       res.body(stacktrace.toString());
     }
   }
-
 
 }
