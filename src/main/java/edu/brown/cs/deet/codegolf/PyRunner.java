@@ -46,7 +46,7 @@ public class PyRunner implements Runner {
     }
     if (inputs.size() != outputs.size()) {
       System.out
-      .println("ERROR: PYINPUT and PYOUTPUT files should have the same number of lines");
+        .println("ERROR: PYINPUT and PYOUTPUT files should have the same number of lines");
       throw new Exception();
     }
     Map<Pair<String, String>, String> toReturn = new HashMap<>();
@@ -66,10 +66,9 @@ public class PyRunner implements Runner {
   }
 
   private static List<String> getInputs(String testDir) throws IOException {
-    System.out.println(testDir);
     String testInputPath = testDir + "/PYINPUT";
     try (BufferedReader testInputReader =
-        new BufferedReader(new FileReader(testInputPath))) {
+      new BufferedReader(new FileReader(testInputPath))) {
       List<String> inputs = new ArrayList<>();
       String line;
       while ((line = testInputReader.readLine()) != null) {
@@ -82,7 +81,7 @@ public class PyRunner implements Runner {
   private static List<String> getOutputs(String testDir) throws IOException {
     String testOutputPath = testDir + "/PYOUTPUT";
     try (BufferedReader testOutputReader =
-        new BufferedReader(new FileReader(testOutputPath))) {
+      new BufferedReader(new FileReader(testOutputPath))) {
       List<String> outputs = new ArrayList<>();
       String line;
       while ((line = testOutputReader.readLine()) != null) {

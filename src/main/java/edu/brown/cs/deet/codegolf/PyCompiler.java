@@ -18,7 +18,7 @@ public class PyCompiler implements Compiler {
   @Override
   public String compile(String filePath) {
     PyObject compileOutput =
-      interpreter.eval(String.format("compile_mod('%s')", filePath));
+        interpreter.eval(String.format("compile_mod('%s')", filePath));
     if (compileOutput.isInteger()) {
       // compile_mod() returned 0, code successfully compiled
       return null;

@@ -1,6 +1,5 @@
 package edu.brown.cs.deet.codegolf;
 
-import java.io.OutputStream;
 import java.util.Map;
 
 public interface Runner {
