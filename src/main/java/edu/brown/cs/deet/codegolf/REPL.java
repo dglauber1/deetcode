@@ -5,9 +5,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.python.apache.commons.compress.compressors.FileNameUtil;
 import org.python.util.PythonInterpreter;
 
 import com.google.common.base.Splitter;
@@ -25,12 +30,11 @@ public final class REPL {
         + "standard input.");
       return;
     }
-    BufferedReader reader = new BufferedReader(inputReader);
-    try (PythonInterpreter interpreter = new PythonInterpreter()) {
-      String input = "";
-      interpreter.exec("import sys");
-      interpreter.setErr(System.err);
-      interpreter.setOut(System.out);
+    String input = "";
+    PythonInterpreter interpreter = new PythonInterpreter();
+    Compiler pyCompiler = new PyCompiler(interpreter);
+    Runner pyRunner = new PyRunner(interpreter);
+    try (BufferedReader reader = new BufferedReader(inputReader)) {
       while ((input = reader.readLine()) != null) {
         if (input.length() == 0) {
           break;
@@ -42,73 +46,44 @@ public final class REPL {
           System.out.println("usage"); // TODO
           continue;
         }
-        // file name of user input file
-        String userInputFile = parsedInput.get(0);
-        int lastSlashIndex = userInputFile.lastIndexOf("/");
-        String inputFileDir = userInputFile.substring(0, lastSlashIndex);
-        String module =
-          userInputFile.substring(lastSlashIndex + 1,
-            userInputFile.indexOf('.'));
-        interpreter.exec(String.format("sys.path = ['%s']", inputFileDir));
-        interpreter.exec("from " + module + " import *");
-
-        // directory of test suite
-        String testDir = parsedInput.get(1);
-        List<String> inputs = getInputs(testDir);
-        List<String> outputs = getOutputs(testDir);
-        if (inputs.size() != outputs.size()) {
-          System.out
-          .println("ERROR: PYINPUT and PYOUTPUT files should have the same number of lines");
+        String solutionPath = parsedInput.get(0);
+        String compileMessage = pyCompiler.compile(solutionPath);
+        if (compileMessage != null) {
+          System.out.println(compileMessage);
           continue;
         }
-        String functionName = testDir.substring(testDir.lastIndexOf('/') + 1);
-        for (int i = 0; i < inputs.size(); i++) {
-          String testInput = inputs.get(i);
-          String testOutput = outputs.get(i);
-          String userOutput =
-            interpreter.eval(functionName + "(" + testInput + ")").toString();
-          if (!userOutput.equals(testOutput)) {
-            System.out
-              .println(String
-                .format(
-                  "%s produced INCORRECT output %s with input = %s. Output should have been %s",
-                  functionName, userOutput, testInput, testOutput));
+        String testDir = parsedInput.get(1);
+        Map<Pair<String, String>, String> runResults;
+        try {
+          runResults = pyRunner.run(solutionPath, testDir);
+        } catch (Exception e) {
+          System.out.println(String.format(
+            "ERROR: error occurred running %s on test directory %s",
+            solutionPath, testDir));
+          e.printStackTrace();
+          continue;
+        }
+        boolean passedAllTests = true;
+        for (Pair<String, String> testIO : runResults.keySet()) {
+          if (runResults.get(testIO) == null) {
+            System.out.println(String.format(
+              "SUCCESS : on %s, expected %s, got %s", testIO.getFirst(),
+              testIO.getSecond(), testIO.getSecond()));
           } else {
             System.out.println(String.format(
-              "%s produced the correct output, %s, with input = %s",
-              functionName, testOutput, testInput));
+              "FAILURE : on %s, expected %s, got %s", testIO.getFirst(),
+              testIO.getSecond(), runResults.get(testIO)));
+            passedAllTests = false;
           }
         }
+        if (passedAllTests) {
+          System.out.println("All tests passed!");
+        }
       }
+
     } catch (IOException e) {
       System.out.println("ERROR: error occurred in reading input");
       return;
-    }
-  }
-
-  private static List<String> getInputs(String testDir) throws IOException {
-    String testInputPath = testDir + "/PYINPUT";
-    try (BufferedReader testInputReader =
-        new BufferedReader(new FileReader(testInputPath))) {
-      List<String> inputs = new ArrayList<>();
-      String line;
-      while ((line = testInputReader.readLine()) != null) {
-        inputs.add(line);
-      }
-      return inputs;
-    }
-  }
-
-  private static List<String> getOutputs(String testDir) throws IOException {
-    String testOutputPath = testDir + "/PYOUTPUT";
-    try (BufferedReader testOutputReader =
-        new BufferedReader(new FileReader(testOutputPath))) {
-      List<String> outputs = new ArrayList<>();
-      String line;
-      while ((line = testOutputReader.readLine()) != null) {
-        outputs.add(line);
-      }
-      return outputs;
     }
   }
 }
