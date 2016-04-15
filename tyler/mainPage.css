@@ -1,0 +1,49 @@
+#links {
+  float: right;
+  height: 50px;
+}
+
+#main-nav.navbar-brand {
+  padding-left: 0px;
+}
+
+.icon-addon {
+  margin-right: 5px;
+}
+
+#title h2 {
+  font-weight: 300;
+}
+
+.categories {
+  margin-top: 20px;
+}
+
+.list-group.questions .list-group-item {
+  padding: 20px;
+}
+
+.leaderboard-button {
+  vertical-align: middle;
+  line-height: 27px;
+  background-color: #F5F6FA;;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  color: #757575;
+  cursor: default;
+  font-family: arial,sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  margin-left: 20px;
+  padding: 0 12px;
+  text-align: center
+}
+
+.leaderboard-button:hover {
+  border-color: #b9b9b9;
+  color: #2f4f4f;
+}
+
+.leaderboard-button:focus {
+  outline: none;  
+}

@@ -1,18 +1,12 @@
 package edu.brown.cs.deet.codegolf;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.python.apache.commons.compress.compressors.FileNameUtil;
 import org.python.util.PythonInterpreter;
 
 import com.google.common.base.Splitter;
@@ -27,7 +21,7 @@ public final class REPL {
       inputReader = new InputStreamReader(System.in, "UTF-8");
     } catch (UnsupportedEncodingException e1) {
       System.out.println("ERROR: Encoding excpetion during read from "
-        + "standard input.");
+          + "standard input.");
       return;
     }
     String input = "";
@@ -40,8 +34,8 @@ public final class REPL {
           break;
         }
         List<String> parsedInput =
-          Lists.newArrayList(Splitter.onPattern("\\s").trimResults()
-            .omitEmptyStrings().split(input));
+            Lists.newArrayList(Splitter.onPattern("\\s").trimResults()
+              .omitEmptyStrings().split(input));
         if (parsedInput.size() != 2) {
           System.out.println("usage"); // TODO
           continue;
