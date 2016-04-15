@@ -8,14 +8,66 @@
          avoid minification for clarity. -->
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/html5bp.css">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/simple-sidebar.css" rel="stylesheet">       
+    <link rel="stylesheet" href="css/TimeCircles.css" />
     <link rel="stylesheet" href="css/main.css">
   </head>
   <body>
-     ${content}
+         <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                        Codegolf
+                    </a>
+                </li>
+                <li>
+                    <a href="#">Homepage</a>
+                </li>
+                <li>
+                    <a href="#">Categories</a>
+                </li>
+                <li>
+                    <a href="#">Your Profile</a>
+                </li>
+                <li>
+                    <a href="#">About</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+	
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a>               	
+                    	${content}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+     
      <!-- Again, we're serving up the unminified source for clarity. -->
      <script src="js/jquery-2.1.1.js"></script>
+     <script type="text/javascript" src="js/TimeCircles.js"></script>
+     <!-- Menu Toggle Script -->
+     <script>
+	     $("#menu-toggle").click(function(e) {
+	         e.preventDefault();
+	         $("#wrapper").toggleClass("toggled");
+	     });
+     </script>
+     
      <script src="js/main.js"></script>
+     <script src="js/timer.js"></script>
   </body>
-  <!-- See http://html5boilerplate.com/ for a good place to start
-       dealing with real world issues like old browsers.  -->
 </html>

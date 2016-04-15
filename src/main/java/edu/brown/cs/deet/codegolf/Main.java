@@ -81,15 +81,15 @@ public class Main {
     FreeMarkerEngine freeMarker = createEngine();
 
     // Setup Spark Routes
-    Spark.get("/stars", new FrontHandler(), freeMarker);
+    Spark.get("/game", new FrontHandler(), freeMarker);
   }
 
   private class FrontHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
       Map<String, Object> variables =
-        ImmutableMap.of("title", "Stars: Query the database", "db", db);
-      return new ModelAndView(variables, "query.ftl");
+        ImmutableMap.of("title", "Game");
+      return new ModelAndView(variables, "game.ftl");
     }
   }
 
