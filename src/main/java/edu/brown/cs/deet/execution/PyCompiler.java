@@ -1,4 +1,4 @@
-package edu.brown.cs.deet.codegolf;
+package edu.brown.cs.deet.execution;
 
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;

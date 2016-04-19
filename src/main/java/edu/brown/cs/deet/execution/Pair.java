@@ -1,4 +1,4 @@
-package edu.brown.cs.deet.codegolf;
+package edu.brown.cs.deet.execution;
 
 public class Pair<E, V> {
 
