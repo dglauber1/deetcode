@@ -11,8 +11,8 @@
   </p>
   <br/>
   <div>
-  	<canvas id="code-box" width="600" height="300" style="border:3px solid black; float: left"></canvas>
   	<div id="CountDownTimer" data-timer="120" style="width: 300px; height: 300px; float: right"></div> 
+	<textarea id="codepad"></textarea>
   </div>
 </#assign>
-<#include "main.ftl">
+<#include "game-main.ftl">

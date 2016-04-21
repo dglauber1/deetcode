@@ -10,11 +10,13 @@
     <link rel="stylesheet" href="css/html5bp.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
 	<link href="css/simple-sidebar.css" rel="stylesheet">       
+    <link rel="stylesheet" href="css/TimeCircles.css" />
+	<link rel="stylesheet" href="codemirror/lib/codemirror.css">
     <link rel="stylesheet" href="css/main.css">
   </head>
+  
   <body>
-         <div id="wrapper">
-
+  	<div id="wrapper">
         <!-- Sidebar -->
         <div id="sidebar-wrapper">
             <ul class="sidebar-nav">
@@ -57,6 +59,10 @@
      
      <!-- Again, we're serving up the unminified source for clarity. -->
      <script src="js/jquery-2.1.1.js"></script>
+     <script type="text/javascript" src="js/TimeCircles.js"></script>
+     <script src="codemirror/lib/codemirror.js"></script>
+   	 <script src="codemirror/mode/javascript/javascript.js"></script>
+   	 
      <!-- Menu Toggle Script -->
      <script>
 	     $("#menu-toggle").click(function(e) {
@@ -65,6 +71,8 @@
 	     });
      </script>
      
-     <script src="js/main.js"></script>
+   	 <script src="js/main.js"></script>
+     <script src="js/timer.js"></script>
+     <script src="js/codepad.js"></script>
   </body>
 </html>
