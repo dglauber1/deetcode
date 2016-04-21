@@ -1,42 +1,20 @@
 package edu.brown.cs.deet.codegolf;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-
+import edu.brown.cs.deet.execution.REPL;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 
-import freemarker.template.Configuration;
-import spark.Spark;
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.TemplateViewRoute;
-import spark.ExceptionHandler;
-import spark.template.freemarker.FreeMarkerEngine;
-
+/**
+ * Main class that launches Codegolf.
+ * @author el13
+ */
 public class Main {
+  /**
+   * Constructs a new Main and runs it.
+   * @param args The arguments from the command line.
+   */
   public static void main(String[] args) {
     new Main(args).run();
   }
@@ -44,10 +22,17 @@ public class Main {
   private String[] args;
   private File db;
 
+  /**
+   * Creates a new instance of Main.
+   * @param args The arguments from the command line.
+   */
   private Main(String[] args) {
     this.args = args;
   }
 
+  /**
+   * Runs Main.
+   */
   private void run() {
     OptionParser parser = new OptionParser();
 
@@ -55,56 +40,9 @@ public class Main {
     OptionSet options = parser.parse(args);
 
     if (options.has("gui")) {
-      runSparkServer();
+      Server.runSparkServer();
     } else {
       REPL.run();
     }
   }
-
-  private static FreeMarkerEngine createEngine() {
-    Configuration config = new Configuration();
-    File templates = new File("src/main/resources/spark/template/freemarker");
-    try {
-      config.setDirectoryForTemplateLoading(templates);
-    } catch (IOException ioe) {
-      System.out.printf("ERROR: Unable use %s for template loading.\n",
-        templates);
-      System.exit(1);
-    }
-    return new FreeMarkerEngine(config);
-  }
-
-  private void runSparkServer() {
-    Spark.externalStaticFileLocation("src/main/resources/static");
-    Spark.exception(Exception.class, new ExceptionPrinter());
-
-    FreeMarkerEngine freeMarker = createEngine();
-
-    // Setup Spark Routes
-    Spark.get("/game", new FrontHandler(), freeMarker);
-  }
-
-  private class FrontHandler implements TemplateViewRoute {
-    @Override
-    public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables =
-        ImmutableMap.of("title", "Game");
-      return new ModelAndView(variables, "game.ftl");
-    }
-  }
-
-  private static class ExceptionPrinter implements ExceptionHandler {
-    @Override
-    public void handle(Exception e, Request req, Response res) {
-      res.status(500);
-      StringWriter stacktrace = new StringWriter();
-      try (PrintWriter pw = new PrintWriter(stacktrace)) {
-        pw.println("<pre>");
-        e.printStackTrace(pw);
-        pw.println("</pre>");
-      }
-      res.body(stacktrace.toString());
-    }
-  }
-
 }
