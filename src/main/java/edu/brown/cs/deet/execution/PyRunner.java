@@ -17,16 +17,21 @@ public class PyRunner implements Runner {
 
   private PythonInterpreter interpreter;
 
-  public PyRunner(PythonInterpreter interp) {
-    this.interpreter = interp;
+  public PyRunner() {
+    this.interpreter = new PythonInterpreter();
     interpreter.setErr(System.err);
     interpreter.exec("import sys");
     interpreter.exec("if not 'bin' in sys.path : sys.path.append('bin')");
     interpreter.exec("from runner import *");
   }
 
+  public String runTest(String input) {
+    PyObject runOutput = interpreter.eval("run(" + input + ")");
+    return runOutput.toString();
+  }
+
   @Override
-  public Map<Pair<String, String>, String> run(String solutionPath,
+  public Map<Pair<String, String>, String> runTests(String solutionPath,
       String testDir) throws Exception {
     Path userInputFile = Paths.get(solutionPath);
     String file = userInputFile.getFileName().toString();

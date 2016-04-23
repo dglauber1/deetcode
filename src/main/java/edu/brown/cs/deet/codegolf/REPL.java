@@ -31,20 +31,18 @@ public final class REPL {
       return;
     }
     String input = "";
-    PythonInterpreter interpreter = new PythonInterpreter();
-    Compiler pyCompiler = new PyCompiler(interpreter);
-    Runner pyRunner = new PyRunner(interpreter);
+    Compiler pyCompiler = new PyCompiler();
+    Runner pyRunner = new PyRunner();
     try (BufferedReader reader = new BufferedReader(inputReader)) {
       while ((input = reader.readLine()) != null) {
         if (input.length() == 0) {
           break;
         }
-        List<String> parsedInput =
-            Lists.newArrayList(Splitter.onPattern("\\s").trimResults()
-              .omitEmptyStrings().split(input));
+        List<String> parsedInput = Lists.newArrayList(Splitter.onPattern("\\s")
+            .trimResults().omitEmptyStrings().split(input));
         if (parsedInput.size() != 3) {
           System.out.println("Please enter an input of the following form: "
-            + "language path/to/solution.file path/to/test/directory");
+              + "language path/to/solution.file path/to/test/directory");
           System.out.println();
           continue;
         }
@@ -52,15 +50,15 @@ public final class REPL {
         Runner myRunner;
         Compiler myCompiler;
         switch (language) {
-        case "python":
-          myRunner = pyRunner;
-          myCompiler = pyCompiler;
-          break;
-        default:
-          System.out
-          .println("language must be either python, ruby, or javascript");
-          System.out.println();
-          continue;
+          case "python":
+            myRunner = pyRunner;
+            myCompiler = pyCompiler;
+            break;
+          default:
+            System.out
+            .println("language must be either python, ruby, or javascript");
+            System.out.println();
+            continue;
         }
         String solutionPath = parsedInput.get(1);
         String compileMessage = myCompiler.compile(solutionPath);
@@ -71,11 +69,11 @@ public final class REPL {
         String testDir = parsedInput.get(2);
         Map<Pair<String, String>, String> runResults;
         try {
-          runResults = myRunner.run(solutionPath, testDir);
+          runResults = myRunner.runTests(solutionPath, testDir);
         } catch (Exception e) {
           System.out.println(String.format(
-            "ERROR: error occurred running %s on test directory %s",
-            solutionPath, testDir));
+              "ERROR: error occurred running %s on test directory %s",
+              solutionPath, testDir));
           System.out.println();
           continue;
         }
@@ -83,12 +81,12 @@ public final class REPL {
         for (Pair<String, String> testIO : runResults.keySet()) {
           if (runResults.get(testIO) == null) {
             System.out.println(String.format(
-              "SUCCESS : on (%s), expected %s, got %s", testIO.getFirst(),
-              testIO.getSecond(), testIO.getSecond()));
+                "SUCCESS : on (%s), expected %s, got %s", testIO.getFirst(),
+                testIO.getSecond(), testIO.getSecond()));
           } else {
             System.out.println(String.format(
-              "FAILURE : on (%s), expected %s, got %s", testIO.getFirst(),
-              testIO.getSecond(), runResults.get(testIO)));
+                "FAILURE : on (%s), expected %s, got %s", testIO.getFirst(),
+                testIO.getSecond(), runResults.get(testIO)));
             passedAllTests = false;
           }
         }

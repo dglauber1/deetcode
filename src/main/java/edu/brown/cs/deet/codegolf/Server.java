@@ -81,6 +81,30 @@ final class Server {
   }
 
   /**
+   * Handler that checks if the entered name in the Admin page is already taken.
+   * @author el13
+   */
+  private static class RunHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String name = GSON.fromJson(qm.value("textValue"), String.class);
+      boolean exists = false;
+
+      try {
+        exists = admin.doesChallengeExist(name);
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
+          exists).build();
+      return GSON.toJson(variables);
+    }
+  }
+
+  /**
    * Handles loading the game page.
    * @author el51
    */

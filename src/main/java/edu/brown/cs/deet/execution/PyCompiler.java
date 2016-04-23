@@ -7,8 +7,8 @@ public class PyCompiler implements Compiler {
 
   private PythonInterpreter interpreter;
 
-  public PyCompiler(PythonInterpreter interp) {
-    this.interpreter = interp;
+  public PyCompiler() {
+    this.interpreter = new PythonInterpreter();
     interpreter.setErr(System.err);
     interpreter.exec("import sys");
     interpreter.exec("if not 'bin' in sys.path : sys.path.append('bin')");
@@ -17,8 +17,8 @@ public class PyCompiler implements Compiler {
 
   @Override
   public String compile(String filePath) {
-    PyObject compileOutput =
-        interpreter.eval(String.format("compile_mod('%s')", filePath));
+    PyObject compileOutput = interpreter.eval(String.format(
+        "compile_mod('%s')", filePath));
     if (compileOutput.isInteger()) {
       // compile_mod() returned 0, code successfully compiled
       return null;
