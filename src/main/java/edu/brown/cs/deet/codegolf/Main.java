@@ -2,9 +2,11 @@ package edu.brown.cs.deet.codegolf;
 
 import java.io.File;
 
-import edu.brown.cs.deet.execution.REPL;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import edu.brown.cs.deet.database.ChallengeDatabase;
+import edu.brown.cs.deet.execution.REPL;
+import edu.brown.cs.deet.pageHandler.AdminHandler;
 
 /**
  * Main class that launches Codegolf.
@@ -16,7 +18,11 @@ public class Main {
    * @param args The arguments from the command line.
    */
   public static void main(String[] args) {
-    new Main(args).run();
+    try {
+      new Main(args).run();
+    } catch (RuntimeException e) {
+      System.out.println(e.getMessage());
+    }
   }
 
   private String[] args;
@@ -40,6 +46,10 @@ public class Main {
     OptionSet options = parser.parse(args);
 
     if (options.has("gui")) {
+      AdminHandler a =
+          new AdminHandler(new ChallengeDatabase(
+              "testdata/challengeDatabaseTester.sqlite3"));
+      Server.setAdminHandler(a);
       Server.runSparkServer();
     } else {
       REPL.run();
