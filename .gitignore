@@ -7,3 +7,4 @@ local.properties
 target
 .project
 /target/
+testdata/challengeDatabaseTester.sqlite3
