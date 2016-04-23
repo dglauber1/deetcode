@@ -175,6 +175,43 @@ public class ChallengeDatabase implements AutoCloseable {
   }
 
   /**
+   * Determines if a category already exists in the database.
+   * @param qCategory the category in question
+   * @return True if the category already exists, False otherwise
+   * @throws SQLException when something has gone wrong with the database
+   */
+  public boolean doesCategoryExist(String qCategory) throws SQLException {
+    String query =
+        "SELECT DISTINCT category FROM challenge WHERE category = ?;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, qCategory);
+      try (ResultSet rs = ps.executeQuery()) {
+        return rs.next();
+      }
+    }
+  }
+
+  /**
+   * Gets all the Categories that exist on the site.
+   * @return A List of Strings each representing a category
+   * @throws SQLException when something has gone wrong with the database
+   */
+  public List<String> getAllCategories() throws SQLException {
+    String query = "SELECT DISTINCT category FROM challenge;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      List<String> categories = new ArrayList<>();
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          categories.add(rs.getString(1));
+        }
+      }
+      return categories;
+    }
+  }
+
+  /**
    * Inserts a row into the test table for the challenge and the language
    * corresponding to the challenge.
    * @param qName

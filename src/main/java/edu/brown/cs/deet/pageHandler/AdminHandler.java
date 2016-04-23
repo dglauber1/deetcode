@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 import edu.brown.cs.deet.database.ChallengeDatabase;
 
@@ -137,5 +138,34 @@ public class AdminHandler {
     }
 
     return false;
+  }
+
+  /**
+   * Determines if a challenge by a certain name already exists.
+   * @param qName the name of the challenge
+   * @return True if the challenge already exists, false otherwise.
+   * @throws SQLException if something with the database goes awry
+   */
+  public boolean doesChallengeExist(String qName) throws SQLException {
+    return challenges.doesChallengeExist(qName);
+  }
+
+  /**
+   * Determines if a category already exists.
+   * @param qCategory the category
+   * @return True if the category already exists, false otherwise.
+   * @throws SQLException if something with the database goes awry
+   */
+  public boolean doesCategoryExist(String qCategory) throws SQLException {
+    return challenges.doesCategoryExist(qCategory);
+  }
+
+  /**
+   * Gets all the categories that exist.
+   * @return all the categories in a List
+   * @throws SQLException if something with the database goes awry
+   */
+  public List<String> getAllCategories() throws SQLException {
+    return challenges.getAllCategories();
   }
 }

@@ -32,6 +32,7 @@ final class Server {
 
   private static final Gson GSON = new Gson();
   private static AdminHandler admin;
+  private static final int PORT = 4567;
 
   /**
    * Sets the AdminHandler for the Server.
@@ -63,6 +64,8 @@ final class Server {
    * Runs the Spark Server.
    */
   public static void runSparkServer() {
+    Spark.setPort(PORT);
+
     Spark.externalStaticFileLocation("src/main/resources/static");
     Spark.exception(Exception.class, new ExceptionPrinter());
 
@@ -70,6 +73,11 @@ final class Server {
 
     // Setup Spark Routes
     Spark.get("/game", new GamePageHandler(), freeMarker);
+    Spark.get("/admin_add", new AdminAddHandler(), freeMarker);
+    Spark.post("/admin_add/results", new NewChallengeHandler());
+    Spark.post("/namecheck", new NameCheckHandler());
+    Spark.post("/categorycheck", new CategoryCheckHandler());
+    Spark.post("/getallcategories", new AllCategoriesHandler());
   }
 
   /**
@@ -122,6 +130,19 @@ final class Server {
   }
 
   /**
+   * Shows the Admin_add page.
+   * @author el13
+   */
+  private static class AdminAddHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      Map<String, Object> variables = ImmutableMap.of("title",
+          "Add a Challenge");
+      return new ModelAndView(variables, "newChallenge.ftl");
+    }
+  }
+
+  /**
    * Handles the input of a new challenge.
    * @author el13
    */
@@ -135,6 +156,10 @@ final class Server {
       String category = GSON.fromJson(qm.value("category"), String.class);
       String name = GSON.fromJson(qm.value("name"), String.class);
       String description = GSON.fromJson(qm.value("description"), String.class);
+
+      System.out.println(name);
+      System.out.println(description);
+      System.out.println(category);
 
       Boolean success = false;
 
@@ -199,6 +224,78 @@ final class Server {
           success).build();
       return GSON.toJson(variables);
     }
+  }
+
+  /**
+   * Handler that checks if the entered name in the Admin page is already taken.
+   * @author el13
+   */
+  @SuppressWarnings("unused")
+  private static class NameCheckHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String name = GSON.fromJson(qm.value("textValue"), String.class);
+      boolean exists = false;
+
+      try {
+        exists = admin.doesChallengeExist(name);
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
+          exists).build();
+      return GSON.toJson(variables);
+    }
+  }
+
+  /**
+   * Handler that gets all of the Categories.
+   * @author el13
+   */
+  private static class AllCategoriesHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      List<String> categories = null;
+      try {
+        categories = admin.getAllCategories();
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      Map<String, Object> variables = new ImmutableMap.Builder().put(
+          "categories", categories).build();
+      return GSON.toJson(variables);
+    }
+
+  }
+
+  /**
+   * Handler that checks if the entered new category already exists.
+   * @author el13
+   */
+  private static class CategoryCheckHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String name = GSON.fromJson(qm.value("textValue"), String.class);
+      boolean exists = false;
+
+      try {
+        exists = admin.doesCategoryExist(name);
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
+          exists).build();
+      return GSON.toJson(variables);
+    }
+
   }
 
   /**
