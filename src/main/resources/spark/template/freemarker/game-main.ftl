@@ -16,7 +16,7 @@
   </head>
   
   <body>
-  	<div id="wrapper">
+  	<div id="wrapper" class="toggled">
         <!-- Sidebar -->
         <div id="sidebar-wrapper">
             <ul class="sidebar-nav">
@@ -46,8 +46,12 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a>               	
-                    	${content}
+                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a> 
+                        <a class="btn btn-default" id="run">Run</a>           	
+                          
+                    </div>
+                    <div class="col-lg-12">
+                         ${content}
                     </div>
                 </div>
             </div>

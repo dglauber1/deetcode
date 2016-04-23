@@ -1,10 +1,14 @@
 package edu.brown.cs.deet.codegolf;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 import spark.ExceptionHandler;
@@ -20,22 +24,19 @@ import spark.template.freemarker.FreeMarkerEngine;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
+import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 import freemarker.template.Configuration;
 
 final class Server {
+
   private static final Gson GSON = new Gson();
   private static AdminHandler admin;
 
   /**
-   * Private constructor for a Server. Never gets called.
-   */
-  private Server() {
-  }
-
-  /**
    * Sets the AdminHandler for the Server.
-   * @param a the AdminHandler
+   * @param a
+   *          the AdminHandler
    */
   public static void setAdminHandler(AdminHandler a) {
     admin = a;
@@ -68,18 +69,55 @@ final class Server {
     FreeMarkerEngine freeMarker = createEngine();
 
     // Setup Spark Routes
-    Spark.get("/game", new FrontHandler(), freeMarker);
+    Spark.get("/game", new GamePageHandler(), freeMarker);
   }
 
   /**
-   * Handles loading the front page.
-   * @author el13
+   * Handles loading the game page.
+   * @author el51
    */
-  private static class FrontHandler implements TemplateViewRoute {
+  private static class GamePageHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Game");
-      return new ModelAndView(variables, "game.ftl");
+      // TODO Currently set to the test database.
+      String dbPath = "data/test.db";
+      try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
+        /*
+         * TODO: This is currently hard-coded in because Tyler and I haven't yet
+         * // set up a system to pass question names/ids from the categories
+         * page // to the game page.
+         */
+        String challengeName = "test";
+        String promptPath = null;
+        try {
+          if (challenges.doesChallengeExist(challengeName)) {
+            List<String> challengeData = challenges.getChallenge(challengeName);
+            promptPath = challengeData.get(1).concat("PROMPT");
+          }
+        } catch (SQLException e) {
+          System.out.println(e.getMessage());
+          System.exit(1);
+        }
+
+        StringBuilder promptBuilder = new StringBuilder();
+        try (BufferedReader r = new BufferedReader(new FileReader(promptPath))) {
+          String line = r.readLine();
+          while (line != null) {
+            promptBuilder.append(line).append("\n");
+            line = r.readLine();
+          }
+        } catch (FileNotFoundException e) {
+          System.out.println("File not found: " + promptPath);
+          System.exit(1);
+        } catch (IOException e) {
+          System.out.println("I/O Exception at: " + promptPath);
+          System.exit(1);
+        }
+
+        Map<String, Object> variables = ImmutableMap.of("title", "Game",
+            "prompt", promptBuilder.toString());
+        return new ModelAndView(variables, "game.ftl");
+      }
     }
   }
 
@@ -88,7 +126,7 @@ final class Server {
    * @author el13
    */
   private static class NewChallengeHandler implements Route {
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
       QueryParamsMap qm = req.queryMap();
@@ -115,10 +153,10 @@ final class Server {
         String javaStub = GSON.fromJson(qm.value("javaStub"), String.class);
 
         // Python test cases and stub code
-        String pythonInput =
-            GSON.fromJson(qm.value("pythonInput"), String.class);
-        String pythonOutput =
-            GSON.fromJson(qm.value("pythonOutput"), String.class);
+        String pythonInput = GSON.fromJson(qm.value("pythonInput"),
+            String.class);
+        String pythonOutput = GSON.fromJson(qm.value("pythonOutput"),
+            String.class);
         String pythonStub = GSON.fromJson(qm.value("pythonStub"), String.class);
 
         // Ruby test cases and stub code
@@ -157,8 +195,8 @@ final class Server {
         }
       }
 
-      Map<String, Object> variables =
-          new ImmutableMap.Builder().put("success", success).build();
+      Map<String, Object> variables = new ImmutableMap.Builder().put("success",
+          success).build();
       return GSON.toJson(variables);
     }
   }
