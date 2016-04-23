@@ -27,7 +27,7 @@ public class PyRunner implements Runner {
 
   @Override
   public Map<Pair<String, String>, String> run(String solutionPath,
-    String testDir) throws Exception {
+      String testDir) throws Exception {
     Path userInputFile = Paths.get(solutionPath);
     String file = userInputFile.getFileName().toString();
     String module = file.replaceAll("\\..*", "");
@@ -41,12 +41,12 @@ public class PyRunner implements Runner {
       inputs = getInputs(testDir);
       outputs = getOutputs(testDir);
     } catch (IOException e) {
-      System.out.println("ERROR: error reading PYINPUT and PYOUTPUT");
+      System.out.println("ERROR: error reading input.txt and output.txt");
       throw new Exception();
     }
     if (inputs.size() != outputs.size()) {
       System.out
-        .println("ERROR: PYINPUT and PYOUTPUT files should have the same number of lines");
+      .println("ERROR: input.txt and output.txt files should have the same number of lines");
       throw new Exception();
     }
     Map<Pair<String, String>, String> toReturn = new HashMap<>();
@@ -66,9 +66,9 @@ public class PyRunner implements Runner {
   }
 
   private static List<String> getInputs(String testDir) throws IOException {
-    String testInputPath = testDir + "/PYINPUT";
-    try (BufferedReader testInputReader =
-      new BufferedReader(new FileReader(testInputPath))) {
+    String testInputPath = testDir + "/input.txt";
+    try (BufferedReader testInputReader = new BufferedReader(new FileReader(
+        testInputPath))) {
       List<String> inputs = new ArrayList<>();
       String line;
       while ((line = testInputReader.readLine()) != null) {
@@ -79,9 +79,9 @@ public class PyRunner implements Runner {
   }
 
   private static List<String> getOutputs(String testDir) throws IOException {
-    String testOutputPath = testDir + "/PYOUTPUT";
-    try (BufferedReader testOutputReader =
-      new BufferedReader(new FileReader(testOutputPath))) {
+    String testOutputPath = testDir + "/output.txt";
+    try (BufferedReader testOutputReader = new BufferedReader(new FileReader(
+        testOutputPath))) {
       List<String> outputs = new ArrayList<>();
       String line;
       while ((line = testOutputReader.readLine()) != null) {
