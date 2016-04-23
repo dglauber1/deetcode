@@ -118,7 +118,7 @@ final class Server {
         try {
           if (challenges.doesChallengeExist(challengeName)) {
             List<String> challengeData = challenges.getChallenge(challengeName);
-            promptPath = challengeData.get(1).concat("PROMPT");
+            promptPath = challengeData.get(1).concat("description.txt");
           }
         } catch (SQLException e) {
           System.out.println(e.getMessage());

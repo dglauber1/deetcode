@@ -82,7 +82,7 @@
      <script>
      </script>
      
-     <-- Save user's progress when the user leaves/refreshes the page -->
+     <!-- Save user's progress when the user leaves/refreshes the page -->
      <script>
      </script>
      
