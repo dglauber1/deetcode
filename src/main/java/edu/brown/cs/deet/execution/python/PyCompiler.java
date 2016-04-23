@@ -5,10 +5,17 @@ import org.python.util.PythonInterpreter;
 
 import edu.brown.cs.deet.execution.MyCompiler;
 
+/**
+ * Implementation of a MyCompiler for the python language.
+ * @author dglauber
+ */
 public class PyCompiler implements MyCompiler {
 
   private PythonInterpreter interpreter;
 
+  /**
+   * Constructor for a PyCompiler.
+   */
   public PyCompiler() {
     this.interpreter = new PythonInterpreter();
     interpreter.setErr(System.err);

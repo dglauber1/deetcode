@@ -16,8 +16,15 @@ import edu.brown.cs.deet.execution.Triple;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyTester;
 
+/**
+ * Class to allow command line repl testing of codegolf project.
+ * @author dglauber
+ */
 public final class REPL {
 
+  /**
+   * Runs the command line repl.
+   */
   public static void run() {
 
     InputStreamReader inputReader = null;
@@ -54,7 +61,7 @@ public final class REPL {
             break;
           default:
             System.out
-                .println("language must be either python, ruby, or javascript");
+            .println("language must be either python, ruby, or javascript");
             System.out.println();
             continue;
         }

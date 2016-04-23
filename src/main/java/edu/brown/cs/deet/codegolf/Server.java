@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import spark.ExceptionHandler;
 import spark.ModelAndView;
@@ -112,7 +111,7 @@ final class Server {
           break;
         default:
           System.out
-          .println("Error in RunHandler: language must be either python, ruby, or javascript");
+              .println("Error in RunHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -131,7 +130,7 @@ final class Server {
 
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -143,8 +142,8 @@ final class Server {
             testInputList);
 
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("runResults", runResults).build();
+        .put("error", false).put("compiled", "success")
+        .put("runResults", runResults).build();
         Files.delete(file.toPath());
         printWriter.close();
         return GSON.toJson(variables);
@@ -308,7 +307,6 @@ final class Server {
    * Handler that checks if the entered name in the Admin page is already taken.
    * @author el13
    */
-  @SuppressWarnings("unused")
   private static class NameCheckHandler implements Route {
     @Override
     public Object handle(Request req, Response res) {

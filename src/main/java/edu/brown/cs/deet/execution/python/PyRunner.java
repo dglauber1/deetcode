@@ -11,10 +11,17 @@ import org.python.util.PythonInterpreter;
 
 import edu.brown.cs.deet.execution.Runner;
 
+/**
+ * Implementation of Runner for the python language.
+ * @author dglauber
+ */
 public class PyRunner implements Runner {
 
   private PythonInterpreter interpreter;
 
+  /**
+   * Constructor for a PyRunner object.
+   */
   public PyRunner() {
     this.interpreter = new PythonInterpreter();
     interpreter.setErr(System.err);
