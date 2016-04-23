@@ -1,0 +1,44 @@
+h4 {
+	margin-top: 20px;
+}
+
+.adminForm {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#python .row {
+	margin-top: 20px;
+}
+
+#ruby .row {
+	margin-top: 20px;
+}
+
+#javascript .row {
+	margin-top: 20px;
+}
+
+#java .row {
+	margin-top: 20px;
+}
+
+.dropdown {
+	margin-bottom: 10px;
+}
+
+#challengeName {
+	margin-bottom: 10px;
+}
+
+#description .row {
+	margin-top: 20px;
+}
+
+textarea {
+	resize: none;
+}
+
+#submit .row {
+	margin-top: 20px;
+}

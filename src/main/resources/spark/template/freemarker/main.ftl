@@ -6,12 +6,14 @@
     <!-- In real-world webapps, css is usually minified and
          concatenated. Here, separate normalize from our code, and
          avoid minification for clarity. -->
+    <link rel="stylesheet" href="js/codemirror-5.14.2/lib/codemirror.css">
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/html5bp.css">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-	<link href="css/simple-sidebar.css" rel="stylesheet">       
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/simple-sidebar.css">       
     <link rel="stylesheet" href="css/TimeCircles.css" />
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/newChallenge.css">
   </head>
   <body>
          <div id="wrapper">
@@ -57,8 +59,17 @@
     <!-- /#wrapper -->
      
      <!-- Again, we're serving up the unminified source for clarity. -->
+     <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
      <script src="js/jquery-2.1.1.js"></script>
      <script type="text/javascript" src="js/TimeCircles.js"></script>
+
+     <!-- Code Mirror Scripts -->
+     <script src="js/codemirror-5.14.2/lib/codemirror.js"></script>
+     <script src="js/codemirror-5.14.2/mode/javascript/javascript.js"></script>
+     <script src="js/codemirror-5.14.2/mode/python/python.js"></script>
+     <script src="js/codemirror-5.14.2/mode/ruby/ruby.js"></script>
+     <script src="js/codemirror-5.14.2/mode/clike/clike.js"></script>
      <!-- Menu Toggle Script -->
      <script>
 	     $("#menu-toggle").click(function(e) {
@@ -69,5 +80,6 @@
      
      <script src="js/main.js"></script>
      <script src="js/timer.js"></script>
+     <script src="js/newChallenge.js"></script>
   </body>
 </html>
