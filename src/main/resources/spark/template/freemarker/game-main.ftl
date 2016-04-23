@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="css/TimeCircles.css" />
 	<link rel="stylesheet" href="codemirror/lib/codemirror.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="vex-2.2.1/css/vex.css"/>
+  	<link rel="stylesheet" href="vex-2.2.1/css/vex-theme-os.css"/>
   </head>
   
   <body>
@@ -47,8 +49,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a> 
-                        <a class="btn btn-default" id="run">Run</a>           	
-                          
+                        <input type="submit" class="btn btn-default" value="Run code">	 	                           
                     </div>
                     <div class="col-lg-12">
                          ${content}
@@ -66,7 +67,9 @@
      <script type="text/javascript" src="js/TimeCircles.js"></script>
      <script src="codemirror/lib/codemirror.js"></script>
    	 <script src="codemirror/mode/javascript/javascript.js"></script>
-   	 
+   	 <script src="vex-2.2.1/js/vex.combined.min.js"></script>
+  	 <script>vex.defaultOptions.className = 'vex-theme-os';</script>
+  	 
      <!-- Menu Toggle Script -->
      <script>
 	     $("#menu-toggle").click(function(e) {
@@ -74,6 +77,38 @@
 	         $("#wrapper").toggleClass("toggled");
 	     });
      </script>
+     
+     <!-- Load User's progress into code editor -->
+     <script>
+     </script>
+     
+     <-- Save user's progress when the user leaves/refreshes the page -->
+     <script>
+     </script>
+     
+     <!-- Run Code Script -->
+     <script>
+	    $('input[type=submit]').click(function(e) {
+	    	var timeLeft = $("#CountDownTimer").TimeCircles().getTime();
+	    	var isTimeOver = (timeLeft <= 0);
+	    	
+	    	<!-- determine whether or not this is the user's first attempt -->
+	    	<!-- currently set manually, ask dan about this -->
+	    	var isRepeatedAttempt = false;
+	    	
+	    	if (isTimeOver || isRepeatedAttempt) {
+	    		<!-- communicate with back end to run code -->
+	    		<!-- determine whether or not code passed or failed -->
+	    		<!-- don't let the user submit to the leaderboard -->	
+	    		vex.dialog.alert("<b>Ran your code! Unfortunately, you can't submit to the leaderboard.</b>");
+	    	} else {
+	    		<!-- communicate with back end to run code -->
+	    		<!-- determine whether or not code passed or failed -->
+	    		vex.dialog.alert("<b>Ran your code! Submitting to the leaderboard.</b>");
+	    	}
+	    });
+     </script>
+     
      
    	 <script src="js/main.js"></script>
      <script src="js/timer.js"></script>
