@@ -4,19 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-
-import org.python.util.PythonInterpreter;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import edu.brown.cs.deet.execution.Compiler;
-import edu.brown.cs.deet.execution.Pair;
-import edu.brown.cs.deet.execution.PyCompiler;
-import edu.brown.cs.deet.execution.PyRunner;
-import edu.brown.cs.deet.execution.Runner;
+import edu.brown.cs.deet.execution.Tester;
+import edu.brown.cs.deet.execution.Triple;
+import edu.brown.cs.deet.execution.python.PyCompiler;
+import edu.brown.cs.deet.execution.python.PyTester;
 
 public final class REPL {
 
@@ -32,7 +30,7 @@ public final class REPL {
     }
     String input = "";
     Compiler pyCompiler = new PyCompiler();
-    Runner pyRunner = new PyRunner();
+    Tester pyTester = new PyTester();
     try (BufferedReader reader = new BufferedReader(inputReader)) {
       while ((input = reader.readLine()) != null) {
         if (input.length() == 0) {
@@ -47,16 +45,16 @@ public final class REPL {
           continue;
         }
         String language = parsedInput.get(0);
-        Runner myRunner;
+        Tester myTester;
         Compiler myCompiler;
         switch (language) {
           case "python":
-            myRunner = pyRunner;
+            myTester = pyTester;
             myCompiler = pyCompiler;
             break;
           default:
             System.out
-            .println("language must be either python, ruby, or javascript");
+                .println("language must be either python, ruby, or javascript");
             System.out.println();
             continue;
         }
@@ -67,9 +65,9 @@ public final class REPL {
           continue;
         }
         String testDir = parsedInput.get(2);
-        Map<Pair<String, String>, String> runResults;
+        Collection<Triple<String, String, String>> testResults;
         try {
-          runResults = myRunner.runTests(solutionPath, testDir);
+          testResults = myTester.test(solutionPath, testDir);
         } catch (Exception e) {
           System.out.println(String.format(
               "ERROR: error occurred running %s on test directory %s",
@@ -78,17 +76,17 @@ public final class REPL {
           continue;
         }
         boolean passedAllTests = true;
-        for (Pair<String, String> testIO : runResults.keySet()) {
-          if (runResults.get(testIO) == null) {
-            System.out.println(String.format(
-                "SUCCESS : on (%s), expected %s, got %s", testIO.getFirst(),
-                testIO.getSecond(), testIO.getSecond()));
+        for (Triple<String, String, String> testResult : testResults) {
+          String successOrFailure;
+          if (testResult.getSecond().equals(testResult.getThird())) {
+            successOrFailure = "SUCCESS";
           } else {
-            System.out.println(String.format(
-                "FAILURE : on (%s), expected %s, got %s", testIO.getFirst(),
-                testIO.getSecond(), runResults.get(testIO)));
+            successOrFailure = "FAILURE";
             passedAllTests = false;
           }
+          System.out.println(String.format("%s : on (%s), expected %s, got %s",
+              successOrFailure, testResult.getFirst(), testResult.getSecond(),
+              testResult.getThird()));
         }
         if (passedAllTests) {
           System.out.println("All tests passed!");

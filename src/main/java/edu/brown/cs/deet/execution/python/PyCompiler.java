@@ -1,7 +1,9 @@
-package edu.brown.cs.deet.execution;
+package edu.brown.cs.deet.execution.python;
 
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
+
+import edu.brown.cs.deet.execution.Compiler;
 
 public class PyCompiler implements Compiler {
 

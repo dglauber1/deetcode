@@ -1,44 +1,27 @@
-package edu.brown.cs.deet.execution;
+package edu.brown.cs.deet.execution.python;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.python.core.PyObject;
-import org.python.util.PythonInterpreter;
+import edu.brown.cs.deet.execution.Tester;
+import edu.brown.cs.deet.execution.Triple;
 
-public class PyRunner implements Runner {
+public class PyTester implements Tester {
 
-  private PythonInterpreter interpreter;
+  private PyRunner runner;
 
-  public PyRunner() {
-    this.interpreter = new PythonInterpreter();
-    interpreter.setErr(System.err);
-    interpreter.exec("import sys");
-    interpreter.exec("if not 'bin' in sys.path : sys.path.append('bin')");
-    interpreter.exec("from runner import *");
-  }
-
-  public String runTest(String input) {
-    PyObject runOutput = interpreter.eval("run(" + input + ")");
-    return runOutput.toString();
+  public PyTester() {
+    runner = new PyRunner();
   }
 
   @Override
-  public Map<Pair<String, String>, String> runTests(String solutionPath,
+  public Collection<Triple<String, String, String>> test(String solutionPath,
       String testDir) throws Exception {
-    Path userInputFile = Paths.get(solutionPath);
-    String file = userInputFile.getFileName().toString();
-    String module = file.replaceAll("\\..*", "");
-    String inputFileDir = userInputFile.getParent().toString();
-    interpreter.exec(String.format("sys.path.append('%s')", inputFileDir));
-    interpreter.exec(String.format("from %s import *", module));
 
     List<String> inputs;
     List<String> outputs;
@@ -54,19 +37,16 @@ public class PyRunner implements Runner {
       .println("ERROR: input.txt and output.txt files should have the same number of lines");
       throw new Exception();
     }
-    Map<Pair<String, String>, String> toReturn = new HashMap<>();
+    Collection<Triple<String, String, String>> toReturn = new ArrayList<>();
+    Map<String, String> runOutputs = runner.run(solutionPath, inputs);
     for (int i = 0; i < inputs.size(); i++) {
       String testInput = inputs.get(i);
       String testOutput = outputs.get(i);
-      Pair<String, String> toAdd = new Pair<>(testInput, testOutput);
-      PyObject runOutput = interpreter.eval("run(" + testInput + ")");
-      if (testOutput.equals(runOutput.toString())) {
-        toReturn.put(toAdd, null);
-      } else {
-        toReturn.put(toAdd, runOutput.toString());
-      }
+      String runOutput = runOutputs.get(testInput);
+      Triple<String, String, String> toAdd = new Triple<>(testInput,
+          testOutput, runOutput);
+      toReturn.add(toAdd);
     }
-    interpreter.exec(String.format("sys.path.remove('%s')", inputFileDir));
     return toReturn;
   }
 
@@ -95,4 +75,5 @@ public class PyRunner implements Runner {
       return outputs;
     }
   }
+
 }

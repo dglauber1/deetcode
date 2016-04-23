@@ -1,17 +1,19 @@
 package edu.brown.cs.deet.execution;
 
+import java.util.Collection;
 import java.util.Map;
 
 public interface Runner {
 
   /**
+   * Given a path to a solution file and a collection of inputs, returns a map
+   * of (input, runOutput) pairs.
    * @param solutionPath
-   * @param testDir
-   * @return A map of <Input, Output> pairs to run results (null if the test
-   *         passed, an error message otherwise).
-   * @throws Exception
+   *          Path to solution file to be tested on inputs.
+   * @param inputs
+   *          Collection of inputs.
+   * @return A map of each input to its corresponding test output.
    */
-  public Map<Pair<String, String>, String> runTests(String solutionPath,
-      String testDir) throws Exception;
+  Map<String, String> run(String solutionPath, Collection<String> inputs);
 
 }
