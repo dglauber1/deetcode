@@ -2,7 +2,6 @@ package edu.brown.cs.deet.codegolf;
 
 import java.io.File;
 
-import edu.brown.cs.deet.execution.REPL;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 

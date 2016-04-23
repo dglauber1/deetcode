@@ -1,4 +1,4 @@
-package edu.brown.cs.deet.execution;
+package edu.brown.cs.deet.codegolf;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +11,12 @@ import org.python.util.PythonInterpreter;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+
+import edu.brown.cs.deet.execution.Compiler;
+import edu.brown.cs.deet.execution.Pair;
+import edu.brown.cs.deet.execution.PyCompiler;
+import edu.brown.cs.deet.execution.PyRunner;
+import edu.brown.cs.deet.execution.Runner;
 
 public final class REPL {
 
