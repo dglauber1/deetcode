@@ -1,6 +1,6 @@
 package edu.brown.cs.deet.execution;
 
-public interface Compiler {
+public interface MyCompiler {
 
   /**
    *

@@ -3,9 +3,9 @@ package edu.brown.cs.deet.execution.python;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 
-import edu.brown.cs.deet.execution.Compiler;
+import edu.brown.cs.deet.execution.MyCompiler;
 
-public class PyCompiler implements Compiler {
+public class PyCompiler implements MyCompiler {
 
   private PythonInterpreter interpreter;
 

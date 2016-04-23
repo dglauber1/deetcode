@@ -37,6 +37,7 @@ public class PyRunner implements Runner {
       PyObject runOutput = interpreter.eval("run(" + input + ")");
       toReturn.put(input, runOutput.toString());
     }
+    interpreter.exec(String.format("sys.path.remove('%s')", inputFileDir));
     return toReturn;
   }
 }
