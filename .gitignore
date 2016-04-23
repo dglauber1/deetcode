@@ -1,5 +1,9 @@
-target
-/target/
+local.properties
+.project
+.settings/
 .classpath
-.settings
 .mvn-classpath
+.metadata
+target
+.project
+/target/
