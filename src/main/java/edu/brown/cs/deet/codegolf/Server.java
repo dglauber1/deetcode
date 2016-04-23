@@ -81,6 +81,24 @@ final class Server {
   }
 
   /**
+   * Runs a user's code on user-provided input and posts the corresponding
+   * output.
+   * @author el13
+   */
+  // private static class RunHandler implements Route {
+  // @Override
+  // public Object handle(Request req, Response res) {
+  // QueryParamsMap qm = req.queryMap();
+  // String name = GSON.fromJson(qm.value("textValue"), String.class);
+  //
+  // @SuppressWarnings({ "rawtypes", "unchecked" })
+  // Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
+  // exists).build();
+  // return GSON.toJson(variables);
+  // }
+  // }
+
+  /**
    * Handles loading the game page.
    * @author el51
    */

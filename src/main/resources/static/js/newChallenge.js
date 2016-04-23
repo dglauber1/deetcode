@@ -140,6 +140,16 @@ $("#submit").click(function() {
 
     $.post("/admin_add/results", postParameters, function(responseJSON){
     	location.reload();
+    	$("#description").val("");
+    	$("#name")[0].value = "";
+    	$("#javaInput").val("");
+    	$("#javaOutput").val("");
+    	$("#pythonInput").val("");
+    	$("#pythonOutput").val("");
+    	$("#rubyInput").val("");
+    	$("#rubyOutput").val("");
+    	$("#jsInput").val("");
+    	$("#jsOutput").val("");
     });
 });
 

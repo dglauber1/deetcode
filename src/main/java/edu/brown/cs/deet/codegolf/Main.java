@@ -5,7 +5,6 @@ import java.io.File;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import edu.brown.cs.deet.database.ChallengeDatabase;
-import edu.brown.cs.deet.execution.REPL;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 
 /**
@@ -15,7 +14,8 @@ import edu.brown.cs.deet.pageHandler.AdminHandler;
 public class Main {
   /**
    * Constructs a new Main and runs it.
-   * @param args The arguments from the command line.
+   * @param args
+   *          The arguments from the command line.
    */
   public static void main(String[] args) {
     try {
@@ -30,7 +30,8 @@ public class Main {
 
   /**
    * Creates a new instance of Main.
-   * @param args The arguments from the command line.
+   * @param args
+   *          The arguments from the command line.
    */
   private Main(String[] args) {
     this.args = args;
@@ -46,9 +47,8 @@ public class Main {
     OptionSet options = parser.parse(args);
 
     if (options.has("gui")) {
-      AdminHandler a =
-          new AdminHandler(new ChallengeDatabase(
-              "testdata/challengeDatabaseTester.sqlite3"));
+      AdminHandler a = new AdminHandler(new ChallengeDatabase(
+          "testdata/challengeDatabaseTester.sqlite3"));
       Server.setAdminHandler(a);
       Server.runSparkServer();
     } else {
