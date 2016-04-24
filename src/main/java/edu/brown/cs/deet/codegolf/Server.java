@@ -71,6 +71,7 @@ final class Server {
     admin = a;
   }
 
+
   /**
    * Sets the UserHandler for the Server.
    * @param a
@@ -126,11 +127,6 @@ final class Server {
     
     // home page
     Spark.get("/", (request, response) -> {
-      // if they're already logged in, send them to the categories page
-      if (validCookie(request)) {
-        response.redirect("/categories");
-      }
-  
       Map<String, Object> variables = ImmutableMap.of("title", "Home",
         "loginURL", getFBURL());
       return new ModelAndView(variables, "landing.ftl");
@@ -157,7 +153,7 @@ final class Server {
         try {
           Boolean usernameAlreadyExists = ud.doesUserExistWithUsername(username);
           Boolean idAlreadyExists = ud.doesUserExistWithID(request.cookie("user"));
-                    
+          
           if (usernameAlreadyExists) {
             response.status(400);
             return GSON.toJson(ImmutableMap.of("error",
@@ -167,6 +163,7 @@ final class Server {
             return GSON.toJson(ImmutableMap.of("error",
               "There is already a user associated with this fb account."));
           } else {
+            request.session().removeAttribute("adding");
             ud.addNewUser(username, request.cookie("user"), false,
               request.cookie("name"));
             return GSON.toJson("Success!");
@@ -181,18 +178,27 @@ final class Server {
     });
     
     // check authentication before every request
-//    Spark.before((request, response) -> {
-//      String url = request.url();
-//
-//      Boolean validUser = validCookie(request);
-//
-//      Boolean staticRequest = url.contains("css") || url.contains("js");
-//
-//      Boolean doesntNeedLogIn = url.equals("http://localhost:4567/")
-//        || url.equals("http://localhost:4567/fblogin");
-//
-//      System.out.println(url);
-//    });
+    Spark.before((request, response) -> {
+      String url = request.url();
+
+      Boolean validUser = validCookie(request);
+      
+      Boolean staticRequest = url.contains("css") || url.contains("js")
+        || url.contains("favico");
+      
+      Boolean doesntNeedLogin = url.equals("http://localhost:4567/")
+        || url.equals("http://localhost:4567/fblogin")
+        || url.equals("http://localhost:4567/add-user");
+      
+      Boolean creatingAccount = url.equals("http://localhost:4567/categories")
+        && (request.session().attribute("adding") != null);
+      
+      Boolean badRequest = !validUser && !(staticRequest || doesntNeedLogin);
+
+      if (badRequest && !creatingAccount) {
+        response.redirect("/");
+      }
+    });
   }
   
   private static Boolean validCookie(Request request) {
@@ -255,6 +261,8 @@ final class Server {
         if (alreadyExists) {
           res.redirect("/categories");
         } else {
+          req.session(true);
+          req.session().attribute("adding", "true");
           res.redirect("/categories#signup");
         }
         
