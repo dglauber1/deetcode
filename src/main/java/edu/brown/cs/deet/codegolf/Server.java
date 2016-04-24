@@ -14,6 +14,16 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import edu.brown.cs.deet.database.UserDatabase;
+import edu.brown.cs.deet.pageHandler.AdminHandler;
+import edu.brown.cs.deet.pageHandler.UserHandler;
+
+import freemarker.template.Configuration;
+
 import spark.ExceptionHandler;
 import spark.ModelAndView;
 import spark.QueryParamsMap;
@@ -23,15 +33,6 @@ import spark.Route;
 import spark.Spark;
 import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import edu.brown.cs.deet.database.UserDatabase;
-import edu.brown.cs.deet.pageHandler.AdminHandler;
-import edu.brown.cs.deet.pageHandler.UserHandler;
-import freemarker.template.Configuration;
 
 final class Server {
 

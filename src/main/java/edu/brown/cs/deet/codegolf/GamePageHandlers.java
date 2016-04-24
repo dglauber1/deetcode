@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -180,6 +181,10 @@ public final class GamePageHandlers {
         String code = qm.value("input");
         printWriter.print(code);
         printWriter.close();
+        LineNumberReader lnr = new LineNumberReader(new FileReader(file));
+        lnr.skip(Long.MAX_VALUE);
+        int numLines = lnr.getLineNumber() + 1;
+        lnr.close();
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
@@ -193,7 +198,7 @@ public final class GamePageHandlers {
             testDir);
         Map<String, Object> variables = new ImmutableMap.Builder()
             .put("error", false).put("compiled", "success")
-            .put("testResults", testResults).build();
+            .put("numLines", numLines).put("testResults", testResults).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
