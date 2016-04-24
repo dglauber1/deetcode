@@ -129,7 +129,7 @@ final class Server {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
-      String userID = req.session().attribute("user");
+      String userID = req.cookie("user");
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
       String language = qm.value("language");
@@ -145,7 +145,7 @@ final class Server {
           break;
         default:
           System.out
-              .println("Error in RunHandler: language must be either python, ruby, or javascript");
+          .println("Error in RunHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -161,7 +161,7 @@ final class Server {
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-          .put("error", false).put("compiled", errorMessage).build();
+              .put("error", false).put("compiled", errorMessage).build();
           Files.delete(file.toPath());
           return GSON.toJson(variables);
         }
@@ -186,9 +186,9 @@ final class Server {
               testResult.get(2)));
         }
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-        .put("testResults", testMessages).put("passed", passedAllTests)
-        .build();
+        .put("error", false).put("compiled", "success")
+            .put("testResults", testMessages).put("passed", passedAllTests)
+            .build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
 
@@ -239,7 +239,7 @@ final class Server {
           break;
         default:
           System.out
-              .println("Error in RunHandler: language must be either python, ruby, or javascript");
+          .println("Error in RunHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -258,7 +258,7 @@ final class Server {
 
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-          .put("error", false).put("compiled", errorMessage).build();
+              .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -270,8 +270,8 @@ final class Server {
             testInputList);
 
         Map<String, Object> variables = new ImmutableMap.Builder()
-        .put("error", false).put("compiled", "success")
-        .put("runResults", runResults).build();
+            .put("error", false).put("compiled", "success")
+            .put("runResults", runResults).build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
 
