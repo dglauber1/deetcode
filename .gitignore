@@ -9,5 +9,5 @@ target
 /target/
 testdata/challengeDatabaseTester.sqlite3
 /data/*
-data/*
+/data/codegolf.db
 

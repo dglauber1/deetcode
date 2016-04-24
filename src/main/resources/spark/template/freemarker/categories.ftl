@@ -15,7 +15,7 @@
         <div id="navbar" class="navbar-collapse">
           <ul class="nav navbar-nav header-right-navbar" id="links">
             <li class="active"><a href="#">Home</a></li>
-            <li><a href="#">Account</a></li>
+            <li><a href="/user/${username}">Me</a></li>
             <li><a href="/logout">Logout</a></li>
           </ul>
         </div>

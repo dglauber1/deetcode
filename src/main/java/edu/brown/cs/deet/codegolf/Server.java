@@ -1,17 +1,9 @@
 package edu.brown.cs.deet.codegolf;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.StringWriter;
-import java.lang.reflect.Type;
-import java.net.URL;
-import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +11,6 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
-import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 import edu.brown.cs.deet.pageHandler.GamePageHandlers;
@@ -373,5 +364,4 @@ final class Server {
       res.body(stacktrace.toString());
     }
   }
-
 }

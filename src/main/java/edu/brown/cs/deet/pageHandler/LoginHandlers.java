@@ -32,8 +32,22 @@ public final class LoginHandlers {
   public static class CategoriesHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
+      
+      String username = "Not yet defined";
+      try (UserDatabase ud = new UserDatabase(dbPath)) {
+        String id = req.cookie("user");
+        try {
+          if (ud.doesUserExistWithID(id)) {
+            username = ud.getUsernameFromID(req.cookie("user"));
+          }
+        } catch (SQLException e) {
+          System.out.println(e.getMessage());
+          System.exit(1);
+        }
+      }
+      
       Map<String, Object> variables = ImmutableMap.of("title",
-          "Categories", "name", req.cookie("name"));
+          "Categories", "name", req.cookie("name"), "username", username);
       return new ModelAndView(variables, "categories.ftl");
     }
   }
