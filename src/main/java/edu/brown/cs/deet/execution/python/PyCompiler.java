@@ -3,12 +3,19 @@ package edu.brown.cs.deet.execution.python;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 
-import edu.brown.cs.deet.execution.Compiler;
+import edu.brown.cs.deet.execution.MyCompiler;
 
-public class PyCompiler implements Compiler {
+/**
+ * Implementation of a MyCompiler for the python language.
+ * @author dglauber
+ */
+public class PyCompiler implements MyCompiler {
 
   private PythonInterpreter interpreter;
 
+  /**
+   * Constructor for a PyCompiler.
+   */
   public PyCompiler() {
     this.interpreter = new PythonInterpreter();
     interpreter.setErr(System.err);

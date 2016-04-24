@@ -2,6 +2,10 @@ package edu.brown.cs.deet.execution;
 
 import java.util.Collection;
 
+/**
+ * Interface to specify the properties of a tester object.
+ * @author dglauber
+ */
 public interface Tester {
 
   /**

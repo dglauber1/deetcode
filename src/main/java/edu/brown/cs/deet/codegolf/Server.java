@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +22,16 @@ import spark.Spark;
 import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
 import edu.brown.cs.deet.database.ChallengeDatabase;
+import edu.brown.cs.deet.execution.MyCompiler;
+import edu.brown.cs.deet.execution.Runner;
+import edu.brown.cs.deet.execution.python.PyCompiler;
+import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 import freemarker.template.Configuration;
 
@@ -78,25 +85,76 @@ final class Server {
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
     Spark.post("/getallcategories", new AllCategoriesHandler());
+    Spark.post("/game/run", new RunHandler());
   }
 
   /**
    * Runs a user's code on user-provided input and posts the corresponding
    * output.
-   * @author el13
+   * @author dglauber
    */
-  // private static class RunHandler implements Route {
-  // @Override
-  // public Object handle(Request req, Response res) {
-  // QueryParamsMap qm = req.queryMap();
-  // String name = GSON.fromJson(qm.value("textValue"), String.class);
-  //
-  // @SuppressWarnings({ "rawtypes", "unchecked" })
-  // Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
-  // exists).build();
-  // return GSON.toJson(variables);
-  // }
-  // }
+  private static class RunHandler implements Route {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String language = qm.value("language");
+
+      String fileType;
+      Runner myRunner;
+      MyCompiler myCompiler;
+      switch (language) {
+        case "python":
+          fileType = ".py";
+          myRunner = new PyRunner();
+          myCompiler = new PyCompiler();
+          break;
+        default:
+          System.out
+          .println("Error in RunHandler: language must be either python, ruby, or javascript");
+          Map<String, Object> variables = new ImmutableMap.Builder().put(
+              "error", true).build();
+          return GSON.toJson(variables);
+      }
+
+      Integer random = (int) (Math.random() * 1000000);
+      String randomFileName = random.toString() + fileType;
+
+      File file = new File("temporary/" + randomFileName);
+
+      try (PrintWriter printWriter = new PrintWriter(file)) {
+        String code = qm.value("input");
+        printWriter.print(code);
+
+        String errorMessage = myCompiler.compile(file.getPath());
+
+        if (errorMessage != null) {
+          Map<String, Object> variables = new ImmutableMap.Builder()
+              .put("error", false).put("compiled", errorMessage).build();
+          return GSON.toJson(variables);
+        }
+
+        String testInputs = qm.value("userTest");
+        List<String> testInputList = Lists.newArrayList(Splitter
+            .on(System.getProperty("line.separator")).trimResults()
+            .omitEmptyStrings().split(testInputs));
+        Map<String, String> runResults = myRunner.run(file.getPath(),
+            testInputList);
+
+        Map<String, Object> variables = new ImmutableMap.Builder()
+            .put("error", false).put("compiled", "success")
+            .put("runResults", runResults).build();
+        Files.delete(file.toPath());
+        return GSON.toJson(variables);
+
+      } catch (IOException e) {
+        System.out.println("IOException in RunHandler");
+        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
+            true).build();
+        return GSON.toJson(variables);
+      }
+    }
+  }
 
   /**
    * Handles loading the game page.
@@ -248,7 +306,6 @@ final class Server {
    * Handler that checks if the entered name in the Admin page is already taken.
    * @author el13
    */
-  @SuppressWarnings("unused")
   private static class NameCheckHandler implements Route {
     @Override
     public Object handle(Request req, Response res) {

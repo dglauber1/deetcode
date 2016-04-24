@@ -11,10 +11,17 @@ import java.util.Map;
 import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.Triple;
 
+/**
+ * Implementation of a Tester for the python language.
+ * @author dglauber
+ */
 public class PyTester implements Tester {
 
   private PyRunner runner;
 
+  /**
+   * Constructor for a PyRunner object.
+   */
   public PyTester() {
     runner = new PyRunner();
   }
@@ -34,7 +41,7 @@ public class PyTester implements Tester {
     }
     if (inputs.size() != outputs.size()) {
       System.out
-      .println("ERROR: input.txt and output.txt files should have the same number of lines");
+          .println("ERROR: input.txt and output.txt files should have the same number of lines");
       throw new Exception();
     }
     Collection<Triple<String, String, String>> toReturn = new ArrayList<>();

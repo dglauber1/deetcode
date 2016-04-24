@@ -10,14 +10,21 @@ import java.util.List;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
-import edu.brown.cs.deet.execution.Compiler;
+import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.Triple;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyTester;
 
+/**
+ * Class to allow command line repl testing of codegolf project.
+ * @author dglauber
+ */
 public final class REPL {
 
+  /**
+   * Runs the command line repl.
+   */
   public static void run() {
 
     InputStreamReader inputReader = null;
@@ -29,7 +36,7 @@ public final class REPL {
       return;
     }
     String input = "";
-    Compiler pyCompiler = new PyCompiler();
+    MyCompiler pyCompiler = new PyCompiler();
     Tester pyTester = new PyTester();
     try (BufferedReader reader = new BufferedReader(inputReader)) {
       while ((input = reader.readLine()) != null) {
@@ -46,7 +53,7 @@ public final class REPL {
         }
         String language = parsedInput.get(0);
         Tester myTester;
-        Compiler myCompiler;
+        MyCompiler myCompiler;
         switch (language) {
           case "python":
             myTester = pyTester;
@@ -54,7 +61,7 @@ public final class REPL {
             break;
           default:
             System.out
-                .println("language must be either python, ruby, or javascript");
+            .println("language must be either python, ruby, or javascript");
             System.out.println();
             continue;
         }
