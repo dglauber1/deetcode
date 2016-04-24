@@ -48,7 +48,7 @@ public final class GamePageHandlers {
     @Override
     public ModelAndView handle(Request req, Response res) {
       // TODO Currently set to the test database.
-      String dbPath = "data/test.db";
+      String dbPath = "testdata/challengeDatabaseTester.sqlite3";
       try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
         /*
          * TODO: This is currently hard-coded in because Tyler and I haven't yet
@@ -60,9 +60,10 @@ public final class GamePageHandlers {
         try {
           if (challenges.doesChallengeExist(challengeName)) {
             List<String> challengeData = challenges.getChallenge(challengeName);
-            promptPath = challengeData.get(1).concat("description.txt");
+            promptPath = challengeData.get(2).concat("/description.txt");
           }
         } catch (SQLException e) {
+          System.out.println("GamePageHandler");
           System.out.println(e.getMessage());
           System.exit(1);
         }
@@ -81,7 +82,6 @@ public final class GamePageHandlers {
           System.out.println("I/O Exception at: " + promptPath);
           System.exit(1);
         }
-
         Map<String, Object> variables = ImmutableMap.of("title", "Game",
             "prompt", promptBuilder.toString());
         return new ModelAndView(variables, "game.ftl");
