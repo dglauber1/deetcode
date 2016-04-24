@@ -30,6 +30,8 @@ public class AdminHandler {
    * Processes the new "basic" information for a new challenge.
    * @param category
    *          The new category
+   * @param pName
+   *          The "path name" of the challenge
    * @param name
    *          The new name
    * @param description
@@ -40,12 +42,12 @@ public class AdminHandler {
    * @throws IOException
    *           If an I/O error occurred with creating a file
    */
-  public boolean newBasicInfo(String category, String name, String description)
-      throws SQLException, IOException {
-    String path = "challenges/" + name;
+  public boolean newBasicInfo(String category, String pName, String name,
+      String description) throws SQLException, IOException {
+    String path = "challenges/" + pName;
 
     // check if an insert to the database is successful
-    if (challenges.insertNewChallenge(name, path, category)) {
+    if (challenges.insertNewChallenge(pName, name, path, category)) {
       // make the directory for the challenge
       File challengeDir = new File(path);
       challengeDir.mkdir();
@@ -73,8 +75,10 @@ public class AdminHandler {
    * file may already exist (and will then also skip the creation of the
    * stub.txt file). Therefore, call this ONLY after newBasicInfo is called (and
    * IMMEDIATELY afterwards).
-   * @param name
-   *          The name of the challenge
+   * @param pName
+   *          The "path name" of the challenge
+   * @param testnames
+   *          The names of each of the tests
    * @param input
    *          The input for the test cases
    * @param output
@@ -92,18 +96,19 @@ public class AdminHandler {
    * @throws SQLException
    *           When the database screws up
    */
-  public boolean newTestInfo(String name, String input, String output,
-      String stub, String language) throws IOException, SQLException {
+  public boolean newTestInfo(String pName, String testnames,
+      String input, String output, String stub, String language)
+      throws IOException, SQLException {
 
-    File directory = new File("challenges/" + name);
+    File directory = new File("challenges/" + pName);
 
     // first checks to see if the directory exists
     if (directory.exists()) {
       // Adding the information to the database
-      challenges.insertTestsForChallenge(name, language);
+      challenges.insertTestsForChallenge(pName, language);
 
       // Make the directory for Language-related stuff
-      String path = "challenges/" + name + "/" + language;
+      String path = "challenges/" + pName + "/" + language;
       File languagePath = new File(path);
 
       if (!languagePath.mkdir()) {
@@ -113,6 +118,17 @@ public class AdminHandler {
       // Create the solutions folder
       File solutionsDir = new File(path + "/solutions");
       solutionsDir.mkdir();
+
+      // Create the testnames file and write to it
+      File testnamesFile = new File(path + "/testnames.txt");
+
+      if (!testnamesFile.createNewFile()) {
+        return false;
+      }
+
+      try (BufferedWriter bw = new BufferedWriter(new FileWriter(testnamesFile))) {
+        bw.write(testnames);
+      }
 
       // Create test input file and write the input to it
       File inputFile = new File(path + "/input.txt");
@@ -155,14 +171,14 @@ public class AdminHandler {
 
   /**
    * Determines if a challenge by a certain name already exists.
-   * @param qName
-   *          the name of the challenge
+   * @param pName
+   *          the "path name" of the challenge
    * @return True if the challenge already exists, false otherwise.
    * @throws SQLException
    *           if something with the database goes awry
    */
-  public boolean doesChallengeExist(String qName) throws SQLException {
-    return challenges.doesChallengeExist(qName);
+  public boolean doesChallengeExist(String pName) throws SQLException {
+    return challenges.doesChallengeExist(pName);
   }
 
   /**

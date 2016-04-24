@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * A bunch of SQL Queries that deal with Leaderboard + User page information.
- * @author el13
+ * @author el13, el51
  */
 public class LeaderboardDatabase implements AutoCloseable {
   /**
@@ -75,6 +75,33 @@ public class LeaderboardDatabase implements AutoCloseable {
   }
 
   /**
+   * Inserts a solution into the Leaderboard.
+   * @param data
+   *          - the data associated with the solution. Contains challengeID,
+   *          username, passed, efficiency, numLines, timeToSolve, aggregate,
+   *          and language in that order.
+   * @throws SQLException
+   * @throws IllegalArgumentException
+   */
+  public void addSolution(String challengeID, String username, boolean passed,
+      double efficiency, double numLines, double timeToSolve, double aggregate,
+      String language) throws SQLException {
+    String query = "INSERT INTO solution VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, challengeID);
+      ps.setString(2, username);
+      ps.setBoolean(3, passed);
+      ps.setDouble(4, efficiency);
+      ps.setDouble(5, numLines);
+      ps.setDouble(6, timeToSolve);
+      ps.setDouble(7, aggregate);
+      ps.setString(8, language);
+      ps.addBatch();
+      ps.executeBatch();
+    }
+  }
+
+  /**
    * Gets the top twenty entries of a particular challenge given a language.
    * @param qName
    *          the name of the challenge
@@ -90,7 +117,7 @@ public class LeaderboardDatabase implements AutoCloseable {
   public List<List<String>> topTwentyOfChallengeLanguage(String qName,
       String qLang) throws SQLException {
     String query = "SELECT challenge_id, username, aggregate, language "
-        + "FROM solution WHERE challenge_id = ? AND language = ? "
+        + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
         + "ORDER BY aggregate DESC LIMIT 20;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {

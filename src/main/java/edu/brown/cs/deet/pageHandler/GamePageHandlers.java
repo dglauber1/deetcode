@@ -1,9 +1,13 @@
 package edu.brown.cs.deet.pageHandler;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -13,16 +17,20 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
+import edu.brown.cs.deet.database.ChallengeDatabase;
+import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
+import spark.ModelAndView;
 import spark.QueryParamsMap;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
 
@@ -30,6 +38,112 @@ public final class GamePageHandlers {
   private static final Runner pyRunner = new PyRunner();
   private static final Tester pyTester = new PyTester();
   private static final Gson GSON = new Gson();
+
+  /**
+   * Handles loading the game page.
+   * @author el51
+   */
+  public static class GamePageHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      // TODO Currently set to the test database.
+      String dbPath = "data/test.db";
+      try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
+        /*
+         * TODO: This is currently hard-coded in because Tyler and I haven't yet
+         * // set up a system to pass question names/ids from the categories
+         * page // to the game page.
+         */
+        String challengeName = "test";
+        String promptPath = null;
+        try {
+          if (challenges.doesChallengeExist(challengeName)) {
+            List<String> challengeData = challenges.getChallenge(challengeName);
+            promptPath = challengeData.get(1).concat("description.txt");
+          }
+        } catch (SQLException e) {
+          System.out.println(e.getMessage());
+          System.exit(1);
+        }
+
+        StringBuilder promptBuilder = new StringBuilder();
+        try (BufferedReader r = new BufferedReader(new FileReader(promptPath))) {
+          String line = r.readLine();
+          while (line != null) {
+            promptBuilder.append(line).append("\n");
+            line = r.readLine();
+          }
+        } catch (FileNotFoundException e) {
+          System.out.println("File not found: " + promptPath);
+          System.exit(1);
+        } catch (IOException e) {
+          System.out.println("I/O Exception at: " + promptPath);
+          System.exit(1);
+        }
+
+        Map<String, Object> variables = ImmutableMap.of("title", "Game",
+            "prompt", promptBuilder.toString());
+        return new ModelAndView(variables, "game.ftl");
+      }
+    }
+  }
+
+  /**
+   * Handlers saving the contents of the game page.
+   * @author el51
+   */
+  public static class SaveSolutionHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String challengeID = qm.value("challengeID");
+      String username = req.cookie("user");
+      String language = qm.value("language");
+      boolean passed = qm.value("passed").equals("true");
+      double efficiency = Double.parseDouble(qm.value("efficiency"));
+      double numLines = Double.parseDouble(qm.value("numLines"));
+      double timeToSolve = Double.parseDouble(qm.value("timeToSolve"));
+      double aggregate = Double.parseDouble(qm.value("aggregate"));
+
+      // TODO Currently set to the test database.
+      String dbPath = "testdata/solutionDatabaseTest";
+      try (LeaderboardDatabase ld = new LeaderboardDatabase(dbPath)) {
+        ld.addSolution(challengeID, username, passed, efficiency, numLines,
+            timeToSolve, aggregate, language);
+      } catch (SQLException e) {
+        return ImmutableMap.of("status", "FAILURE", "message", e.getMessage());
+      }
+
+      String fileType;
+      switch (language) {
+        case "python":
+          fileType = ".py";
+          break;
+        default:
+          String msg = "Error in SaveSolutionHandler: "
+              + "language must be either python, ruby, or javascript";
+          Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
+              "message", msg);
+          return GSON.toJson(variables);
+      }
+
+      String fileName = username + fileType;
+      File file = new File(String.format("challenges/%s/%s/solutions/%s",
+          challengeID, language, fileName));
+      try (PrintWriter printWriter = new PrintWriter(file)) {
+        String code = qm.value("input");
+        printWriter.print(code);
+        printWriter.close();
+      } catch (FileNotFoundException e) {
+        String msg = "Error in SaveSolutionHandler: File not found.";
+        Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
+            "message", msg);
+        return GSON.toJson(variables);
+      }
+
+      return GSON.toJson(ImmutableMap.of("status", "SUCCESS"));
+    }
+  }
 
   public static class DeetTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -51,7 +165,7 @@ public final class GamePageHandlers {
           break;
         default:
           System.out
-          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+              .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -68,7 +182,7 @@ public final class GamePageHandlers {
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-          .put("error", false).put("compiled", errorMessage).build();
+              .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -77,8 +191,8 @@ public final class GamePageHandlers {
         Collection<List<String>> testResults = myTester.test(file.getPath(),
             testDir);
         Map<String, Object> variables = new ImmutableMap.Builder()
-        .put("error", false).put("compiled", "success")
-        .put("testResults", testResults).build();
+            .put("error", false).put("compiled", "success")
+            .put("testResults", testResults).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
@@ -96,7 +210,7 @@ public final class GamePageHandlers {
           Files.delete(file.toPath());
         } catch (IOException e) {
           System.out
-          .println("error deleting temporary directory in DeetTestsHandler");
+              .println("error deleting temporary directory in DeetTestsHandler");
         }
       }
     }
@@ -125,7 +239,7 @@ public final class GamePageHandlers {
           break;
         default:
           System.out
-          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+              .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -144,7 +258,7 @@ public final class GamePageHandlers {
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-          .put("error", false).put("compiled", errorMessage).build();
+              .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -156,8 +270,8 @@ public final class GamePageHandlers {
             testInputList);
 
         Map<String, Object> variables = new ImmutableMap.Builder()
-        .put("error", false).put("compiled", "success")
-        .put("runResults", runResults).build();
+            .put("error", false).put("compiled", "success")
+            .put("runResults", runResults).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
@@ -173,7 +287,7 @@ public final class GamePageHandlers {
           Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-          .println("error deleting temporary directory in UserTestsHandler");
+              .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }

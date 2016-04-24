@@ -5,8 +5,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +43,6 @@ final class Server {
   private static UserHandler user;
   private static final int PORT = 4567;
   private static final String dbPath = "data/codegolf.db";
-
   private static String appID = "1559408461020162";
   private static String loginRedirectURL = "http://localhost:4567/fblogin";
   private static String appSecret = "9ffcf58f5f448a3e9e723537c476b5eb";
@@ -90,9 +94,14 @@ final class Server {
     FreeMarkerEngine freeMarker = createEngine();
 
     // Setup Spark Routes
-    Spark.get("/game", new GamePageHandler(), freeMarker);
+    Spark.get("/game", new GamePageHandlers.GamePageHandler(), freeMarker);
     Spark.get("/admin_add", new AdminAddHandler(), freeMarker);
     Spark.get("/user/:username", new UserPageHandler(), freeMarker);
+    /*
+     * TODO: get leaderboard associated with a particular challenge
+     * Spark.get("/leaderboard/:challengeInfo", new GetLeaderboardHandler(),
+     * freeMarker);
+     */
     Spark.post("/admin_add/results", new NewChallengeHandler());
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
@@ -110,17 +119,17 @@ final class Server {
       String url = request.url();
 
       Boolean validUser = validCookie(request);
-      
+
       Boolean staticRequest = url.contains("css") || url.contains("js")
-        || url.contains("favico");
-      
+          || url.contains("favico");
+
       Boolean doesntNeedLogin = url.equals("http://localhost:4567/")
-        || url.equals("http://localhost:4567/fblogin")
-        || url.equals("http://localhost:4567/add-user");
-      
+          || url.equals("http://localhost:4567/fblogin")
+          || url.equals("http://localhost:4567/add-user");
+
       Boolean creatingAccount = url.equals("http://localhost:4567/categories")
-        && (request.session().attribute("adding") != null);
-      
+          && (request.session().attribute("adding") != null);
+
       Boolean badRequest = !validUser && !(staticRequest || doesntNeedLogin);
 
       if (badRequest && !creatingAccount) {
@@ -146,55 +155,6 @@ final class Server {
     return !(noCookie || badCookie);
   }
 
-
-  /**
-   * Handles loading the game page.
-   * @author el51
-   */
-  private static class GamePageHandler implements TemplateViewRoute {
-    @Override
-    public ModelAndView handle(Request req, Response res) {
-      // TODO Currently set to the test database.
-      String dbPath = "data/test.db";
-      try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
-        /*
-         * TODO: This is currently hard-coded in because Tyler and I haven't yet
-         * // set up a system to pass question names/ids from the categories
-         * page // to the game page.
-         */
-        String challengeName = "test";
-        String promptPath = null;
-        try {
-          if (challenges.doesChallengeExist(challengeName)) {
-            List<String> challengeData = challenges.getChallenge(challengeName);
-            promptPath = challengeData.get(1).concat("description.txt");
-          }
-        } catch (SQLException e) {
-          System.out.println(e.getMessage());
-          System.exit(1);
-        }
-
-        StringBuilder promptBuilder = new StringBuilder();
-        try (BufferedReader r = new BufferedReader(new FileReader(promptPath))) {
-          String line = r.readLine();
-          while (line != null) {
-            promptBuilder.append(line).append("\n");
-            line = r.readLine();
-          }
-        } catch (FileNotFoundException e) {
-          System.out.println("File not found: " + promptPath);
-          System.exit(1);
-        } catch (IOException e) {
-          System.out.println("I/O Exception at: " + promptPath);
-          System.exit(1);
-        }
-
-        Map<String, Object> variables = ImmutableMap.of("title", "Game",
-            "prompt", promptBuilder.toString());
-        return new ModelAndView(variables, "game.ftl");
-      }
-    }
-  }
 
   /**
    * Shows the Admin_add page.
@@ -245,17 +205,14 @@ final class Server {
 
       // Basic info
       String category = GSON.fromJson(qm.value("category"), String.class);
+      String pName = GSON.fromJson(qm.value("pName"), String.class);
       String name = GSON.fromJson(qm.value("name"), String.class);
       String description = GSON.fromJson(qm.value("description"), String.class);
-
-      System.out.println(name);
-      System.out.println(description);
-      System.out.println(category);
 
       Boolean success = false;
 
       try {
-        success = admin.newBasicInfo(category, name, description);
+        success = admin.newBasicInfo(category, pName, name, description);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);
       } catch (IOException e) {
@@ -264,11 +221,15 @@ final class Server {
 
       // Java test cases and stub code
       if (success) {
+        String javaTestnames = GSON.fromJson(qm.value("javaTestName"),
+            String.class);
         String javaInput = GSON.fromJson(qm.value("javaInput"), String.class);
         String javaOutput = GSON.fromJson(qm.value("javaOutput"), String.class);
         String javaStub = GSON.fromJson(qm.value("javaStub"), String.class);
 
         // Python test cases and stub code
+        String pythonTestnames = GSON.fromJson(qm.value("pythonTestName"),
+            String.class);
         String pythonInput = GSON.fromJson(qm.value("pythonInput"),
             String.class);
         String pythonOutput = GSON.fromJson(qm.value("pythonOutput"),
@@ -276,11 +237,15 @@ final class Server {
         String pythonStub = GSON.fromJson(qm.value("pythonStub"), String.class);
 
         // Ruby test cases and stub code
+        String rubyTestnames = GSON.fromJson(qm.value("rubyTestName"),
+            String.class);
         String rubyInput = GSON.fromJson(qm.value("rubyInput"), String.class);
         String rubyOutput = GSON.fromJson(qm.value("rubyOutput"), String.class);
         String rubyStub = GSON.fromJson(qm.value("rubyStub"), String.class);
 
         // Javascript test cases and stub code
+        String jsTestnames = GSON
+            .fromJson(qm.value("jsTestName"), String.class);
         String jsInput = GSON.fromJson(qm.value("jsInput"), String.class);
         String jsOutput = GSON.fromJson(qm.value("jsOutput"), String.class);
         String jsStub = GSON.fromJson(qm.value("jsStub"), String.class);
@@ -289,20 +254,23 @@ final class Server {
           // putting all of the code into the directory, but only if something
           // was entered for those fields on the page
           if (!javaInput.equals("")) {
-            admin.newTestInfo(name, javaInput, javaOutput, javaStub, "java");
+            admin.newTestInfo(pName, javaTestnames, javaInput, javaOutput,
+                javaStub, "java");
           }
 
           if (!pythonInput.equals("")) {
-            admin.newTestInfo(name, pythonInput, pythonOutput, pythonStub,
-                "python");
+            admin.newTestInfo(pName, pythonTestnames, pythonInput,
+                pythonOutput, pythonStub, "python");
           }
 
           if (!rubyInput.equals("")) {
-            admin.newTestInfo(name, rubyInput, rubyOutput, rubyStub, "ruby");
+            admin.newTestInfo(pName, rubyTestnames, rubyInput, rubyOutput,
+                rubyStub, "ruby");
           }
 
           if (!jsInput.equals("")) {
-            admin.newTestInfo(name, jsInput, jsOutput, jsStub, "javascript");
+            admin.newTestInfo(pName, jsTestnames, jsInput, jsOutput, jsStub,
+                "javascript");
           }
         } catch (IOException e) {
           new ExceptionPrinter().handle(e, req, res);

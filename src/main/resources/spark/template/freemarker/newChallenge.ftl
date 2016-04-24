@@ -42,6 +42,19 @@
 
       <div class="row">
         <div class="col-xs-6 col-md-12">
+          <h4>Challenge Directory Name</h4>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12 col-md-6">
+          <input type="text" id="pName" class="form-control" placeholder="Challenge Directory Name" aria-describedby="basic-addon1">
+        </div>
+        <div class="col-xs-6 col-md-6" id="nameMessage"></div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-6 col-md-12">
           <h4>Challenge Name</h4>
         </div>
       </div>
@@ -50,7 +63,7 @@
         <div class="col-xs-12 col-md-6">
           <input type="text" id="name" class="form-control" placeholder="Challenge Name" aria-describedby="basic-addon1">
         </div>
-        <div class="col-xs-6 col-md-6" id="nameMessage"></div>
+        <div class="col-xs-6 col-md-6"></div>
       </div>
 
       <div class="row">
@@ -64,11 +77,15 @@
 
     <div id="python" class="tab-pane fade">
       <div class="row">
-        <div class="col-xs-6 col-md-6">
+        <div class="col-xs-4 col-md-4">
+            <h4>Test Name (one per line):</h4>
+            <textarea class="form-control" id="pythonTestName" rows="4"></textarea>
+        </div>
+        <div class="col-xs-4 col-md-4">
             <h4>Test Input (one per line):</h4>
             <textarea class="form-control" id="pythonInput" rows="4"></textarea>
         </div>
-        <div class="col-xs-6 col-md-6">
+        <div class="col-xs-4 col-md-4">
             <h4>Test Output (one per line):</h4>
             <textarea class="form-control" id="pythonOutput" rows="4"></textarea>
         </div>
@@ -84,11 +101,15 @@
 
     <div id="ruby" class="tab-pane fade">
       <div class="row">
-        <div class="col-xs-12 col-md-6">
+        <div class="col-xs-4 col-md-4">
+            <h4>Test Name (one per line):</h4>
+            <textarea class="form-control" id="rubyTestName" rows="4"></textarea>
+        </div>
+        <div class="col-xs-4 col-md-4">
             <h4>Test Input (one per line):</h4>
             <textarea class="form-control" id="rubyInput" rows="4"></textarea>
         </div>
-        <div class="col-xs-6 col-md-6">
+        <div class="col-xs-4 col-md-4">
             <h4>Test Output (one per line):</h4>
             <textarea class="form-control" id="rubyOutput" rows="4"></textarea>
         </div>
@@ -104,11 +125,15 @@
 
     <div id="javascript" class="tab-pane fade">
       <div class="row">
-        <div class="col-xs-6 col-md-6">
+        <div class="col-xs-4 col-md-4">
+            <h4>Test Name (one per line):</h4>
+            <textarea class="form-control" id="jsTestName" rows="4"></textarea>
+        </div>
+        <div class="col-xs-4 col-md-4">
             <h4>Test Input (one per line):</h4>
             <textarea class="form-control" id="jsInput" rows="4"></textarea>
         </div>
-        <div class="col-xs-6 col-md-6">
+        <div class="col-xs-4 col-md-4">
             <h4>Test Output (one per line):</h4>
             <textarea class="form-control" id="jsOutput" rows="4"></textarea>
         </div>
@@ -124,11 +149,15 @@
 
     <div id="java" class="tab-pane fade">
       <div class="row">
-        <div class="col-xs-6 col-md-6">
+        <div class="col-xs-4 col-md-4">
+            <h4>Test Name (one per line):</h4>
+            <textarea class="form-control" id="javaTestName" rows="4"></textarea>
+        </div>
+        <div class="col-xs-4 col-md-4">
             <h4>Test Input (one per line):</h4>
             <textarea class="form-control" id="javaInput" rows="4"></textarea>
         </div>
-        <div class="col-xs-6 col-md-6">
+        <div class="col-xs-4 col-md-4">
             <h4>Test Output (one per line):</h4>
             <textarea class="form-control" id="javaOutput" rows="4"></textarea>
         </div>
