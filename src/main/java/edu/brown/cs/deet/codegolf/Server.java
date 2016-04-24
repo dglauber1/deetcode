@@ -157,7 +157,7 @@ final class Server {
           break;
         default:
           System.out
-              .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -169,11 +169,11 @@ final class Server {
       try (PrintWriter printWriter = new PrintWriter(file)) {
         String code = qm.value("input");
         printWriter.print(code);
-
+        printWriter.close();
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          .put("error", false).put("compiled", errorMessage).build();
           Files.delete(file.toPath());
           return GSON.toJson(variables);
         }
@@ -198,8 +198,8 @@ final class Server {
         // testResult.get(2)));
         // }
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("testResults", testResults).build();
+        .put("error", false).put("compiled", "success")
+        .put("testResults", testResults).build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
 
@@ -250,26 +250,26 @@ final class Server {
           break;
         default:
           System.out
-              .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
       }
 
       Integer random = (int) (Math.random() * 1000000);
-      String randomFileName = random.toString() + fileType;
-
+      String randomFileName = "temp" + random.toString() + fileType;
+      File tempDir = new File("temporary");
+      tempDir.mkdir();
       File file = new File("temporary/" + randomFileName);
 
       try (PrintWriter printWriter = new PrintWriter(file)) {
         String code = qm.value("input");
         printWriter.print(code);
-
+        printWriter.close();
         String errorMessage = myCompiler.compile(file.getPath());
-
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -281,21 +281,25 @@ final class Server {
             testInputList);
 
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("runResults", runResults).build();
-        Files.delete(file.toPath());
+        .put("error", false).put("compiled", "success")
+        .put("runResults", runResults).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
         System.out.println("IOException in UserTestsHandler");
         Map<String, Object> variables = new ImmutableMap.Builder().put("error",
             true).build();
-        try {
-          Files.delete(file.toPath());
-        } catch (IOException e1) {
-          System.out.println("ERROR: error deleting file in UserTestsHandler");
-        }
         return GSON.toJson(variables);
+      } finally {
+        for (File f : tempDir.listFiles()) {
+          f.delete();
+        }
+        try {
+          Files.delete(tempDir.toPath());
+        } catch (IOException e) {
+          System.out
+          .println("error deleting temporary directory in UserTestsHandler");
+        }
       }
     }
   }
