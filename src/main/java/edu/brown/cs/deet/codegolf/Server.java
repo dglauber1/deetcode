@@ -52,11 +52,6 @@ final class Server {
   private static UserHandler user;
   private static final int PORT = 4567;
   private static final String dbPath = "data/codegolf.db";
-  
-
-  private static final MyCompiler pyCompiler = new PyCompiler();
-  private static final Runner pyRunner = new PyRunner();
-  private static final Tester pyTester = new PyTester();
 
   private static String appID = "1559408461020162";
   private static String loginRedirectURL = "http://localhost:4567/fblogin";
@@ -116,32 +111,36 @@ final class Server {
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
     Spark.post("/getallcategories", new AllCategoriesHandler());
-    Spark.post("/game/usertests", new UserTestsHandler());
-    Spark.post("/game/deettests", new DeetTestsHandler());
-    Spark.get("/categories", (request, response) -> {
-      Map<String, Object> variables = ImmutableMap.of("title", "Categories",
-          "name", request.cookie("name"));
-      return new ModelAndView(variables, "categories.ftl");
-    }, freeMarker);
-    
+    Spark.post("/game/usertests", new GamePageHandlers.UserTestsHandler());
+    Spark.post("/game/deettests", new GamePageHandlers.DeetTestsHandler());
+    Spark.get(
+        "/categories",
+        (request, response) -> {
+          Map<String, Object> variables = ImmutableMap.of("title",
+              "Categories", "name", request.cookie("name"));
+          return new ModelAndView(variables, "categories.ftl");
+        }, freeMarker);
+
     // home page
-    Spark.get("/", (request, response) -> {
-      // if they're already logged in, send them to the categories page
-      if (validCookie(request)) {
-        response.redirect("/categories");
-      }
-  
-      Map<String, Object> variables = ImmutableMap.of("title", "Home",
-        "loginURL", getFBURL());
-      return new ModelAndView(variables, "landing.ftl");
-    }, freeMarker);
-    
+    Spark.get(
+        "/",
+        (request, response) -> {
+          // if they're already logged in, send them to the categories page
+          if (validCookie(request)) {
+            response.redirect("/categories");
+          }
+
+          Map<String, Object> variables = ImmutableMap.of("title", "Home",
+              "loginURL", getFBURL());
+          return new ModelAndView(variables, "landing.ftl");
+        }, freeMarker);
+
     // Facebook authentication redirect
     Spark.get("/fblogin", (request, response) -> {
       String fbcode = request.queryParams("code");
       return handleFB(fbcode, request, response);
     });
-    
+
     // logout request
     Spark.get("/logout", (request, response) -> {
       response.removeCookie("name");
@@ -149,57 +148,63 @@ final class Server {
       response.redirect("/");
       return "Should never get here";
     });
-    
+
     // adding a user AJAX call
-    Spark.post("/add-user", (request, response) -> {
-      String username = request.queryMap().value("username");
-      try (UserDatabase ud = new UserDatabase(dbPath)) {
-        try {
-          Boolean usernameAlreadyExists = ud.doesUserExistWithUsername(username);
-          Boolean idAlreadyExists = ud.doesUserExistWithID(request.cookie("user"));
-                    
-          if (usernameAlreadyExists) {
-            response.status(400);
-            return GSON.toJson(ImmutableMap.of("error",
-              "That username is already taken."));
-          } else if (idAlreadyExists) {
-            response.status(400);
-            return GSON.toJson(ImmutableMap.of("error",
-              "There is already a user associated with this fb account."));
-          } else {
-            ud.addNewUser(username, request.cookie("user"), false,
-              request.cookie("name"));
-            return GSON.toJson("Success!");
+    Spark
+    .post(
+        "/add-user",
+        (request, response) -> {
+          String username = request.queryMap().value("username");
+          try (UserDatabase ud = new UserDatabase(dbPath)) {
+            try {
+              Boolean usernameAlreadyExists = ud
+                  .doesUserExistWithUsername(username);
+              Boolean idAlreadyExists = ud.doesUserExistWithID(request
+                  .cookie("user"));
+
+              if (usernameAlreadyExists) {
+                response.status(400);
+                return GSON.toJson(ImmutableMap.of("error",
+                    "That username is already taken."));
+              } else if (idAlreadyExists) {
+                response.status(400);
+                return GSON.toJson(ImmutableMap
+                    .of("error",
+                        "There is already a user associated with this fb account."));
+              } else {
+                ud.addNewUser(username, request.cookie("user"), false,
+                    request.cookie("name"));
+                return GSON.toJson("Success!");
+              }
+
+            } catch (SQLException e) {
+              System.out.println(e.getMessage());
+              System.exit(1);
+            }
+            return "Should never get here";
           }
-          
-        } catch (SQLException e) {
-          System.out.println(e.getMessage());
-          System.exit(1);
-        }
-        return "Should never get here";
-      }
-    });
-    
+        });
+
     // check authentication before every request
-//    Spark.before((request, response) -> {
-//      String url = request.url();
-//
-//      Boolean validUser = validCookie(request);
-//
-//      Boolean staticRequest = url.contains("css") || url.contains("js");
-//
-//      Boolean doesntNeedLogIn = url.equals("http://localhost:4567/")
-//        || url.equals("http://localhost:4567/fblogin");
-//
-//      System.out.println(url);
-//    });
+    // Spark.before((request, response) -> {
+    // String url = request.url();
+    //
+    // Boolean validUser = validCookie(request);
+    //
+    // Boolean staticRequest = url.contains("css") || url.contains("js");
+    //
+    // Boolean doesntNeedLogIn = url.equals("http://localhost:4567/")
+    // || url.equals("http://localhost:4567/fblogin");
+    //
+    // System.out.println(url);
+    // });
   }
-  
+
   private static Boolean validCookie(Request request) {
     String userID = request.cookie("user");
     Boolean noCookie = userID == null;
     Boolean badCookie = true;
-        
+
     try (UserDatabase ud = new UserDatabase(dbPath)) {
       try {
         badCookie = !ud.doesUserExistWithID(userID);
@@ -208,234 +213,73 @@ final class Server {
         System.exit(1);
       }
     }
-    
+
     return !(noCookie || badCookie);
   }
-  
+
   /**
    * Handles FB requests for logins and registrations.
-   * @param code the code returned from the initial authentication step
-   * @param req the request object
-   * @param res the response object
+   * @param code
+   *          the code returned from the initial authentication step
+   * @param req
+   *          the request object
+   * @param res
+   *          the response object
    * @return the string representing the desired response
    */
   private static String handleFB(String code, Request req, Response res) {
-    String accessTokenURL =
-      "https://graph.facebook.com/v2.3/oauth/access_token?client_id="
-      + appID + "&redirect_uri=" + loginRedirectURL + "&client_secret="
-      + appSecret + "&code=" + code;
-    
+    String accessTokenURL = "https://graph.facebook.com/v2.3/oauth/access_token?client_id="
+        + appID
+        + "&redirect_uri="
+        + loginRedirectURL
+        + "&client_secret="
+        + appSecret + "&code=" + code;
+
     Map<String, String> tokenJSON = getJSONFromURL(accessTokenURL);
-    
+
     if (!tokenJSON.containsKey("access_token")) {
       res.status(500);
       return "Unable to get access token for the given FB account.";
     }
-          
+
     String graphDataURL = "https://graph.facebook.com/v2.3/me?access_token="
-      + tokenJSON.get("access_token") + "&fields=id,name";
-    
+        + tokenJSON.get("access_token") + "&fields=id,name";
+
     Map<String, String> dataJSON = getJSONFromURL(graphDataURL);
-    
+
     if (!dataJSON.containsKey("id")) {
       res.status(500);
       return "Unable to get data for given FB account.";
     }
-    
+
     String name = dataJSON.get("name");
     String fbID = dataJSON.get("id");
-    
+
     try (UserDatabase ud = new UserDatabase(dbPath)) {
       try {
         Boolean alreadyExists = ud.doesUserExistWithID(fbID);
-        
+
         res.cookie("name", name);
         res.cookie("user", fbID);
-        
+
         if (alreadyExists) {
           res.redirect("/categories");
         } else {
           res.redirect("/categories#signup");
         }
-        
+
       } catch (SQLException e) {
         System.out.println(e.getMessage());
         System.exit(1);
       }
-    };
- 
+    }
+    ;
+
     // should never get here
-    String toReturn = String.format("Name: %s, ID: %s",
-      dataJSON.get("name"), dataJSON.get("id"));
-    
+    String toReturn = String.format("Name: %s, ID: %s", dataJSON.get("name"),
+        dataJSON.get("id"));
+
     return toReturn;
-  }
-
-  private static class DeetTestsHandler implements Route {
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    public Object handle(Request req, Response res) {
-      String userID = req.cookie("user");
-      QueryParamsMap qm = req.queryMap();
-      String challengeID = qm.value("challengeID");
-      String language = qm.value("language");
-
-      String fileType;
-      Tester myTester;
-      MyCompiler myCompiler;
-      switch (language) {
-        case "python":
-          fileType = ".py";
-          myTester = pyTester;
-          myCompiler = pyCompiler;
-          break;
-        default:
-          System.out
-          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
-          Map<String, Object> variables = new ImmutableMap.Builder().put(
-              "error", true).build();
-          return GSON.toJson(variables);
-      }
-
-      String fileName = userID + fileType;
-      File file = new File(String.format("challenges/%s/%s/solutions/%s",
-          challengeID, language, fileName));
-      try (PrintWriter printWriter = new PrintWriter(file)) {
-        String code = qm.value("input");
-        printWriter.print(code);
-        printWriter.close();
-        String errorMessage = myCompiler.compile(file.getPath());
-        if (errorMessage != null) {
-          Map<String, Object> variables = new ImmutableMap.Builder()
-          .put("error", false).put("compiled", errorMessage).build();
-          Files.delete(file.toPath());
-          return GSON.toJson(variables);
-        }
-
-        String testDir = String.format("challenges/%s/%s", challengeID,
-            language);
-        Collection<List<String>> testResults = myTester.test(file.getPath(),
-            testDir);
-        // boolean passedAllTests = true;
-        // List<String> testMessages = new ArrayList<>();
-        // for (List<String> testResult : testResults) {
-        // String successOrFailure;
-        // if (testResult.get(1).equals(testResult.get(2))) {
-        // successOrFailure = "SUCCESS";
-        // } else {
-        // successOrFailure = "FAILURE";
-        // passedAllTests = false;
-        // }
-        // testMessages.add(String.format(
-        // "%s on %s: on (%s), expected %s, got %s", successOrFailure,
-        // testResult.get(3), testResult.get(0), testResult.get(1),
-        // testResult.get(2)));
-        // }
-        Map<String, Object> variables = new ImmutableMap.Builder()
-        .put("error", false).put("compiled", "success")
-        .put("testResults", testResults).build();
-        Files.delete(file.toPath());
-        return GSON.toJson(variables);
-
-      } catch (IOException e) {
-        System.out.println("ERROR: IOException in DeetTestsHandler");
-        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
-            true).build();
-        try {
-          Files.delete(file.toPath());
-        } catch (IOException e1) {
-          System.out.println("ERROR: error deleting file in DeetTestsHandler");
-        }
-        return GSON.toJson(variables);
-      } catch (Exception e) {
-        System.out.println("ERROR: Tester error occurred in DeetTestsHandler");
-        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
-            true).build();
-        try {
-          Files.delete(file.toPath());
-        } catch (IOException e1) {
-          System.out.println("ERROR: error deleting file in DeetTestsHandler");
-        }
-        return GSON.toJson(variables);
-      }
-    }
-  }
-
-  /**
-   * Runs a user's code on user-provided input and posts the corresponding
-   * output.
-   * @author dglauber
-   */
-  private static class UserTestsHandler implements Route {
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    public Object handle(Request req, Response res) {
-      QueryParamsMap qm = req.queryMap();
-      String language = qm.value("language");
-
-      String fileType;
-      Runner myRunner;
-      MyCompiler myCompiler;
-      switch (language) {
-        case "python":
-          fileType = ".py";
-          myRunner = pyRunner;
-          myCompiler = pyCompiler;
-          break;
-        default:
-          System.out
-          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
-          Map<String, Object> variables = new ImmutableMap.Builder().put(
-              "error", true).build();
-          return GSON.toJson(variables);
-      }
-
-      Integer random = (int) (Math.random() * 1000000);
-      String randomFileName = "temp" + random.toString() + fileType;
-      File tempDir = new File("temporary");
-      tempDir.mkdir();
-      File file = new File("temporary/" + randomFileName);
-
-      try (PrintWriter printWriter = new PrintWriter(file)) {
-        String code = qm.value("input");
-        printWriter.print(code);
-        printWriter.close();
-        String errorMessage = myCompiler.compile(file.getPath());
-        if (errorMessage != null) {
-          Map<String, Object> variables = new ImmutableMap.Builder()
-          .put("error", false).put("compiled", errorMessage).build();
-          return GSON.toJson(variables);
-        }
-
-        String testInputs = qm.value("userTest");
-        List<String> testInputList = Lists.newArrayList(Splitter
-            .on(System.getProperty("line.separator")).trimResults()
-            .omitEmptyStrings().split(testInputs));
-        Map<String, String> runResults = myRunner.run(file.getPath(),
-            testInputList);
-
-        Map<String, Object> variables = new ImmutableMap.Builder()
-        .put("error", false).put("compiled", "success")
-        .put("runResults", runResults).build();
-        return GSON.toJson(variables);
-
-      } catch (IOException e) {
-        System.out.println("IOException in UserTestsHandler");
-        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
-            true).build();
-        return GSON.toJson(variables);
-      } finally {
-        for (File f : tempDir.listFiles()) {
-          f.delete();
-        }
-        try {
-          Files.delete(tempDir.toPath());
-        } catch (IOException e) {
-          System.out
-          .println("error deleting temporary directory in UserTestsHandler");
-        }
-      }
-    }
   }
 
   /**
@@ -632,7 +476,8 @@ final class Server {
       Reader reader = new InputStreamReader(connection.getInputStream());
       BufferedReader buff = new BufferedReader(reader);
       String line = buff.readLine();
-      Type stringStringMap = new TypeToken<Map<String, String>>(){}.getType();
+      Type stringStringMap = new TypeToken<Map<String, String>>() {
+      }.getType();
       Map<String, String> json = new Gson().fromJson(line, stringStringMap);
       return json;
     } catch (IOException e) {
