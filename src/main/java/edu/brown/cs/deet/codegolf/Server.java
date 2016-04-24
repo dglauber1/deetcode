@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +32,10 @@ import com.google.gson.Gson;
 import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
+import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
+import edu.brown.cs.deet.execution.python.PyTester;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 import freemarker.template.Configuration;
 
@@ -40,6 +44,9 @@ final class Server {
   private static final Gson GSON = new Gson();
   private static AdminHandler admin;
   private static final int PORT = 4567;
+  private static final MyCompiler pyCompiler = new PyCompiler();
+  private static final Runner pyRunner = new PyRunner();
+  private static final Tester pyTester = new PyTester();
 
   /**
    * Sets the AdminHandler for the Server.
@@ -88,6 +95,86 @@ final class Server {
     Spark.post("/game/run", new RunHandler());
   }
 
+  private static class SubmitHandler implements Route {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object handle(Request req, Response res) {
+      String userID = req.session().attribute("user");
+      QueryParamsMap qm = req.queryMap();
+      String challengeID = qm.value("challengeID");
+      String language = qm.value("language");
+
+      String fileType;
+      Tester myTester;
+      MyCompiler myCompiler;
+      switch (language) {
+        case "python":
+          fileType = ".py";
+          myTester = pyTester;
+          myCompiler = pyCompiler;
+          break;
+        default:
+          System.out
+              .println("Error in RunHandler: language must be either python, ruby, or javascript");
+          Map<String, Object> variables = new ImmutableMap.Builder().put(
+              "error", true).build();
+          return GSON.toJson(variables);
+      }
+
+      String fileName = userID + fileType;
+      File file = new File(String.format("challenges/%s/%s/solutions/%s",
+          challengeID, language, fileName));
+      try (PrintWriter printWriter = new PrintWriter(file)) {
+        String code = qm.value("input");
+        printWriter.print(code);
+
+        String errorMessage = myCompiler.compile(file.getPath());
+        if (errorMessage != null) {
+          Map<String, Object> variables = new ImmutableMap.Builder()
+          .put("error", false).put("compiled", errorMessage).build();
+          return GSON.toJson(variables);
+        }
+
+        String testDir = String.format("challenges/%s/%s", challengeID,
+            language);
+        Collection<List<String>> testResults = myTester.test(file.getPath(),
+            testDir);
+        boolean passedAllTests = true;
+        List<String> testMessages = new ArrayList<>();
+        for (List<String> testResult : testResults) {
+          String successOrFailure;
+          if (testResult.get(1).equals(testResult.get(2))) {
+            successOrFailure = "SUCCESS";
+          } else {
+            successOrFailure = "FAILURE";
+            passedAllTests = false;
+          }
+          testMessages.add(String.format(
+              "%s on %s: on (%s), expected %s, got %s", successOrFailure,
+              testResult.get(3), testResult.get(0), testResult.get(1),
+              testResult.get(2)));
+        }
+        Map<String, Object> variables = new ImmutableMap.Builder()
+            .put("error", false).put("compiled", "success")
+        .put("testResults", testMessages).put("passed", passedAllTests)
+        .build();
+        return GSON.toJson(variables);
+
+      } catch (IOException e) {
+        System.out.println("ERROR: IOException in SubmitHandler");
+        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
+            true).build();
+        return GSON.toJson(variables);
+      } catch (Exception e) {
+        System.out.println("ERROR: Tester error occurred in SubmitHandler");
+        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
+            true).build();
+        return GSON.toJson(variables);
+      }
+      // TODO add solution info to DB
+    }
+  }
+
   /**
    * Runs a user's code on user-provided input and posts the corresponding
    * output.
@@ -106,12 +193,12 @@ final class Server {
       switch (language) {
         case "python":
           fileType = ".py";
-          myRunner = new PyRunner();
-          myCompiler = new PyCompiler();
+          myRunner = pyRunner;
+          myCompiler = pyCompiler;
           break;
         default:
           System.out
-          .println("Error in RunHandler: language must be either python, ruby, or javascript");
+              .println("Error in RunHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -130,7 +217,7 @@ final class Server {
 
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -142,8 +229,8 @@ final class Server {
             testInputList);
 
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("runResults", runResults).build();
+        .put("error", false).put("compiled", "success")
+        .put("runResults", runResults).build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
 
