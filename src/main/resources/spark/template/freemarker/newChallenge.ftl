@@ -37,7 +37,7 @@
         <div class="col-xs-12 col-md-6">
           <input type="text" id="newCategory" class="form-control" placeholder="New Challenge Category" aria-describedby="basic-addon1">
         </div>
-        <div class="col-xs-6 col-md-6" id="newCategoryMessage"></div>
+        <div class="col-xs-6 col-md-6" id="newCategoryError"></div>
       </div>
 
       <div class="row">
@@ -50,7 +50,7 @@
         <div class="col-xs-12 col-md-6">
           <input type="text" id="pName" class="form-control" placeholder="Challenge Directory Name" aria-describedby="basic-addon1">
         </div>
-        <div class="col-xs-6 col-md-6" id="nameMessage"></div>
+        <div class="col-xs-6 col-md-6" id="pNameError"></div>
       </div>
 
       <div class="row">
@@ -63,15 +63,20 @@
         <div class="col-xs-12 col-md-6">
           <input type="text" id="name" class="form-control" placeholder="Challenge Name" aria-describedby="basic-addon1">
         </div>
-        <div class="col-xs-6 col-md-6"></div>
+        <div class="col-xs-6 col-md-6" id="nameError"></div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-6 col-md-12">
+          <h4>Challenge Description</h4>
+        </div>
       </div>
 
       <div class="row">
         <div class="col-xs-12 col-md-6">
-          <h4>Challenge Description</h4>
           <textarea class="form-control" id="description" rows="4"></textarea>
         </div>
-        <div class="col-xs-6 col-md-6"></div>
+        <div class="col-xs-6 col-md-6" id="descriptionError"></div>
       </div>
     </div>
 
@@ -178,6 +183,12 @@
           <h4>Are you sure you want to submit this challenge?</h4>
           <button type="button" class="btn btn-primary" id="submit">Submit Challenge</button>
         </div>
+        <div class="col-xs-2 col-md-2"></div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-2 col-md-2"></div>
+        <div class="col-xs-2 col-md-8" id="submitError"></div>
         <div class="col-xs-2 col-md-2"></div>
       </div>
     </div>

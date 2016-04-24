@@ -106,27 +106,27 @@ final class Server {
     Spark.post("/add-user", new LoginHandlers.AddUserHandler());
     
     // check authentication before every request
-    Spark.before((request, response) -> {
-      String url = request.url();
-
-      Boolean validUser = validCookie(request);
-
-      Boolean staticRequest = url.contains("css") || url.contains("js")
-          || url.contains("favico");
-
-      Boolean doesntNeedLogin = url.equals("http://localhost:4567/")
-          || url.equals("http://localhost:4567/fblogin")
-          || url.equals("http://localhost:4567/add-user");
-
-      Boolean creatingAccount = url.equals("http://localhost:4567/categories")
-          && (request.session().attribute("adding") != null);
-
-      Boolean badRequest = !validUser && !(staticRequest || doesntNeedLogin);
-
-      if (badRequest && !creatingAccount) {
-        response.redirect("/");
-      }
-    });
+    // Spark.before((request, response) -> {
+    // String url = request.url();
+    //
+    // Boolean validUser = validCookie(request);
+    //
+    // Boolean staticRequest = url.contains("css") || url.contains("js")
+    // || url.contains("favico");
+    //
+    // Boolean doesntNeedLogin = url.equals("http://localhost:4567/")
+    // || url.equals("http://localhost:4567/fblogin")
+    // || url.equals("http://localhost:4567/add-user");
+    //
+    // Boolean creatingAccount = url.equals("http://localhost:4567/categories")
+    // && (request.session().attribute("adding") != null);
+    //
+    // Boolean badRequest = !validUser && !(staticRequest || doesntNeedLogin);
+    //
+    // if (badRequest && !creatingAccount) {
+    // response.redirect("/");
+    // }
+    // });
   }
 
   private static Boolean validCookie(Request request) {
