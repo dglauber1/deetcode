@@ -2,8 +2,6 @@ package edu.brown.cs.deet.codegolf;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -12,29 +10,10 @@ import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import edu.brown.cs.deet.database.ChallengeDatabase;
-import edu.brown.cs.deet.database.UserDatabase;
-import edu.brown.cs.deet.execution.MyCompiler;
-import edu.brown.cs.deet.execution.Runner;
-import edu.brown.cs.deet.execution.Tester;
-import edu.brown.cs.deet.execution.python.PyCompiler;
-import edu.brown.cs.deet.execution.python.PyRunner;
-import edu.brown.cs.deet.execution.python.PyTester;
-import edu.brown.cs.deet.pageHandler.AdminHandler;
-import edu.brown.cs.deet.pageHandler.UserHandler;
-import freemarker.template.Configuration;
 import spark.ExceptionHandler;
 import spark.ModelAndView;
 import spark.QueryParamsMap;
@@ -45,6 +24,15 @@ import spark.Spark;
 import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import edu.brown.cs.deet.database.UserDatabase;
+import edu.brown.cs.deet.pageHandler.AdminHandler;
+import edu.brown.cs.deet.pageHandler.UserHandler;
+import freemarker.template.Configuration;
+
 final class Server {
 
   private static final Gson GSON = new Gson();
@@ -52,7 +40,6 @@ final class Server {
   private static UserHandler user;
   private static final int PORT = 4567;
   private static final String dbPath = "data/codegolf.db";
-
   private static String appID = "1559408461020162";
   private static String loginRedirectURL = "http://localhost:4567/fblogin";
   private static String appSecret = "9ffcf58f5f448a3e9e723537c476b5eb";
@@ -104,15 +91,21 @@ final class Server {
     FreeMarkerEngine freeMarker = createEngine();
 
     // Setup Spark Routes
-    Spark.get("/game", new GamePageHandler(), freeMarker);
+    Spark.get("/game", new GamePageHandlers.GamePageHandler(), freeMarker);
     Spark.get("/admin_add", new AdminAddHandler(), freeMarker);
     Spark.get("/user/:username", new UserPageHandler(), freeMarker);
+    /*
+     * TODO: get leaderboard associated with a particular challenge
+     * Spark.get("/leaderboard/:challengeInfo", new GetLeaderboardHandler(),
+     * freeMarker);
+     */
     Spark.post("/admin_add/results", new NewChallengeHandler());
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
     Spark.post("/getallcategories", new AllCategoriesHandler());
     Spark.post("/game/usertests", new GamePageHandlers.UserTestsHandler());
     Spark.post("/game/deettests", new GamePageHandlers.DeetTestsHandler());
+    Spark.post("/save", new GamePageHandlers.SaveSolutionHandler());
     Spark.get(
         "/categories",
         (request, response) -> {
@@ -151,39 +144,39 @@ final class Server {
 
     // adding a user AJAX call
     Spark
-    .post(
-        "/add-user",
-        (request, response) -> {
-          String username = request.queryMap().value("username");
-          try (UserDatabase ud = new UserDatabase(dbPath)) {
-            try {
-              Boolean usernameAlreadyExists = ud
-                  .doesUserExistWithUsername(username);
-              Boolean idAlreadyExists = ud.doesUserExistWithID(request
-                  .cookie("user"));
+        .post(
+            "/add-user",
+            (request, response) -> {
+              String username = request.queryMap().value("username");
+              try (UserDatabase ud = new UserDatabase(dbPath)) {
+                try {
+                  Boolean usernameAlreadyExists = ud
+                      .doesUserExistWithUsername(username);
+                  Boolean idAlreadyExists = ud.doesUserExistWithID(request
+                      .cookie("user"));
 
-              if (usernameAlreadyExists) {
-                response.status(400);
-                return GSON.toJson(ImmutableMap.of("error",
-                    "That username is already taken."));
-              } else if (idAlreadyExists) {
-                response.status(400);
-                return GSON.toJson(ImmutableMap
-                    .of("error",
-                        "There is already a user associated with this fb account."));
-              } else {
-                ud.addNewUser(username, request.cookie("user"), false,
-                    request.cookie("name"));
-                return GSON.toJson("Success!");
+                  if (usernameAlreadyExists) {
+                    response.status(400);
+                    return GSON.toJson(ImmutableMap.of("error",
+                        "That username is already taken."));
+                  } else if (idAlreadyExists) {
+                    response.status(400);
+                    return GSON.toJson(ImmutableMap
+                        .of("error",
+                            "There is already a user associated with this fb account."));
+                  } else {
+                    ud.addNewUser(username, request.cookie("user"), false,
+                        request.cookie("name"));
+                    return GSON.toJson("Success!");
+                  }
+
+                } catch (SQLException e) {
+                  System.out.println(e.getMessage());
+                  System.exit(1);
+                }
+                return "Should never get here";
               }
-
-            } catch (SQLException e) {
-              System.out.println(e.getMessage());
-              System.exit(1);
-            }
-            return "Should never get here";
-          }
-        });
+            });
 
     // check authentication before every request
     // Spark.before((request, response) -> {
@@ -272,6 +265,7 @@ final class Server {
         System.out.println(e.getMessage());
         System.exit(1);
       }
+
     }
     ;
 
@@ -280,55 +274,6 @@ final class Server {
         dataJSON.get("id"));
 
     return toReturn;
-  }
-
-  /**
-   * Handles loading the game page.
-   * @author el51
-   */
-  private static class GamePageHandler implements TemplateViewRoute {
-    @Override
-    public ModelAndView handle(Request req, Response res) {
-      // TODO Currently set to the test database.
-      String dbPath = "data/test.db";
-      try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
-        /*
-         * TODO: This is currently hard-coded in because Tyler and I haven't yet
-         * // set up a system to pass question names/ids from the categories
-         * page // to the game page.
-         */
-        String challengeName = "test";
-        String promptPath = null;
-        try {
-          if (challenges.doesChallengeExist(challengeName)) {
-            List<String> challengeData = challenges.getChallenge(challengeName);
-            promptPath = challengeData.get(1).concat("description.txt");
-          }
-        } catch (SQLException e) {
-          System.out.println(e.getMessage());
-          System.exit(1);
-        }
-
-        StringBuilder promptBuilder = new StringBuilder();
-        try (BufferedReader r = new BufferedReader(new FileReader(promptPath))) {
-          String line = r.readLine();
-          while (line != null) {
-            promptBuilder.append(line).append("\n");
-            line = r.readLine();
-          }
-        } catch (FileNotFoundException e) {
-          System.out.println("File not found: " + promptPath);
-          System.exit(1);
-        } catch (IOException e) {
-          System.out.println("I/O Exception at: " + promptPath);
-          System.exit(1);
-        }
-
-        Map<String, Object> variables = ImmutableMap.of("title", "Game",
-            "prompt", promptBuilder.toString());
-        return new ModelAndView(variables, "game.ftl");
-      }
-    }
   }
 
   /**
