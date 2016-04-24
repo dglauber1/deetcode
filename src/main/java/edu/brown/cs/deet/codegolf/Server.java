@@ -14,10 +14,19 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import spark.ExceptionHandler;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Spark;
+import spark.TemplateViewRoute;
+import spark.template.freemarker.FreeMarkerEngine;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
@@ -34,15 +43,6 @@ import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 import freemarker.template.Configuration;
-import spark.ExceptionHandler;
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.Spark;
-import spark.TemplateViewRoute;
-import spark.template.freemarker.FreeMarkerEngine;
 
 final class Server {
 
@@ -145,7 +145,7 @@ final class Server {
           break;
         default:
           System.out
-          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+              .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -186,7 +186,7 @@ final class Server {
         // testResult.get(2)));
         // }
         Map<String, Object> variables = new ImmutableMap.Builder()
-        .put("error", false).put("compiled", "success")
+            .put("error", false).put("compiled", "success")
             .put("testResults", testResults).build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
@@ -238,7 +238,7 @@ final class Server {
           break;
         default:
           System.out
-          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+              .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);

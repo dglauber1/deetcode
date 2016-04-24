@@ -86,30 +86,6 @@
      <script>
      </script>
      
-     <!-- Run Code Script -->
-     <script>
-	    $('input[type=submit]').click(function(e) {
-	    	var timeLeft = $("#CountDownTimer").TimeCircles().getTime();
-	    	var isTimeOver = (timeLeft <= 0);
-	    	
-	    	<!-- determine whether or not this is the user's first attempt -->
-	    	<!-- currently set manually, ask dan about this -->
-	    	var isRepeatedAttempt = false;
-	    	
-	    	if (isTimeOver || isRepeatedAttempt) {
-	    		<!-- communicate with back end to run code -->
-	    		<!-- determine whether or not code passed or failed -->
-	    		<!-- don't let the user submit to the leaderboard -->	
-	    		vex.dialog.alert("<b>Ran your code! Unfortunately, you can't submit to the leaderboard.</b>");
-	    	} else {
-	    		<!-- communicate with back end to run code -->
-	    		<!-- determine whether or not code passed or failed -->
-	    		vex.dialog.alert("<b>Ran your code! Submitting to the leaderboard.</b>");
-	    	}
-	    });
-     </script>
-     
-     
    	 <script src="js/main.js"></script>
      <script src="js/timer.js"></script>
      <script src="js/codepad.js"></script>
