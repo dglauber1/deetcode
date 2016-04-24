@@ -2,6 +2,8 @@ package edu.brown.cs.deet.codegolf;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -14,6 +16,16 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+
+import edu.brown.cs.deet.database.ChallengeDatabase;
+import edu.brown.cs.deet.database.UserDatabase;
+import edu.brown.cs.deet.pageHandler.AdminHandler;
+import edu.brown.cs.deet.pageHandler.GamePageHandlers;
+import edu.brown.cs.deet.pageHandler.LoginHandlers;
+import edu.brown.cs.deet.pageHandler.UserHandler;
+import freemarker.template.Configuration;
 import spark.ExceptionHandler;
 import spark.ModelAndView;
 import spark.QueryParamsMap;
@@ -23,15 +35,6 @@ import spark.Route;
 import spark.Spark;
 import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import edu.brown.cs.deet.database.UserDatabase;
-import edu.brown.cs.deet.pageHandler.AdminHandler;
-import edu.brown.cs.deet.pageHandler.UserHandler;
-import freemarker.template.Configuration;
 
 final class Server {
 
@@ -105,75 +108,12 @@ final class Server {
     Spark.post("/getallcategories", new AllCategoriesHandler());
     Spark.post("/game/usertests", new GamePageHandlers.UserTestsHandler());
     Spark.post("/game/deettests", new GamePageHandlers.DeetTestsHandler());
-    Spark.post("/save", new GamePageHandlers.SaveSolutionHandler());
-    Spark.get(
-        "/categories",
-        (request, response) -> {
-          Map<String, Object> variables = ImmutableMap.of("title",
-              "Categories", "name", request.cookie("name"));
-          return new ModelAndView(variables, "categories.ftl");
-        }, freeMarker);
-
-    // home page
-    Spark.get(
-        "/",
-        (request, response) -> {
-          Map<String, Object> variables = ImmutableMap.of("title", "Home",
-              "loginURL", getFBURL());
-          return new ModelAndView(variables, "landing.ftl");
-        }, freeMarker);
-
-    // Facebook authentication redirect
-    Spark.get("/fblogin", (request, response) -> {
-      String fbcode = request.queryParams("code");
-      return handleFB(fbcode, request, response);
-    });
-
-    // logout request
-    Spark.get("/logout", (request, response) -> {
-      response.removeCookie("name");
-      response.removeCookie("user");
-      response.redirect("/");
-      return "Should never get here";
-    });
-
-    // adding a user AJAX call
-    Spark
-        .post(
-            "/add-user",
-            (request, response) -> {
-              String username = request.queryMap().value("username");
-              try (UserDatabase ud = new UserDatabase(dbPath)) {
-                try {
-                  Boolean usernameAlreadyExists = ud
-                      .doesUserExistWithUsername(username);
-                  Boolean idAlreadyExists = ud.doesUserExistWithID(request
-                      .cookie("user"));
-
-                  if (usernameAlreadyExists) {
-                    response.status(400);
-                    return GSON.toJson(ImmutableMap.of("error",
-                        "That username is already taken."));
-                  } else if (idAlreadyExists) {
-                    response.status(400);
-                    return GSON.toJson(ImmutableMap
-                        .of("error",
-                            "There is already a user associated with this fb account."));
-                  } else {
-                    request.session().removeAttribute("adding");
-                    ud.addNewUser(username, request.cookie("user"), false,
-                        request.cookie("name"));
-                    return GSON.toJson("Success!");
-                  }
-
-                } catch (SQLException e) {
-                  System.out.println(e.getMessage());
-                  System.exit(1);
-                }
-                return "Should never get here";
-              }
-            });
-
+    Spark.get("/categories", new LoginHandlers.CategoriesHandler(), freeMarker);
+    Spark.get("/", new LoginHandlers.HomePageHandler(), freeMarker);
+    Spark.get("/fblogin", new LoginHandlers.FBHandler());
+    Spark.get("/logout", new LoginHandlers.LogoutHandler());
+    Spark.post("/add-user", new LoginHandlers.AddUserHandler());
+    
     // check authentication before every request
     // Spark.before((request, response) -> {
     // String url = request.url();
@@ -215,73 +155,6 @@ final class Server {
     return !(noCookie || badCookie);
   }
 
-  /**
-   * Handles FB requests for logins and registrations.
-   * @param code
-   *          the code returned from the initial authentication step
-   * @param req
-   *          the request object
-   * @param res
-   *          the response object
-   * @return the string representing the desired response
-   */
-  private static String handleFB(String code, Request req, Response res) {
-    String accessTokenURL = "https://graph.facebook.com/v2.3/oauth/access_token?client_id="
-        + appID
-        + "&redirect_uri="
-        + loginRedirectURL
-        + "&client_secret="
-        + appSecret + "&code=" + code;
-
-    Map<String, String> tokenJSON = getJSONFromURL(accessTokenURL);
-
-    if (!tokenJSON.containsKey("access_token")) {
-      res.status(500);
-      return "Unable to get access token for the given FB account.";
-    }
-
-    String graphDataURL = "https://graph.facebook.com/v2.3/me?access_token="
-        + tokenJSON.get("access_token") + "&fields=id,name";
-
-    Map<String, String> dataJSON = getJSONFromURL(graphDataURL);
-
-    if (!dataJSON.containsKey("id")) {
-      res.status(500);
-      return "Unable to get data for given FB account.";
-    }
-
-    String name = dataJSON.get("name");
-    String fbID = dataJSON.get("id");
-
-    try (UserDatabase ud = new UserDatabase(dbPath)) {
-      try {
-        Boolean alreadyExists = ud.doesUserExistWithID(fbID);
-
-        res.cookie("name", name);
-        res.cookie("user", fbID);
-
-        if (alreadyExists) {
-          res.redirect("/categories");
-        } else {
-          req.session(true);
-          req.session().attribute("adding", "true");
-          res.redirect("/categories#signup");
-        }
-
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
-        System.exit(1);
-      }
-
-    }
-    ;
-
-    // should never get here
-    String toReturn = String.format("Name: %s, ID: %s", dataJSON.get("name"),
-        dataJSON.get("id"));
-
-    return toReturn;
-  }
 
   /**
    * Shows the Admin_add page.
@@ -412,39 +285,6 @@ final class Server {
     }
   }
 
-  // TODO: deal with login and registration differently
-  private static String getFBURL() {
-    return "https://www.facebook.com/dialog/oauth?client_id=" + appID
-        + "&redirect_uri=" + loginRedirectURL;
-  }
-
-  /**
-   * Takes a url, makes a get request, and then returns the JSON response in the
-   * form of a Map
-   * @param urlString
-   *          the string of the url you want to hit
-   * @return the JSON response as a Map<String, String>
-   */
-  private static Map<String, String> getJSONFromURL(String urlString) {
-    try {
-      // open a URL connection
-      URL url = new URL(urlString);
-      URLConnection connection = url.openConnection();
-      connection.connect();
-
-      // read the URL connection into a json object
-      Reader reader = new InputStreamReader(connection.getInputStream());
-      BufferedReader buff = new BufferedReader(reader);
-      String line = buff.readLine();
-      Type stringStringMap = new TypeToken<Map<String, String>>() {
-      }.getType();
-      Map<String, String> json = new Gson().fromJson(line, stringStringMap);
-      return json;
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
-      return ImmutableMap.of("error", e.getMessage());
-    }
-  }
 
   /**
    * Handler that checks if the entered name in the Admin page is already taken.

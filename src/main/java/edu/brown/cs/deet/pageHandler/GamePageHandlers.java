@@ -1,23 +1,17 @@
-package edu.brown.cs.deet.codegolf;
+package edu.brown.cs.deet.pageHandler;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
@@ -32,6 +26,12 @@ import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
 
@@ -44,11 +44,11 @@ public final class GamePageHandlers {
    * Handles loading the game page.
    * @author el51
    */
-  static class GamePageHandler implements TemplateViewRoute {
+  public static class GamePageHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
       // TODO Currently set to the test database.
-      String dbPath = "data/test.db";
+      String dbPath = "testdata/challengeDatabaseTester.sqlite3";
       try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
         /*
          * TODO: This is currently hard-coded in because Tyler and I haven't yet
@@ -60,9 +60,10 @@ public final class GamePageHandlers {
         try {
           if (challenges.doesChallengeExist(challengeName)) {
             List<String> challengeData = challenges.getChallenge(challengeName);
-            promptPath = challengeData.get(1).concat("description.txt");
+            promptPath = challengeData.get(2).concat("/description.txt");
           }
         } catch (SQLException e) {
+          System.out.println("GamePageHandler");
           System.out.println(e.getMessage());
           System.exit(1);
         }
@@ -81,7 +82,6 @@ public final class GamePageHandlers {
           System.out.println("I/O Exception at: " + promptPath);
           System.exit(1);
         }
-
         Map<String, Object> variables = ImmutableMap.of("title", "Game",
             "prompt", promptBuilder.toString());
         return new ModelAndView(variables, "game.ftl");
@@ -93,7 +93,7 @@ public final class GamePageHandlers {
    * Handlers saving the contents of the game page.
    * @author el51
    */
-  static class SaveSolutionHandler implements Route {
+  public static class SaveSolutionHandler implements Route {
     @Override
     public Object handle(Request req, Response res) {
       QueryParamsMap qm = req.queryMap();
@@ -146,7 +146,7 @@ public final class GamePageHandlers {
     }
   }
 
-  static class DeetTestsHandler implements Route {
+  public static class DeetTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
@@ -180,6 +180,10 @@ public final class GamePageHandlers {
         String code = qm.value("input");
         printWriter.print(code);
         printWriter.close();
+        LineNumberReader lnr = new LineNumberReader(new FileReader(file));
+        lnr.skip(Long.MAX_VALUE);
+        int numLines = lnr.getLineNumber() + 1;
+        lnr.close();
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
@@ -189,11 +193,15 @@ public final class GamePageHandlers {
 
         String testDir = String.format("challenges/%s/%s", challengeID,
             language);
+        long start = System.currentTimeMillis();
         Collection<List<String>> testResults = myTester.test(file.getPath(),
             testDir);
+        long finish = System.currentTimeMillis();
+        long time = finish - start; /* in milliseconds */
         Map<String, Object> variables = new ImmutableMap.Builder()
             .put("error", false).put("compiled", "success")
-            .put("testResults", testResults).build();
+            .put("numLines", numLines).put("testResults", testResults)
+        .put("timeToSolve", time).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
@@ -222,7 +230,7 @@ public final class GamePageHandlers {
    * output.
    * @author dglauber
    */
-  static class UserTestsHandler implements Route {
+  public static class UserTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {

@@ -13,7 +13,13 @@ $('input[type=submit]').click(function(e) {
    	// parsing URL to get challenge ID
    	// note: hardcoding this value later on for now until tyler and i resolve formatting
     var url = document.URL.replace("http://", "");
-    var challengeID = url.substr(url.indexOf("/game/") + 1);
+    url = url.substr(url.indexOf("/") + 1);
+    var challengeID = url.indexOf("game" + 1);
+    
+    // temporary hard coding of challengeID!
+    challengeID = "add-one";
+    
+    console.log(challengeID);
     
    	// note: separate on new line?
    	var userTests = $("#userInput")[0].value;
@@ -100,7 +106,7 @@ $('input[type=submit]').click(function(e) {
 								} else {
 									vex.dialog.alert(responseObject.message);
 								}
-							}
+							});
 						}
 					}
 				});
