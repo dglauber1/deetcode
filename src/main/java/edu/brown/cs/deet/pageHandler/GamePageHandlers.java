@@ -1,4 +1,4 @@
-package edu.brown.cs.deet.codegolf;
+package edu.brown.cs.deet.pageHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,11 +7,6 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
@@ -24,6 +19,10 @@ import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
 
 public final class GamePageHandlers {
 
@@ -32,7 +31,7 @@ public final class GamePageHandlers {
   private static final Tester pyTester = new PyTester();
   private static final Gson GSON = new Gson();
 
-  static class DeetTestsHandler implements Route {
+  public static class DeetTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
@@ -108,7 +107,7 @@ public final class GamePageHandlers {
    * output.
    * @author dglauber
    */
-  static class UserTestsHandler implements Route {
+  public static class UserTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
