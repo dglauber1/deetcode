@@ -103,8 +103,8 @@ final class Server {
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
     Spark.post("/getallcategories", new AllCategoriesHandler());
-    Spark.post("/game/run", new RunHandler());
-    Spark.post("/game/submit", new SubmitHandler());
+    Spark.post("/game/usertests", new UserTestsHandler());
+    Spark.post("/game/deettests", new DeetTestsHandler());
     Spark.get("/categories", (request, response) -> {
       Map<String, Object> variables = ImmutableMap.of("title", "Categories");
       return new ModelAndView(variables, "categories.ftl");
@@ -125,7 +125,7 @@ final class Server {
     });
   }
 
-  private static class SubmitHandler implements Route {
+  private static class DeetTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
@@ -145,7 +145,7 @@ final class Server {
           break;
         default:
           System.out
-          .println("Error in RunHandler: language must be either python, ruby, or javascript");
+              .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -161,7 +161,7 @@ final class Server {
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          .put("error", false).put("compiled", errorMessage).build();
           Files.delete(file.toPath());
           return GSON.toJson(variables);
         }
@@ -186,30 +186,30 @@ final class Server {
               testResult.get(2)));
         }
         Map<String, Object> variables = new ImmutableMap.Builder()
-        .put("error", false).put("compiled", "success")
-            .put("testResults", testMessages).put("passed", passedAllTests)
-            .build();
+            .put("error", false).put("compiled", "success")
+        .put("testResults", testMessages).put("passed", passedAllTests)
+        .build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
 
       } catch (IOException e) {
-        System.out.println("ERROR: IOException in SubmitHandler");
+        System.out.println("ERROR: IOException in DeetTestsHandler");
         Map<String, Object> variables = new ImmutableMap.Builder().put("error",
             true).build();
         try {
           Files.delete(file.toPath());
         } catch (IOException e1) {
-          System.out.println("ERROR: error deleting file in SubmitHandler");
+          System.out.println("ERROR: error deleting file in DeetTestsHandler");
         }
         return GSON.toJson(variables);
       } catch (Exception e) {
-        System.out.println("ERROR: Tester error occurred in SubmitHandler");
+        System.out.println("ERROR: Tester error occurred in DeetTestsHandler");
         Map<String, Object> variables = new ImmutableMap.Builder().put("error",
             true).build();
         try {
           Files.delete(file.toPath());
         } catch (IOException e1) {
-          System.out.println("ERROR: error deleting file in SubmitHandler");
+          System.out.println("ERROR: error deleting file in DeetTestsHandler");
         }
         return GSON.toJson(variables);
       }
@@ -221,7 +221,7 @@ final class Server {
    * output.
    * @author dglauber
    */
-  private static class RunHandler implements Route {
+  private static class UserTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
@@ -239,7 +239,7 @@ final class Server {
           break;
         default:
           System.out
-          .println("Error in RunHandler: language must be either python, ruby, or javascript");
+              .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -258,7 +258,7 @@ final class Server {
 
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -270,19 +270,19 @@ final class Server {
             testInputList);
 
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("runResults", runResults).build();
+        .put("error", false).put("compiled", "success")
+        .put("runResults", runResults).build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
 
       } catch (IOException e) {
-        System.out.println("IOException in RunHandler");
+        System.out.println("IOException in UserTestsHandler");
         Map<String, Object> variables = new ImmutableMap.Builder().put("error",
             true).build();
         try {
           Files.delete(file.toPath());
         } catch (IOException e1) {
-          System.out.println("ERROR: error deleting file in RunHandler");
+          System.out.println("ERROR: error deleting file in UserTestsHandler");
         }
         return GSON.toJson(variables);
       }
