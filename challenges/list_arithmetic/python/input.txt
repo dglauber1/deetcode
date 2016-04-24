@@ -1,0 +1,7 @@
+add_lists, [[5, 6, 7], [1, 2, 3]]
+add_lists, [[-1, -2, -3], [1, 2, 3]]
+add_lists, [[], []]
+subtract_lists, [[1, 1], [20, -4]]
+subtract_lists, [[5, 4, 3], [3, 2, 1]]
+divide_lists, [[10, 8, 6], [2, 2, 2]]
+divide_lists, [[4], [0]]

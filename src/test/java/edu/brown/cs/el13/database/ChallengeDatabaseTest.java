@@ -12,10 +12,8 @@ import edu.brown.cs.deet.database.ChallengeDatabase;
 public class ChallengeDatabaseTest {
   @Test
   public void insertChallengeTest() {
-    ChallengeDatabase db =
-        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3");
-
-    try {
+    try (ChallengeDatabase db =
+        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3")) {
       // adding a new Challenge
       assertTrue(db.insertNewChallenge("addone", "/challenges/addone",
           "Integers"));
@@ -39,10 +37,8 @@ public class ChallengeDatabaseTest {
 
   @Test
   public void doesChallengeExistTests() {
-    ChallengeDatabase db =
-        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3");
-
-    try {
+    try (ChallengeDatabase db =
+        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3")) {
       assertTrue(db.insertNewChallenge("addone", "/challenges/addone",
           "Integers"));
       // this challenge does exist
@@ -58,10 +54,8 @@ public class ChallengeDatabaseTest {
 
   @Test
   public void getChallengeTests() {
-    ChallengeDatabase db =
-        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3");
-
-    try {
+    try (ChallengeDatabase db =
+        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3")) {
       // adding a new Challenge
       assertTrue(db.insertNewChallenge("subTwo", "/challenges/subTwo",
           "Integers"));
@@ -81,10 +75,8 @@ public class ChallengeDatabaseTest {
 
   @Test
   public void editChallengeTests() {
-    ChallengeDatabase db =
-        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3");
-
-    try {
+    try (ChallengeDatabase db =
+        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3")) {
       // adding the challenge
       assertTrue(db.insertNewChallenge("subTwo", "/challenges/subTwo",
           "Integers"));
@@ -123,10 +115,8 @@ public class ChallengeDatabaseTest {
 
   @Test
   public void deleteChallengeTests() {
-    ChallengeDatabase db =
-        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3");
-
-    try {
+    try (ChallengeDatabase db =
+        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3")) {
       // adding the challenge
       assertTrue(db.insertNewChallenge("subTwo", "/challenges/subTwo",
           "Integers"));
@@ -143,10 +133,8 @@ public class ChallengeDatabaseTest {
 
   @Test
   public void testsForChallengeTests() {
-    ChallengeDatabase db =
-        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3");
-
-    try {
+    try (ChallengeDatabase db =
+        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3")) {
       // inserting tests
       db.insertTestsForChallenge("reverse", "Java");
       db.insertTestsForChallenge("reverse", "Python");
@@ -165,6 +153,32 @@ public class ChallengeDatabaseTest {
 
       languages = db.getLanguagesSupported("reverse");
       assertTrue(languages.size() == 0);
+    } catch (SQLException e) {
+      assertTrue(false);
+    }
+  }
+
+  @Test
+  public void doesCategoryExistTest() {
+    try (ChallengeDatabase db =
+        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3")) {
+      assertTrue(db.doesCategoryExist("lists"));
+      assertTrue(db.doesCategoryExist("integers"));
+      assertTrue(!db.doesCategoryExist("hash"));
+    } catch (SQLException e) {
+      assertTrue(false);
+    }
+  }
+
+  @Test
+  public void getAllCategoriesTests() {
+    // there are categories and there are duplicates
+    try (ChallengeDatabase db =
+        new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3")) {
+      List<String> categories = db.getAllCategories();
+      assertTrue(categories.size() == 2);
+      assertTrue(categories.get(0).equals("lists"));
+      assertTrue(categories.get(1).equals("integers"));
     } catch (SQLException e) {
       assertTrue(false);
     }
