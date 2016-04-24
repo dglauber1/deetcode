@@ -181,20 +181,18 @@ final class Server {
     });
     
     // check authentication before every request
-    Spark.before((request, response) -> {
-      String url = request.url();
-      
-      System.out.println(url);
-      
-      System.out.println(validCookie(request));
-      
-      if ((!validCookie(request)) &&
-        !(url.equals("http://localhost:4567/")
-        || url.equals("http://localhost:4567/fblogin")
-        || url.equals("http://localhost:4567/categories#signup"))) {
-        response.redirect("/");
-      };
-    });
+//    Spark.before((request, response) -> {
+//      String url = request.url();
+//
+//      Boolean validUser = validCookie(request);
+//
+//      Boolean staticRequest = url.contains("css") || url.contains("js");
+//
+//      Boolean doesntNeedLogIn = url.equals("http://localhost:4567/")
+//        || url.equals("http://localhost:4567/fblogin");
+//
+//      System.out.println(url);
+//    });
   }
   
   private static Boolean validCookie(Request request) {
