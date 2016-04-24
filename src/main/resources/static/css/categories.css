@@ -47,3 +47,30 @@
 .leaderboard-button:focus {
   outline: none;  
 }
+
+/* center modal */
+body.modal-open .modal {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+#usernameForm {
+  margin-top: 20px;
+}
+
+#usernameSubmitButton {
+  font-size: 16px;
+  width: 100px;
+  margin-top: 5px;
+}
+
+input[name=username] {
+  width: 80%;
+  margin: auto;
+}
+
+.modal-header {
+  background-color: rgba(0,0,0,.04);
+}

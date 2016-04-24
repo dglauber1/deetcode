@@ -16,7 +16,7 @@
           <ul class="nav navbar-nav header-right-navbar" id="links">
             <li class="active"><a href="#">Home</a></li>
             <li><a href="#">Account</a></li>
-            <li><a href="#">Logout</a></li>
+            <li><a href="/logout">Logout</a></li>
           </ul>
         </div>
       </div>
@@ -88,6 +88,29 @@
               <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
               <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="signupModal" class="modal fade" role="dialog" tabindex="-1" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+              <h4 class="modal-title text-center">Welcome to DeetCode!</h4>
+          </div>
+          <div class="modal-body">
+            <p>Some super fun text goes here.</p>
+            <p>Before you begin, we just need to know what to call you:</p>
+            <form id="usernameForm" action="#" method="POST" autocomplete="off">       
+              <div class="form-group">
+                <input type="text" class="form-control" name="username" placeholder="Type your username here!">
+              </div>
+              <div class="form-group separator" style="text-align:center">
+                <button id="usernameSubmitButton" name="submit" class="btn btn-primary">Submit</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

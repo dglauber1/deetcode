@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import edu.brown.cs.deet.database.ChallengeDatabase;
+import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
@@ -45,6 +46,7 @@ final class Server {
   private static final Gson GSON = new Gson();
   private static AdminHandler admin;
   private static final int PORT = 4567;
+  private static final String dbPath = "data/codegolf.db";
   
   private static String appID = "1559408461020162";
   private static String loginRedirectURL = "http://localhost:4567/fblogin";
@@ -88,7 +90,6 @@ final class Server {
     FreeMarkerEngine freeMarker = createEngine();
 
     // Setup Spark Routes
-
     Spark.get("/game", new GamePageHandler(), freeMarker);
     Spark.get("/admin_add", new AdminAddHandler(), freeMarker);
     Spark.post("/admin_add/results", new NewChallengeHandler());
@@ -96,22 +97,155 @@ final class Server {
     Spark.post("/categorycheck", new CategoryCheckHandler());
     Spark.post("/getallcategories", new AllCategoriesHandler());
     Spark.post("/game/run", new RunHandler());
+    
+    // categories page
     Spark.get("/categories", (request, response) -> {
-      Map<String, Object> variables = ImmutableMap.of("title", "Categories");
+      Map<String, Object> variables = ImmutableMap.of("title", "Categories",
+          "name", request.cookie("name"));
       return new ModelAndView(variables, "categories.ftl");
     }, freeMarker);
     
+    // home page
     Spark.get("/", (request, response) -> {
       Map<String, Object> variables = ImmutableMap.of("title", "Home",
         "loginURL", getFBURL());
       return new ModelAndView(variables, "landing.ftl");
     }, freeMarker);
     
+    // Facebook authentication redirect
     Spark.get("/fblogin", (request, response) -> {
       String fbcode = request.queryParams("code");
-      
-      return handleFBLogin(fbcode, response);
+      return handleFB(fbcode, request, response);
     });
+    
+    // logout request
+    Spark.get("/logout", (request, response) -> {
+      response.removeCookie("name");
+      response.removeCookie("user");
+      response.redirect("/");
+      return "Should never get here";
+    });
+    
+    // adding a user AJAX call
+    Spark.post("/add-user", (request, response) -> {
+      String username = request.queryMap().value("username");
+      try (UserDatabase ud = new UserDatabase(dbPath)) {
+        try {
+          Boolean usernameAlreadyExists = ud.doesUserExistWithUsername(username);
+          Boolean idAlreadyExists = ud.doesUserExistWithID(request.cookie("user"));
+                    
+          if (usernameAlreadyExists) {
+            response.status(400);
+            return GSON.toJson(ImmutableMap.of("error",
+              "That username is already taken."));
+          } else if (idAlreadyExists) {
+            response.status(400);
+            return GSON.toJson(ImmutableMap.of("error",
+              "There is already a user associated with this fb account."));
+          } else {
+            ud.addNewUser(username, request.cookie("user"), false,
+              request.cookie("name"));
+            return GSON.toJson("Success!");
+          }
+          
+        } catch (SQLException e) {
+          System.out.println(e.getMessage());
+          System.exit(1);
+        }
+        return "Should never get here";
+      }
+    });
+    
+    // check authentication before every request
+    Spark.before((request, response) -> {
+      String url = request.url();
+      String userID = request.cookie("user");
+      Boolean noCookie = userID == null;
+      Boolean badCookie = true;
+          
+      try (UserDatabase ud = new UserDatabase(dbPath)) {
+        try {
+          badCookie = !ud.doesUserExistWithID(userID);
+        } catch (SQLException e) {
+          System.out.println(e.getMessage());
+          System.exit(1);
+        }
+      }
+      
+      if ((noCookie || badCookie) &&
+        !(url.equals("http://localhost:4567/")
+        || url.equals("http://localhost:4567/fblogin"))) {
+        response.redirect("/");
+      };
+    });
+  }
+  
+  /**
+   * Handles FB requests for logins and registrations.
+   * @param code the code returned from the initial authentication step
+   * @param req the request object
+   * @param res the response object
+   * @return the string representing the desired response
+   */
+  private static String handleFB(String code, Request req, Response res) {
+    String accessTokenURL =
+      "https://graph.facebook.com/v2.3/oauth/access_token?client_id="
+      + appID + "&redirect_uri=" + loginRedirectURL + "&client_secret="
+      + appSecret + "&code=" + code;
+    
+    Map<String, String> tokenJSON = getJSONFromURL(accessTokenURL);
+    
+    if (!tokenJSON.containsKey("access_token")) {
+      res.status(500);
+      return "Unable to get access token for the given FB account.";
+    }
+          
+    String graphDataURL = "https://graph.facebook.com/v2.3/me?access_token="
+      + tokenJSON.get("access_token") + "&fields=id,name";
+    
+    Map<String, String> dataJSON = getJSONFromURL(graphDataURL);
+    
+    if (!dataJSON.containsKey("id")) {
+      res.status(500);
+      return "Unable to get data for given FB account.";
+    }
+    
+    String name = dataJSON.get("name");
+    String fbID = dataJSON.get("id");
+    
+    try (UserDatabase ud = new UserDatabase(dbPath)) {
+      try {
+        Boolean alreadyExists = ud.doesUserExistWithID(fbID);
+        
+        res.cookie("name", name);
+        res.cookie("user", fbID);
+        
+        if (alreadyExists) {
+          res.redirect("/categories");
+        } else {
+          res.redirect("/categories#signup");
+        }
+        
+      } catch (SQLException e) {
+        System.out.println(e.getMessage());
+        System.exit(1);
+      }
+    };
+ 
+    // should never get here
+    String toReturn = String.format("Name: %s, ID: %s",
+      dataJSON.get("name"), dataJSON.get("id"));
+    
+    return toReturn;
+  }
+  
+  /**
+   * Gets the URL to send to the front end for the register/login buttons
+   * @return the appropriate url
+   */
+  private static String getFBURL() {
+    return "https://www.facebook.com/dialog/oauth?client_id="
+      + appID + "&redirect_uri=" + loginRedirectURL;
   }
 
   /**
@@ -190,8 +324,8 @@ final class Server {
     @Override
     public ModelAndView handle(Request req, Response res) {
       // TODO Currently set to the test database.
-      String dbPath = "data/test.db";
-      try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
+      String testdb = "data/codegolf.db";
+      try (ChallengeDatabase challenges = new ChallengeDatabase(testdb)) {
         /*
          * TODO: This is currently hard-coded in because Tyler and I haven't yet
          * // set up a system to pass question names/ids from the categories
@@ -327,12 +461,6 @@ final class Server {
       return GSON.toJson(variables);
     }
   }
-
-  //TODO: deal with login and registration differently
-  private static String getFBURL() {
-    return "https://www.facebook.com/dialog/oauth?client_id="
-      + appID + "&redirect_uri=" + loginRedirectURL;
-  }
   
   /**
    * Takes a url, makes a get request, and then returns the JSON response in
@@ -358,35 +486,6 @@ final class Server {
       System.out.println(e.getMessage());
       return ImmutableMap.of("error", e.getMessage());
     }
-  }
-  
-  private static String handleFBLogin(String code, Response response) {
-    String accessTokenURL =
-      "https://graph.facebook.com/v2.3/oauth/access_token?client_id="
-      + appID + "&redirect_uri=" + loginRedirectURL + "&client_secret="
-      + appSecret + "&code=" + code;
-    
-    Map<String, String> tokenJSON = getJSONFromURL(accessTokenURL);
-    
-    if (!tokenJSON.containsKey("access_token")) {
-      response.status(500);
-      return "failed";
-    }
-          
-    String graphDataURL = "https://graph.facebook.com/v2.3/me?access_token="
-      + tokenJSON.get("access_token") + "&fields=id,name";
-    
-    Map<String, String> dataJSON = getJSONFromURL(graphDataURL);
-    
-    if (!dataJSON.containsKey("id")) {
-      response.status(500);
-      return "failed";
-    }
-    
-    String toReturn = String.format("Name: %s, ID: %s",
-      dataJSON.get("name"), dataJSON.get("id"));
-    
-    return toReturn;
   }
 
   /**
