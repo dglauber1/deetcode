@@ -1,4 +1,4 @@
-package edu.brown.cs.deet.codegolf;
+package edu.brown.cs.deet.pageHandler;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,13 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -33,6 +26,12 @@ import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
 
@@ -45,7 +44,7 @@ public final class GamePageHandlers {
    * Handles loading the game page.
    * @author el51
    */
-  static class GamePageHandler implements TemplateViewRoute {
+  public static class GamePageHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
       // TODO Currently set to the test database.
@@ -94,7 +93,7 @@ public final class GamePageHandlers {
    * Handlers saving the contents of the game page.
    * @author el51
    */
-  static class SaveSolutionHandler implements Route {
+  public static class SaveSolutionHandler implements Route {
     @Override
     public Object handle(Request req, Response res) {
       System.out.println("hi");
@@ -160,7 +159,7 @@ public final class GamePageHandlers {
     }
   }
 
-  static class DeetTestsHandler implements Route {
+  public static class DeetTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
@@ -247,7 +246,7 @@ public final class GamePageHandlers {
    * output.
    * @author dglauber
    */
-  static class UserTestsHandler implements Route {
+  public static class UserTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {

@@ -220,6 +220,7 @@ public class ChallengeDatabase implements AutoCloseable {
       return categories;
     }
   }
+  
 
   /**
    * Inserts a row into the test table for the challenge and the language

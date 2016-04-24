@@ -8,6 +8,14 @@ $(function() {
 
   $('#usernameForm').submit(function(e) {
     e.preventDefault();
+
+    var username = $('input[name=username]').val();
+
+    if (username === "") {
+      alert("You must enter a username!");
+      return;
+    }
+
     var data = {
       username: $('input[name=username]').val()
     };

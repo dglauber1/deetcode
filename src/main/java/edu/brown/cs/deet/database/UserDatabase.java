@@ -85,6 +85,18 @@ public class UserDatabase implements AutoCloseable {
       }
     }
   }
+  
+  public String getUsernameFromID(String id) throws SQLException {
+    String query =
+        "SELECT DISTINCT username FROM user WHERE id = ?;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, id);
+      try (ResultSet rs = ps.executeQuery()) {
+        return rs.getString(1);
+      }
+    }
+  }
 
   @Override
   public void close() {
