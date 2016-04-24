@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.List;
@@ -36,19 +39,6 @@ import spark.Route;
 import spark.Spark;
 import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-
-import edu.brown.cs.deet.database.ChallengeDatabase;
-import edu.brown.cs.deet.execution.MyCompiler;
-import edu.brown.cs.deet.execution.Runner;
-import edu.brown.cs.deet.execution.python.PyCompiler;
-import edu.brown.cs.deet.execution.python.PyRunner;
-import edu.brown.cs.deet.pageHandler.AdminHandler;
-import freemarker.template.Configuration;
 
 final class Server {
 
