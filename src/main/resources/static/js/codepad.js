@@ -100,7 +100,7 @@ $('input[type=submit]').click(function(e) {
 								} else {
 									vex.dialog.alert(responseObject.message);
 								}
-							}
+							});
 						}
 					}
 				});
