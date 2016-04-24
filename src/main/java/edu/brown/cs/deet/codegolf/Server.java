@@ -216,20 +216,20 @@ final class Server {
           // putting all of the code into the directory, but only if something
           // was entered for those fields on the page
           if (!javaInput.equals("")) {
-            admin.newTestInfo(name, javaInput, javaOutput, javaStub, "Java");
+            admin.newTestInfo(name, javaInput, javaOutput, javaStub, "java");
           }
 
           if (!pythonInput.equals("")) {
             admin.newTestInfo(name, pythonInput, pythonOutput, pythonStub,
-                "Python");
+                "python");
           }
 
           if (!rubyInput.equals("")) {
-            admin.newTestInfo(name, rubyInput, rubyOutput, rubyStub, "Ruby");
+            admin.newTestInfo(name, rubyInput, rubyOutput, rubyStub, "ruby");
           }
 
           if (!jsInput.equals("")) {
-            admin.newTestInfo(name, jsInput, jsOutput, jsStub, "Javascript");
+            admin.newTestInfo(name, jsInput, jsOutput, jsStub, "javascript");
           }
         } catch (IOException e) {
           new ExceptionPrinter().handle(e, req, res);
