@@ -2,7 +2,7 @@
 
 <div class="container">
   <ul class="nav nav-tabs">
-    <h3>eddyword</h3>
+    <h3>${title}</h3>
     <li class="active"><a data-toggle="tab" href="#about">About</a></li>
     <li><a data-toggle="tab" href="#challenges">Challenges</a></li>
   </ul>
@@ -48,18 +48,22 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>add_one</td>
-                  <td>Yes</td>
-                  <td>1</td>
-                  <td><button type="button" class="btn btn-primary" onclick="popup('add_one')">Solution</button></td>
-                </tr>
-                <tr>
-                  <td>reverse</td>
-                  <td>Yes</td>
-                  <td>2</td>
-                  <td><button type="button" class="btn btn-primary" onclick="popup('reverse')">Solution</button></td>
-                </tr>
+                <#list results as result>
+                  <tr>
+                    <td>${result[0]}</td>
+                    <#if result[1] == "true">
+                      <td>Yes</td>
+                    <#else>
+                      <td>No</td>
+                    </#if>  
+                    <td>${result[2]}</td>
+                    <#if result[3] != "n/a">
+                      <td><button type="button" class="btn btn-primary" value="${result[4]}" onclick="popup(this)">Solution</button></td>
+                    <#else>
+                      <td><td>
+                    </#if>    
+                  </tr>
+                </#list>
               </tbody>
             </table>
         </div>

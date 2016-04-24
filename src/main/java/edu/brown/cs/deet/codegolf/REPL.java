@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Tester;
-import edu.brown.cs.deet.execution.Triple;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyTester;
 
@@ -72,7 +71,7 @@ public final class REPL {
           continue;
         }
         String testDir = parsedInput.get(2);
-        Collection<Triple<String, String, String>> testResults;
+        Collection<List<String>> testResults;
         try {
           testResults = myTester.test(solutionPath, testDir);
         } catch (Exception e) {
@@ -83,17 +82,18 @@ public final class REPL {
           continue;
         }
         boolean passedAllTests = true;
-        for (Triple<String, String, String> testResult : testResults) {
+        for (List<String> testResult : testResults) {
           String successOrFailure;
-          if (testResult.getSecond().equals(testResult.getThird())) {
+          if (testResult.get(1).equals(testResult.get(2))) {
             successOrFailure = "SUCCESS";
           } else {
             successOrFailure = "FAILURE";
             passedAllTests = false;
           }
-          System.out.println(String.format("%s : on (%s), expected %s, got %s",
-              successOrFailure, testResult.getFirst(), testResult.getSecond(),
-              testResult.getThird()));
+          System.out.println(String.format(
+              "%s on %s: on (%s), expected %s, got %s", successOrFailure,
+              testResult.get(3), testResult.get(0), testResult.get(1),
+              testResult.get(2)));
         }
         if (passedAllTests) {
           System.out.println("All tests passed!");

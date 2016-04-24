@@ -18,6 +18,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import spark.ExceptionHandler;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Spark;
+import spark.TemplateViewRoute;
+import spark.template.freemarker.FreeMarkerEngine;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -35,15 +45,6 @@ import edu.brown.cs.deet.execution.python.PyTester;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 import edu.brown.cs.deet.pageHandler.UserHandler;
 import freemarker.template.Configuration;
-import spark.ExceptionHandler;
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.Spark;
-import spark.TemplateViewRoute;
-import spark.template.freemarker.FreeMarkerEngine;
 
 final class Server {
 
@@ -51,13 +52,16 @@ final class Server {
   private static AdminHandler admin;
   private static UserHandler user;
   private static final int PORT = 4567;
+<<<<<<< HEAD
   private static final String dbPath = "data/codegolf.db";
   
+=======
 
   private static final MyCompiler pyCompiler = new PyCompiler();
   private static final Runner pyRunner = new PyRunner();
   private static final Tester pyTester = new PyTester();
 
+>>>>>>> 4688f2c72d64d6fbeb833c277e684f72d10a91c9
   private static String appID = "1559408461020162";
   private static String loginRedirectURL = "http://localhost:4567/fblogin";
   private static String appSecret = "9ffcf58f5f448a3e9e723537c476b5eb";
@@ -116,21 +120,23 @@ final class Server {
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
     Spark.post("/getallcategories", new AllCategoriesHandler());
+<<<<<<< HEAD
+    Spark.post("/game/run", new RunHandler());
+    
+    // categories page
+=======
     Spark.post("/game/usertests", new UserTestsHandler());
     Spark.post("/game/deettests", new DeetTestsHandler());
+>>>>>>> 4688f2c72d64d6fbeb833c277e684f72d10a91c9
     Spark.get("/categories", (request, response) -> {
       Map<String, Object> variables = ImmutableMap.of("title", "Categories",
           "name", request.cookie("name"));
       return new ModelAndView(variables, "categories.ftl");
     }, freeMarker);
+<<<<<<< HEAD
     
     // home page
     Spark.get("/", (request, response) -> {
-      // if they're already logged in, send them to the categories page
-      if (validCookie(request)) {
-        response.redirect("/categories");
-      }
-  
       Map<String, Object> variables = ImmutableMap.of("title", "Home",
         "loginURL", getFBURL());
       return new ModelAndView(variables, "landing.ftl");
@@ -183,35 +189,40 @@ final class Server {
     // check authentication before every request
     Spark.before((request, response) -> {
       String url = request.url();
+      String userID = request.cookie("user");
+      Boolean noCookie = userID == null;
+      Boolean badCookie = true;
+          
+      try (UserDatabase ud = new UserDatabase(dbPath)) {
+        try {
+          badCookie = !ud.doesUserExistWithID(userID);
+        } catch (SQLException e) {
+          System.out.println(e.getMessage());
+          System.exit(1);
+        }
+      }
       
-      System.out.println(url);
-      
-      System.out.println(validCookie(request));
-      
-      if ((!validCookie(request)) &&
+      if ((noCookie || badCookie) &&
         !(url.equals("http://localhost:4567/")
-        || url.equals("http://localhost:4567/fblogin")
-        || url.equals("http://localhost:4567/categories#signup"))) {
+        || url.equals("http://localhost:4567/fblogin"))) {
         response.redirect("/");
       };
+=======
+
+    Spark.get(
+        "/",
+        (request, response) -> {
+          Map<String, Object> variables = ImmutableMap.of("title", "Home",
+              "loginURL", getFBURL());
+          return new ModelAndView(variables, "landing.ftl");
+        }, freeMarker);
+
+    Spark.get("/fblogin", (request, response) -> {
+      String fbcode = request.queryParams("code");
+
+      return handleFBLogin(fbcode, response);
+>>>>>>> 4688f2c72d64d6fbeb833c277e684f72d10a91c9
     });
-  }
-  
-  private static Boolean validCookie(Request request) {
-    String userID = request.cookie("user");
-    Boolean noCookie = userID == null;
-    Boolean badCookie = true;
-        
-    try (UserDatabase ud = new UserDatabase(dbPath)) {
-      try {
-        badCookie = !ud.doesUserExistWithID(userID);
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
-        System.exit(1);
-      }
-    }
-    
-    return !(noCookie || badCookie);
   }
   
   /**
@@ -271,6 +282,15 @@ final class Server {
       dataJSON.get("name"), dataJSON.get("id"));
     
     return toReturn;
+  }
+  
+  /**
+   * Gets the URL to send to the front end for the register/login buttons
+   * @return the appropriate url
+   */
+  private static String getFBURL() {
+    return "https://www.facebook.com/dialog/oauth?client_id="
+      + appID + "&redirect_uri=" + loginRedirectURL;
   }
 
   private static class DeetTestsHandler implements Route {
@@ -444,8 +464,8 @@ final class Server {
     @Override
     public ModelAndView handle(Request req, Response res) {
       // TODO Currently set to the test database.
-      String dbPath = "data/test.db";
-      try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
+      String testdb = "data/codegolf.db";
+      try (ChallengeDatabase challenges = new ChallengeDatabase(testdb)) {
         /*
          * TODO: This is currently hard-coded in because Tyler and I haven't yet
          * // set up a system to pass question names/ids from the categories
@@ -605,6 +625,9 @@ final class Server {
       return GSON.toJson(variables);
     }
   }
+<<<<<<< HEAD
+  
+=======
 
   // TODO: deal with login and registration differently
   private static String getFBURL() {
@@ -612,6 +635,7 @@ final class Server {
         + "&redirect_uri=" + loginRedirectURL;
   }
 
+>>>>>>> 4688f2c72d64d6fbeb833c277e684f72d10a91c9
   /**
    * Takes a url, makes a get request, and then returns the JSON response in the
    * form of a Map
@@ -630,7 +654,8 @@ final class Server {
       Reader reader = new InputStreamReader(connection.getInputStream());
       BufferedReader buff = new BufferedReader(reader);
       String line = buff.readLine();
-      Type stringStringMap = new TypeToken<Map<String, String>>(){}.getType();
+      Type stringStringMap = new TypeToken<Map<String, String>>() {
+      }.getType();
       Map<String, String> json = new Gson().fromJson(line, stringStringMap);
       return json;
     } catch (IOException e) {
@@ -638,6 +663,40 @@ final class Server {
       return ImmutableMap.of("error", e.getMessage());
     }
   }
+<<<<<<< HEAD
+=======
+
+  private static String handleFBLogin(String code, Response response) {
+    String accessTokenURL = "https://graph.facebook.com/v2.3/oauth/access_token?client_id="
+        + appID
+        + "&redirect_uri="
+        + loginRedirectURL
+        + "&client_secret="
+        + appSecret + "&code=" + code;
+
+    Map<String, String> tokenJSON = getJSONFromURL(accessTokenURL);
+
+    if (!tokenJSON.containsKey("access_token")) {
+      response.status(500);
+      return "failed";
+    }
+
+    String graphDataURL = "https://graph.facebook.com/v2.3/me?access_token="
+        + tokenJSON.get("access_token") + "&fields=id,name";
+
+    Map<String, String> dataJSON = getJSONFromURL(graphDataURL);
+
+    if (!dataJSON.containsKey("id")) {
+      response.status(500);
+      return "failed";
+    }
+
+    String toReturn = String.format("Name: %s, ID: %s", dataJSON.get("name"),
+        dataJSON.get("id"));
+
+    return toReturn;
+  }
+>>>>>>> 4688f2c72d64d6fbeb833c277e684f72d10a91c9
 
   /**
    * Handler that checks if the entered name in the Admin page is already taken.
