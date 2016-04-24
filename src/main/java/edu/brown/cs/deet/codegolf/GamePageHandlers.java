@@ -194,11 +194,15 @@ public final class GamePageHandlers {
 
         String testDir = String.format("challenges/%s/%s", challengeID,
             language);
+        long start = System.currentTimeMillis();
         Collection<List<String>> testResults = myTester.test(file.getPath(),
             testDir);
+        long finish = System.currentTimeMillis();
+        long time = finish - start; /* in milliseconds */
         Map<String, Object> variables = new ImmutableMap.Builder()
             .put("error", false).put("compiled", "success")
-            .put("numLines", numLines).put("testResults", testResults).build();
+            .put("numLines", numLines).put("testResults", testResults)
+        .put("timeToSolve", time).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
