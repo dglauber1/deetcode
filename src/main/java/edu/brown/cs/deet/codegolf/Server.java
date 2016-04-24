@@ -145,7 +145,7 @@ final class Server {
           break;
         default:
           System.out
-              .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -161,7 +161,7 @@ final class Server {
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-          .put("error", false).put("compiled", errorMessage).build();
+              .put("error", false).put("compiled", errorMessage).build();
           Files.delete(file.toPath());
           return GSON.toJson(variables);
         }
@@ -170,25 +170,24 @@ final class Server {
             language);
         Collection<List<String>> testResults = myTester.test(file.getPath(),
             testDir);
-        boolean passedAllTests = true;
-        List<String> testMessages = new ArrayList<>();
-        for (List<String> testResult : testResults) {
-          String successOrFailure;
-          if (testResult.get(1).equals(testResult.get(2))) {
-            successOrFailure = "SUCCESS";
-          } else {
-            successOrFailure = "FAILURE";
-            passedAllTests = false;
-          }
-          testMessages.add(String.format(
-              "%s on %s: on (%s), expected %s, got %s", successOrFailure,
-              testResult.get(3), testResult.get(0), testResult.get(1),
-              testResult.get(2)));
-        }
+        // boolean passedAllTests = true;
+        // List<String> testMessages = new ArrayList<>();
+        // for (List<String> testResult : testResults) {
+        // String successOrFailure;
+        // if (testResult.get(1).equals(testResult.get(2))) {
+        // successOrFailure = "SUCCESS";
+        // } else {
+        // successOrFailure = "FAILURE";
+        // passedAllTests = false;
+        // }
+        // testMessages.add(String.format(
+        // "%s on %s: on (%s), expected %s, got %s", successOrFailure,
+        // testResult.get(3), testResult.get(0), testResult.get(1),
+        // testResult.get(2)));
+        // }
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-        .put("testResults", testMessages).put("passed", passedAllTests)
-        .build();
+        .put("error", false).put("compiled", "success")
+            .put("testResults", testResults).build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
 
@@ -239,7 +238,7 @@ final class Server {
           break;
         default:
           System.out
-              .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -258,7 +257,7 @@ final class Server {
 
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-          .put("error", false).put("compiled", errorMessage).build();
+              .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -270,8 +269,8 @@ final class Server {
             testInputList);
 
         Map<String, Object> variables = new ImmutableMap.Builder()
-        .put("error", false).put("compiled", "success")
-        .put("runResults", runResults).build();
+            .put("error", false).put("compiled", "success")
+            .put("runResults", runResults).build();
         Files.delete(file.toPath());
         return GSON.toJson(variables);
 
