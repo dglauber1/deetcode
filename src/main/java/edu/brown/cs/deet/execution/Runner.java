@@ -3,6 +3,10 @@ package edu.brown.cs.deet.execution;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Interface to specify the properties of a runner object.
+ * @author dglauber
+ */
 public interface Runner {
 
   /**

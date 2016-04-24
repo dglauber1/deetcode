@@ -5,12 +5,35 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import edu.brown.cs.deet.database.ChallengeDatabase;
+import edu.brown.cs.deet.execution.MyCompiler;
+import edu.brown.cs.deet.execution.Runner;
+import edu.brown.cs.deet.execution.Tester;
+import edu.brown.cs.deet.execution.python.PyCompiler;
+import edu.brown.cs.deet.execution.python.PyRunner;
+import edu.brown.cs.deet.execution.python.PyTester;
+import edu.brown.cs.deet.pageHandler.AdminHandler;
+import freemarker.template.Configuration;
 import spark.ExceptionHandler;
 import spark.ModelAndView;
 import spark.QueryParamsMap;
@@ -21,18 +44,19 @@ import spark.Spark;
 import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-
-import edu.brown.cs.deet.database.ChallengeDatabase;
-import edu.brown.cs.deet.pageHandler.AdminHandler;
-import freemarker.template.Configuration;
-
 final class Server {
 
   private static final Gson GSON = new Gson();
   private static AdminHandler admin;
   private static final int PORT = 4567;
+
+  private static final MyCompiler pyCompiler = new PyCompiler();
+  private static final Runner pyRunner = new PyRunner();
+  private static final Tester pyTester = new PyTester();
+
+  private static String appID = "1559408461020162";
+  private static String loginRedirectURL = "http://localhost:4567/fblogin";
+  private static String appSecret = "9ffcf58f5f448a3e9e723537c476b5eb";
 
   /**
    * Sets the AdminHandler for the Server.
@@ -72,31 +96,181 @@ final class Server {
     FreeMarkerEngine freeMarker = createEngine();
 
     // Setup Spark Routes
+
     Spark.get("/game", new GamePageHandler(), freeMarker);
     Spark.get("/admin_add", new AdminAddHandler(), freeMarker);
     Spark.post("/admin_add/results", new NewChallengeHandler());
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
     Spark.post("/getallcategories", new AllCategoriesHandler());
+    Spark.post("/game/run", new RunHandler());
+    Spark.get("/categories", (request, response) -> {
+      Map<String, Object> variables = ImmutableMap.of("title", "Categories");
+      return new ModelAndView(variables, "categories.ftl");
+    }, freeMarker);
+
+    Spark.get(
+        "/",
+        (request, response) -> {
+          Map<String, Object> variables = ImmutableMap.of("title", "Home",
+              "loginURL", getFBURL());
+          return new ModelAndView(variables, "landing.ftl");
+        }, freeMarker);
+
+    Spark.get("/fblogin", (request, response) -> {
+      String fbcode = request.queryParams("code");
+
+      return handleFBLogin(fbcode, response);
+    });
+  }
+
+  private static class SubmitHandler implements Route {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object handle(Request req, Response res) {
+      String userID = req.session().attribute("user");
+      QueryParamsMap qm = req.queryMap();
+      String challengeID = qm.value("challengeID");
+      String language = qm.value("language");
+
+      String fileType;
+      Tester myTester;
+      MyCompiler myCompiler;
+      switch (language) {
+        case "python":
+          fileType = ".py";
+          myTester = pyTester;
+          myCompiler = pyCompiler;
+          break;
+        default:
+          System.out
+          .println("Error in RunHandler: language must be either python, ruby, or javascript");
+          Map<String, Object> variables = new ImmutableMap.Builder().put(
+              "error", true).build();
+          return GSON.toJson(variables);
+      }
+
+      String fileName = userID + fileType;
+      File file = new File(String.format("challenges/%s/%s/solutions/%s",
+          challengeID, language, fileName));
+      try (PrintWriter printWriter = new PrintWriter(file)) {
+        String code = qm.value("input");
+        printWriter.print(code);
+
+        String errorMessage = myCompiler.compile(file.getPath());
+        if (errorMessage != null) {
+          Map<String, Object> variables = new ImmutableMap.Builder()
+              .put("error", false).put("compiled", errorMessage).build();
+          return GSON.toJson(variables);
+        }
+
+        String testDir = String.format("challenges/%s/%s", challengeID,
+            language);
+        Collection<List<String>> testResults = myTester.test(file.getPath(),
+            testDir);
+        boolean passedAllTests = true;
+        List<String> testMessages = new ArrayList<>();
+        for (List<String> testResult : testResults) {
+          String successOrFailure;
+          if (testResult.get(1).equals(testResult.get(2))) {
+            successOrFailure = "SUCCESS";
+          } else {
+            successOrFailure = "FAILURE";
+            passedAllTests = false;
+          }
+          testMessages.add(String.format(
+              "%s on %s: on (%s), expected %s, got %s", successOrFailure,
+              testResult.get(3), testResult.get(0), testResult.get(1),
+              testResult.get(2)));
+        }
+        Map<String, Object> variables = new ImmutableMap.Builder()
+        .put("error", false).put("compiled", "success")
+            .put("testResults", testMessages).put("passed", passedAllTests)
+            .build();
+        return GSON.toJson(variables);
+
+      } catch (IOException e) {
+        System.out.println("ERROR: IOException in SubmitHandler");
+        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
+            true).build();
+        return GSON.toJson(variables);
+      } catch (Exception e) {
+        System.out.println("ERROR: Tester error occurred in SubmitHandler");
+        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
+            true).build();
+        return GSON.toJson(variables);
+      }
+      // TODO add solution info to DB
+    }
   }
 
   /**
    * Runs a user's code on user-provided input and posts the corresponding
    * output.
-   * @author el13
+   * @author dglauber
    */
-  // private static class RunHandler implements Route {
-  // @Override
-  // public Object handle(Request req, Response res) {
-  // QueryParamsMap qm = req.queryMap();
-  // String name = GSON.fromJson(qm.value("textValue"), String.class);
-  //
-  // @SuppressWarnings({ "rawtypes", "unchecked" })
-  // Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
-  // exists).build();
-  // return GSON.toJson(variables);
-  // }
-  // }
+  private static class RunHandler implements Route {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String language = qm.value("language");
+
+      String fileType;
+      Runner myRunner;
+      MyCompiler myCompiler;
+      switch (language) {
+        case "python":
+          fileType = ".py";
+          myRunner = pyRunner;
+          myCompiler = pyCompiler;
+          break;
+        default:
+          System.out
+          .println("Error in RunHandler: language must be either python, ruby, or javascript");
+          Map<String, Object> variables = new ImmutableMap.Builder().put(
+              "error", true).build();
+          return GSON.toJson(variables);
+      }
+
+      Integer random = (int) (Math.random() * 1000000);
+      String randomFileName = random.toString() + fileType;
+
+      File file = new File("temporary/" + randomFileName);
+
+      try (PrintWriter printWriter = new PrintWriter(file)) {
+        String code = qm.value("input");
+        printWriter.print(code);
+
+        String errorMessage = myCompiler.compile(file.getPath());
+
+        if (errorMessage != null) {
+          Map<String, Object> variables = new ImmutableMap.Builder()
+              .put("error", false).put("compiled", errorMessage).build();
+          return GSON.toJson(variables);
+        }
+
+        String testInputs = qm.value("userTest");
+        List<String> testInputList = Lists.newArrayList(Splitter
+            .on(System.getProperty("line.separator")).trimResults()
+            .omitEmptyStrings().split(testInputs));
+        Map<String, String> runResults = myRunner.run(file.getPath(),
+            testInputList);
+
+        Map<String, Object> variables = new ImmutableMap.Builder()
+            .put("error", false).put("compiled", "success")
+            .put("runResults", runResults).build();
+        Files.delete(file.toPath());
+        return GSON.toJson(variables);
+
+      } catch (IOException e) {
+        System.out.println("IOException in RunHandler");
+        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
+            true).build();
+        return GSON.toJson(variables);
+      }
+    }
+  }
 
   /**
    * Handles loading the game page.
@@ -118,7 +292,7 @@ final class Server {
         try {
           if (challenges.doesChallengeExist(challengeName)) {
             List<String> challengeData = challenges.getChallenge(challengeName);
-            promptPath = challengeData.get(1).concat("PROMPT");
+            promptPath = challengeData.get(1).concat("description.txt");
           }
         } catch (SQLException e) {
           System.out.println(e.getMessage());
@@ -244,11 +418,75 @@ final class Server {
     }
   }
 
+  // TODO: deal with login and registration differently
+  private static String getFBURL() {
+    return "https://www.facebook.com/dialog/oauth?client_id=" + appID
+        + "&redirect_uri=" + loginRedirectURL;
+  }
+
+  /**
+   * Takes a url, makes a get request, and then returns the JSON response in the
+   * form of a Map
+   * @param urlString
+   *          the string of the url you want to hit
+   * @return the JSON response as a Map<String, String>
+   */
+  private static Map<String, String> getJSONFromURL(String urlString) {
+    try {
+      // open a URL connection
+      URL url = new URL(urlString);
+      URLConnection connection = url.openConnection();
+      connection.connect();
+
+      // read the URL connection into a json object
+      Reader reader = new InputStreamReader(connection.getInputStream());
+      BufferedReader buff = new BufferedReader(reader);
+      String line = buff.readLine();
+      Type stringStringMap = new TypeToken<Map<String, String>>() {
+      }.getType();
+      Map<String, String> json = new Gson().fromJson(line, stringStringMap);
+      return json;
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+      return ImmutableMap.of("error", e.getMessage());
+    }
+  }
+
+  private static String handleFBLogin(String code, Response response) {
+    String accessTokenURL = "https://graph.facebook.com/v2.3/oauth/access_token?client_id="
+        + appID
+        + "&redirect_uri="
+        + loginRedirectURL
+        + "&client_secret="
+        + appSecret + "&code=" + code;
+
+    Map<String, String> tokenJSON = getJSONFromURL(accessTokenURL);
+
+    if (!tokenJSON.containsKey("access_token")) {
+      response.status(500);
+      return "failed";
+    }
+
+    String graphDataURL = "https://graph.facebook.com/v2.3/me?access_token="
+        + tokenJSON.get("access_token") + "&fields=id,name";
+
+    Map<String, String> dataJSON = getJSONFromURL(graphDataURL);
+
+    if (!dataJSON.containsKey("id")) {
+      response.status(500);
+      return "failed";
+    }
+
+    String toReturn = String.format("Name: %s, ID: %s", dataJSON.get("name"),
+        dataJSON.get("id"));
+
+    return toReturn;
+  }
+
   /**
    * Handler that checks if the entered name in the Admin page is already taken.
    * @author el13
    */
-  @SuppressWarnings("unused")
   private static class NameCheckHandler implements Route {
     @Override
     public Object handle(Request req, Response res) {
@@ -313,7 +551,6 @@ final class Server {
           exists).build();
       return GSON.toJson(variables);
     }
-
   }
 
   /**

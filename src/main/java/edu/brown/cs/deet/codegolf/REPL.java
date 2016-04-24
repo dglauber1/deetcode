@@ -10,14 +10,20 @@ import java.util.List;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
-import edu.brown.cs.deet.execution.Compiler;
+import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Tester;
-import edu.brown.cs.deet.execution.Triple;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyTester;
 
+/**
+ * Class to allow command line repl testing of codegolf project.
+ * @author dglauber
+ */
 public final class REPL {
 
+  /**
+   * Runs the command line repl.
+   */
   public static void run() {
 
     InputStreamReader inputReader = null;
@@ -29,7 +35,7 @@ public final class REPL {
       return;
     }
     String input = "";
-    Compiler pyCompiler = new PyCompiler();
+    MyCompiler pyCompiler = new PyCompiler();
     Tester pyTester = new PyTester();
     try (BufferedReader reader = new BufferedReader(inputReader)) {
       while ((input = reader.readLine()) != null) {
@@ -46,7 +52,7 @@ public final class REPL {
         }
         String language = parsedInput.get(0);
         Tester myTester;
-        Compiler myCompiler;
+        MyCompiler myCompiler;
         switch (language) {
           case "python":
             myTester = pyTester;
@@ -54,7 +60,7 @@ public final class REPL {
             break;
           default:
             System.out
-                .println("language must be either python, ruby, or javascript");
+            .println("language must be either python, ruby, or javascript");
             System.out.println();
             continue;
         }
@@ -65,7 +71,7 @@ public final class REPL {
           continue;
         }
         String testDir = parsedInput.get(2);
-        Collection<Triple<String, String, String>> testResults;
+        Collection<List<String>> testResults;
         try {
           testResults = myTester.test(solutionPath, testDir);
         } catch (Exception e) {
@@ -76,17 +82,18 @@ public final class REPL {
           continue;
         }
         boolean passedAllTests = true;
-        for (Triple<String, String, String> testResult : testResults) {
+        for (List<String> testResult : testResults) {
           String successOrFailure;
-          if (testResult.getSecond().equals(testResult.getThird())) {
+          if (testResult.get(1).equals(testResult.get(2))) {
             successOrFailure = "SUCCESS";
           } else {
             successOrFailure = "FAILURE";
             passedAllTests = false;
           }
-          System.out.println(String.format("%s : on (%s), expected %s, got %s",
-              successOrFailure, testResult.getFirst(), testResult.getSecond(),
-              testResult.getThird()));
+          System.out.println(String.format(
+              "%s on %s: on (%s), expected %s, got %s", successOrFailure,
+              testResult.get(3), testResult.get(0), testResult.get(1),
+              testResult.get(2)));
         }
         if (passedAllTests) {
           System.out.println("All tests passed!");

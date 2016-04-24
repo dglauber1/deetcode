@@ -4,7 +4,11 @@
 	${prompt} 
   </p>
   <br/>
-    <div id="CountDownTimer" data-timer="120" style="width: 300px; height: 150px; float: right"></div> 
+  <div>
+	  <div id="CountDownTimer" data-timer="120" style="width: 300px; height: 150px; float: right"></div> 
+      <textarea id="userInput">User input here!</textarea>
+  </div>
+  
   <div style="width: 650px; height: 300px">
 	<textarea id="codepad" style="float:left" ></textarea>
   </div>

@@ -1,7 +1,5 @@
 package edu.brown.cs.deet.codegolf;
 
-import java.io.File;
-
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import edu.brown.cs.deet.database.ChallengeDatabase;
@@ -26,7 +24,6 @@ public class Main {
   }
 
   private String[] args;
-  private File db;
 
   /**
    * Creates a new instance of Main.
