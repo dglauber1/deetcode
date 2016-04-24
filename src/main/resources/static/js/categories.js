@@ -23,6 +23,7 @@ $(function() {
           $('#signupModal').modal('hide');
           $('#usernameSubmitButton').prop('disabled', false);
           $('#usernameSubmitButton').html('Submit');
+          window.location.href = "/categories";
         }, 500);
       },
       error: function(response) {
@@ -51,12 +52,8 @@ $(function() {
     }
   });
 
-  // TODO: post request for the username submit
-
   var modalType = window.location.hash;
   if (modalType === "#signup") {
-    console.log("here");
-    console.log($('#signupModal'));
     $('#signupModal').modal('show');
   }
 });
