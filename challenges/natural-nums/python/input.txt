@@ -1,0 +1,3 @@
+natural_nums, [4]
+natural_nums, [5]
+natural_nums, [0]
