@@ -398,17 +398,14 @@ final class Server {
 
       // Basic info
       String category = GSON.fromJson(qm.value("category"), String.class);
+      String pName = GSON.fromJson(qm.value("pName"), String.class);
       String name = GSON.fromJson(qm.value("name"), String.class);
       String description = GSON.fromJson(qm.value("description"), String.class);
-
-      System.out.println(name);
-      System.out.println(description);
-      System.out.println(category);
 
       Boolean success = false;
 
       try {
-        success = admin.newBasicInfo(category, name, description);
+        success = admin.newBasicInfo(category, pName, name, description);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);
       } catch (IOException e) {
@@ -417,11 +414,15 @@ final class Server {
 
       // Java test cases and stub code
       if (success) {
+        String javaTestnames = GSON.fromJson(qm.value("javaTestName"),
+            String.class);
         String javaInput = GSON.fromJson(qm.value("javaInput"), String.class);
         String javaOutput = GSON.fromJson(qm.value("javaOutput"), String.class);
         String javaStub = GSON.fromJson(qm.value("javaStub"), String.class);
 
         // Python test cases and stub code
+        String pythonTestnames = GSON.fromJson(qm.value("pythonTestName"),
+            String.class);
         String pythonInput = GSON.fromJson(qm.value("pythonInput"),
             String.class);
         String pythonOutput = GSON.fromJson(qm.value("pythonOutput"),
@@ -429,11 +430,15 @@ final class Server {
         String pythonStub = GSON.fromJson(qm.value("pythonStub"), String.class);
 
         // Ruby test cases and stub code
+        String rubyTestnames = GSON.fromJson(qm.value("rubyTestName"),
+            String.class);
         String rubyInput = GSON.fromJson(qm.value("rubyInput"), String.class);
         String rubyOutput = GSON.fromJson(qm.value("rubyOutput"), String.class);
         String rubyStub = GSON.fromJson(qm.value("rubyStub"), String.class);
 
         // Javascript test cases and stub code
+        String jsTestnames = GSON
+            .fromJson(qm.value("jsTestName"), String.class);
         String jsInput = GSON.fromJson(qm.value("jsInput"), String.class);
         String jsOutput = GSON.fromJson(qm.value("jsOutput"), String.class);
         String jsStub = GSON.fromJson(qm.value("jsStub"), String.class);
@@ -442,20 +447,23 @@ final class Server {
           // putting all of the code into the directory, but only if something
           // was entered for those fields on the page
           if (!javaInput.equals("")) {
-            admin.newTestInfo(name, javaInput, javaOutput, javaStub, "java");
+            admin.newTestInfo(pName, javaTestnames, javaInput, javaOutput,
+                javaStub, "java");
           }
 
           if (!pythonInput.equals("")) {
-            admin.newTestInfo(name, pythonInput, pythonOutput, pythonStub,
-                "python");
+            admin.newTestInfo(pName, pythonTestnames, pythonInput,
+                pythonOutput, pythonStub, "python");
           }
 
           if (!rubyInput.equals("")) {
-            admin.newTestInfo(name, rubyInput, rubyOutput, rubyStub, "ruby");
+            admin.newTestInfo(pName, rubyTestnames, rubyInput, rubyOutput,
+                rubyStub, "ruby");
           }
 
           if (!jsInput.equals("")) {
-            admin.newTestInfo(name, jsInput, jsOutput, jsStub, "javascript");
+            admin.newTestInfo(pName, jsTestnames, jsInput, jsOutput, jsStub,
+                "javascript");
           }
         } catch (IOException e) {
           new ExceptionPrinter().handle(e, req, res);

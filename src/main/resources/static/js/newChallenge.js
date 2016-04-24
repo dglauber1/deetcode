@@ -46,13 +46,13 @@ $("#challengeSelect").change(function() {
 	}
 });
 
-// whenever user enters text into name, check to see if the name is already taken
-$("#name").on('input', function(){
-	var name = $("#name")[0];
-	var nameValue = JSON.stringify(name.value); // stringify?
+// whenever user enters text into challenge directory name, check to see if the name is already taken
+$("#pName").on('input', function(){
+	var pName = $("#pName")[0];
+	var pNameValue = JSON.stringify(pName.value); // stringify?
 
 	var postParameters = {
-	    textValue:nameValue,
+	    textValue:pNameValue,
     };
 
     $.post("/namecheck", postParameters, function(responseJSON){
@@ -60,7 +60,7 @@ $("#name").on('input', function(){
         var exists = responseObject.exists;
 
         if (exists) {
-        	document.getElementById("nameMessage").innerHTML = "This name is already taken.";
+        	document.getElementById("nameMessage").innerHTML = "This path name is already taken.";
         } else {
         	document.getElementById("nameMessage").innerHTML = "";
         }
@@ -123,33 +123,43 @@ $("#submit").click(function() {
 	var postParameters = {
 	    category: JSON.stringify(cat),
 	    name: JSON.stringify($("#name")[0].value),
+	    pName: JSON.stringify($("#pName")[0].value),
 	    description: JSON.stringify($("#description").val()),
+	    javaTestName: JSON.stringify($("#javaTestName").val()),
 	    javaInput: JSON.stringify($("#javaInput").val()),
 	    javaOutput: JSON.stringify($("#javaOutput").val()),
 	    javaStub: JSON.stringify(javaEditor.getValue()),
+	    pythonTestName: JSON.stringify($("#pythonTestName").val()),
 	    pythonInput: JSON.stringify($("#pythonInput").val()),
 	    pythonOutput: JSON.stringify($("#pythonOutput").val()),
 	    pythonStub: JSON.stringify(pythonEditor.getValue()),
+	    rubyTestName: JSON.stringify($("#rubyTestName").val()),
 	    rubyInput: JSON.stringify($("#rubyInput").val()),
 	    rubyOutput: JSON.stringify($("#rubyOutput").val()),
 	    rubyStub: JSON.stringify(rubyEditor.getValue()),
+	    jsTestName: JSON.stringify($("#jsTestName").val()),
 	    jsInput: JSON.stringify($("#jsInput").val()),
 	    jsOutput: JSON.stringify($("#jsOutput").val()),
 	    jsStub: JSON.stringify(jsEditor.getValue())
     };
 
     $.post("/admin_add/results", postParameters, function(responseJSON){
-    	location.reload();
     	$("#description").val("");
+    	$("#pName")[0].value = "";
     	$("#name")[0].value = "";
+    	$("#javaTestName").val("");
     	$("#javaInput").val("");
     	$("#javaOutput").val("");
+    	$("#pythonTestName").val("");
     	$("#pythonInput").val("");
     	$("#pythonOutput").val("");
+    	$("#rubyTestName").val("");
     	$("#rubyInput").val("");
     	$("#rubyOutput").val("");
+    	$("#jsTestName").val("");
     	$("#jsInput").val("");
     	$("#jsOutput").val("");
+    	location.reload();
     });
 });
 

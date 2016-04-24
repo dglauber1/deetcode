@@ -41,8 +41,10 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Inserts a new challenge into the database.
+   * @param pName
+   *          the unique "path" name of the challenge
    * @param qName
-   *          the unique name of the challenge
+   *          the name of the challenge
    * @param qPath
    *          the path to the directory that contains all challenge information
    * @param qCategory
@@ -52,18 +54,19 @@ public class ChallengeDatabase implements AutoCloseable {
    * @throws SQLException
    *           when something has gone wrong with the database
    */
-  public boolean insertNewChallenge(String qName, String qPath, String qCategory)
-      throws SQLException {
-    if (doesChallengeExist(qName)) {
+  public boolean insertNewChallenge(String pName, String qName, String qPath,
+      String qCategory) throws SQLException {
+    if (doesChallengeExist(pName)) {
       return false;
     }
 
-    String query = "INSERT INTO challenge values(?, ?, ?);";
+    String query = "INSERT INTO challenge values(?, ?, ?, ?);";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
-      ps.setString(1, qName);
-      ps.setString(2, qPath);
-      ps.setString(3, qCategory);
+      ps.setString(1, pName);
+      ps.setString(2, qName);
+      ps.setString(3, qPath);
+      ps.setString(4, qCategory);
 
       ps.execute();
 
@@ -74,18 +77,18 @@ public class ChallengeDatabase implements AutoCloseable {
   /**
    * Gets the basic information for a challenge, such as name, path, and
    * category.
-   * @param qName
-   *          The name of the challenge
-   * @return A List of Strings containing the name, path, and category of the
-   *         challenge, in that order.
+   * @param pName
+   *          The "path name" of the challenge
+   * @return A List of Strings containing the path name, real name, path, and
+   *         category of the challenge, in that order.
    * @throws SQLException
    *           when something goes wrong with the database
    */
-  public List<String> getChallenge(String qName) throws SQLException {
-    String query = "SELECT * from challenge WHERE question_name = ?;";
+  public List<String> getChallenge(String pName) throws SQLException {
+    String query = "SELECT * from challenge WHERE question_id = ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
-      ps.setString(1, qName);
+      ps.setString(1, pName);
 
       List<String> challengeInfo = new ArrayList<>();
       try (ResultSet rs = ps.executeQuery()) {
@@ -93,6 +96,7 @@ public class ChallengeDatabase implements AutoCloseable {
           challengeInfo.add(rs.getString(1));
           challengeInfo.add(rs.getString(2));
           challengeInfo.add(rs.getString(3));
+          challengeInfo.add(rs.getString(4));
         }
 
         return challengeInfo;
@@ -103,13 +107,13 @@ public class ChallengeDatabase implements AutoCloseable {
   /**
    * Deletes the basic information for a challenge, specifically name, path and
    * category, from the challenge table.
-   * @param qName
-   *          the name of the challenge
+   * @param pName
+   *          the "path name" of the challenge
    * @throws SQLException
    *           when something goes wrong with the database
    */
   public void deleteChallenge(String qName) throws SQLException {
-    String query = "DELETE FROM challenge WHERE question_name = ?;";
+    String query = "DELETE FROM challenge WHERE question_id = ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, qName);
@@ -120,8 +124,10 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Edits a challenge currently in the database.
-   * @param origName
+   * @param origPName
    *          the original unique name of the challenge
+   * @param pName
+   *          the "path name" of the challenge
    * @param qName
    *          the unique name of the challenge
    * @param qPath
@@ -133,21 +139,23 @@ public class ChallengeDatabase implements AutoCloseable {
    * @throws SQLException
    *           when something has gone wrong with the database
    */
-  public boolean editChallenge(String origName, String qName, String qPath,
-      String qCategory) throws SQLException {
+  public boolean editChallenge(String origPName, String pName, String qName,
+      String qPath, String qCategory) throws SQLException {
 
-    if (doesChallengeExist(qName)) {
+    // check if pName already exists or not
+    if (doesChallengeExist(pName)) {
       return false;
     }
 
-    String query = "UPDATE challenge SET question_name = ?, path = ?, category = ? "
-        + "where question_name = ?;";
+    String query = "UPDATE challenge SET question_id = ?, question_name = ?, "
+        + "path = ?, category = ? where question_id = ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
-      ps.setString(1, qName);
-      ps.setString(2, qPath);
-      ps.setString(3, qCategory);
-      ps.setString(4, origName);
+      ps.setString(1, pName);
+      ps.setString(2, qName);
+      ps.setString(3, qPath);
+      ps.setString(4, qCategory);
+      ps.setString(5, origPName);
 
       ps.execute();
 
@@ -157,17 +165,17 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Determines if a challenge already exists in the database.
-   * @param qName
-   *          the unique name of the challenge
+   * @param pName
+   *          the "path name" of the challenge
    * @return true if already exists, false otherwise
    * @throws SQLException
    *           when something has gone wrong with the database
    */
-  public boolean doesChallengeExist(String qName) throws SQLException {
-    String query = "SELECT * FROM challenge WHERE question_name = ?;";
+  public boolean doesChallengeExist(String pName) throws SQLException {
+    String query = "SELECT * FROM challenge WHERE question_id = ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
-      ps.setString(1, qName);
+      ps.setString(1, pName);
       try (ResultSet rs = ps.executeQuery()) {
         return rs.next();
       }
@@ -176,13 +184,14 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Determines if a category already exists in the database.
-   * @param qCategory the category in question
+   * @param qCategory
+   *          the category in question
    * @return True if the category already exists, False otherwise
-   * @throws SQLException when something has gone wrong with the database
+   * @throws SQLException
+   *           when something has gone wrong with the database
    */
   public boolean doesCategoryExist(String qCategory) throws SQLException {
-    String query =
-        "SELECT DISTINCT category FROM challenge WHERE category = ?;";
+    String query = "SELECT DISTINCT category FROM challenge WHERE category = ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, qCategory);
@@ -195,7 +204,8 @@ public class ChallengeDatabase implements AutoCloseable {
   /**
    * Gets all the Categories that exist on the site.
    * @return A List of Strings each representing a category
-   * @throws SQLException when something has gone wrong with the database
+   * @throws SQLException
+   *           when something has gone wrong with the database
    */
   public List<String> getAllCategories() throws SQLException {
     String query = "SELECT DISTINCT category FROM challenge;";
@@ -214,19 +224,19 @@ public class ChallengeDatabase implements AutoCloseable {
   /**
    * Inserts a row into the test table for the challenge and the language
    * corresponding to the challenge.
-   * @param qName
-   *          the name of the challenge
+   * @param pName
+   *          the "path name" of the challenge
    * @param language
    *          the language
    * @throws SQLException
    *           when something has gone wrong with the database
    */
-  public void insertTestsForChallenge(String qName, String language)
+  public void insertTestsForChallenge(String pName, String language)
       throws SQLException {
     String query = "INSERT INTO test values(?, ?);";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
-      ps.setString(1, qName);
+      ps.setString(1, pName);
       ps.setString(2, language);
 
       ps.execute();
@@ -235,17 +245,17 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Gets all the languages that are supported for a particular challenge.
-   * @param qName
-   *          the name of the challenge
+   * @param pName
+   *          the "path name" of the challenge
    * @return a List of the languages that are supported for the challenge
    * @throws SQLException
    *           when the database screws up
    */
-  public List<String> getLanguagesSupported(String qName) throws SQLException {
+  public List<String> getLanguagesSupported(String pName) throws SQLException {
     String query = "SELECT language FROM test WHERE challenge_name = ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
-      ps.setString(1, qName);
+      ps.setString(1, pName);
 
       List<String> languages = new ArrayList<>();
       try (ResultSet rs = ps.executeQuery()) {
@@ -259,19 +269,19 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Deletes a supported language for a challenge.
-   * @param qName
-   *          the name of the challenge
+   * @param oName
+   *          the "path name" of the challenge
    * @param language
    *          the supported language
    * @throws SQLException
    *           when the database screws up
    */
-  public void deleteLanguageSupported(String qName, String language)
+  public void deleteLanguageSupported(String pName, String language)
       throws SQLException {
     String query = "DELETE FROM test WHERE challenge_name = ? AND language = ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
-      ps.setString(1, qName);
+      ps.setString(1, pName);
       ps.setString(2, language);
 
       ps.execute();

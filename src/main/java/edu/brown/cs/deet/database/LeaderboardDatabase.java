@@ -90,7 +90,7 @@ public class LeaderboardDatabase implements AutoCloseable {
   public List<List<String>> topTwentyOfChallengeLanguage(String qName,
       String qLang) throws SQLException {
     String query = "SELECT challenge_id, username, aggregate, language "
-        + "FROM solution WHERE challenge_id = ? AND language = ? "
+        + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
         + "ORDER BY aggregate DESC LIMIT 20;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
