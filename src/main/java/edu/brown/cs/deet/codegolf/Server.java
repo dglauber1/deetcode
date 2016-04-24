@@ -116,7 +116,8 @@ final class Server {
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
     Spark.post("/getallcategories", new AllCategoriesHandler());
-    Spark.post("/game/run", new RunHandler());
+    Spark.post("/game/usertests", new UserTestsHandler());
+    Spark.post("/game/deettests", new DeetTestsHandler());
     Spark.get("/categories", (request, response) -> {
       Map<String, Object> variables = ImmutableMap.of("title", "Categories");
       return new ModelAndView(variables, "categories.ftl");
@@ -137,11 +138,11 @@ final class Server {
     });
   }
 
-  private static class SubmitHandler implements Route {
+  private static class DeetTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
-      String userID = req.session().attribute("user");
+      String userID = req.cookie("user");
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
       String language = qm.value("language");
@@ -157,7 +158,7 @@ final class Server {
           break;
         default:
           System.out
-              .println("Error in RunHandler: language must be either python, ruby, or javascript");
+          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -174,6 +175,7 @@ final class Server {
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
               .put("error", false).put("compiled", errorMessage).build();
+          Files.delete(file.toPath());
           return GSON.toJson(variables);
         }
 
@@ -181,39 +183,48 @@ final class Server {
             language);
         Collection<List<String>> testResults = myTester.test(file.getPath(),
             testDir);
-        boolean passedAllTests = true;
-        List<String> testMessages = new ArrayList<>();
-        for (List<String> testResult : testResults) {
-          String successOrFailure;
-          if (testResult.get(1).equals(testResult.get(2))) {
-            successOrFailure = "SUCCESS";
-          } else {
-            successOrFailure = "FAILURE";
-            passedAllTests = false;
-          }
-          testMessages.add(String.format(
-              "%s on %s: on (%s), expected %s, got %s", successOrFailure,
-              testResult.get(3), testResult.get(0), testResult.get(1),
-              testResult.get(2)));
-        }
+        // boolean passedAllTests = true;
+        // List<String> testMessages = new ArrayList<>();
+        // for (List<String> testResult : testResults) {
+        // String successOrFailure;
+        // if (testResult.get(1).equals(testResult.get(2))) {
+        // successOrFailure = "SUCCESS";
+        // } else {
+        // successOrFailure = "FAILURE";
+        // passedAllTests = false;
+        // }
+        // testMessages.add(String.format(
+        // "%s on %s: on (%s), expected %s, got %s", successOrFailure,
+        // testResult.get(3), testResult.get(0), testResult.get(1),
+        // testResult.get(2)));
+        // }
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("testResults", testMessages).put("passed", passedAllTests)
-            .build();
+        .put("error", false).put("compiled", "success")
+            .put("testResults", testResults).build();
+        Files.delete(file.toPath());
         return GSON.toJson(variables);
 
       } catch (IOException e) {
-        System.out.println("ERROR: IOException in SubmitHandler");
+        System.out.println("ERROR: IOException in DeetTestsHandler");
         Map<String, Object> variables = new ImmutableMap.Builder().put("error",
             true).build();
+        try {
+          Files.delete(file.toPath());
+        } catch (IOException e1) {
+          System.out.println("ERROR: error deleting file in DeetTestsHandler");
+        }
         return GSON.toJson(variables);
       } catch (Exception e) {
-        System.out.println("ERROR: Tester error occurred in SubmitHandler");
+        System.out.println("ERROR: Tester error occurred in DeetTestsHandler");
         Map<String, Object> variables = new ImmutableMap.Builder().put("error",
             true).build();
+        try {
+          Files.delete(file.toPath());
+        } catch (IOException e1) {
+          System.out.println("ERROR: error deleting file in DeetTestsHandler");
+        }
         return GSON.toJson(variables);
       }
-      // TODO add solution info to DB
     }
   }
 
@@ -222,7 +233,7 @@ final class Server {
    * output.
    * @author dglauber
    */
-  private static class RunHandler implements Route {
+  private static class UserTestsHandler implements Route {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
@@ -240,7 +251,7 @@ final class Server {
           break;
         default:
           System.out
-              .println("Error in RunHandler: language must be either python, ruby, or javascript");
+          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -277,9 +288,14 @@ final class Server {
         return GSON.toJson(variables);
 
       } catch (IOException e) {
-        System.out.println("IOException in RunHandler");
+        System.out.println("IOException in UserTestsHandler");
         Map<String, Object> variables = new ImmutableMap.Builder().put("error",
             true).build();
+        try {
+          Files.delete(file.toPath());
+        } catch (IOException e1) {
+          System.out.println("ERROR: error deleting file in UserTestsHandler");
+        }
         return GSON.toJson(variables);
       }
     }
