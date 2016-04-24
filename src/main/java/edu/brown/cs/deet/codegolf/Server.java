@@ -42,12 +42,14 @@ import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
+import edu.brown.cs.deet.pageHandler.UserHandler;
 import freemarker.template.Configuration;
 
 final class Server {
 
   private static final Gson GSON = new Gson();
   private static AdminHandler admin;
+  private static UserHandler user;
   private static final int PORT = 4567;
 
   private static final MyCompiler pyCompiler = new PyCompiler();
@@ -65,6 +67,15 @@ final class Server {
    */
   public static void setAdminHandler(AdminHandler a) {
     admin = a;
+  }
+
+  /**
+   * Sets the UserHandler for the Server.
+   * @param a
+   *          the UserHandler
+   */
+  public static void setUserHandler(UserHandler u) {
+    user = u;
   }
 
   /**
@@ -99,6 +110,7 @@ final class Server {
 
     Spark.get("/game", new GamePageHandler(), freeMarker);
     Spark.get("/admin_add", new AdminAddHandler(), freeMarker);
+    Spark.get("/user/:username", new UserPageHandler(), freeMarker);
     Spark.post("/admin_add/results", new NewChallengeHandler());
     Spark.post("/namecheck", new NameCheckHandler());
     Spark.post("/categorycheck", new CategoryCheckHandler());
@@ -347,6 +359,30 @@ final class Server {
       Map<String, Object> variables = ImmutableMap.of("title",
           "Add a Challenge");
       return new ModelAndView(variables, "newChallenge.ftl");
+    }
+  }
+
+  /**
+   * Handles user pages.
+   * @author el13
+   */
+  private static class UserPageHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      String username = req.params(":username");
+      try {
+        List<List<String>> results = user.getChallengeInfoForUser(username);
+
+        Map<String, Object> variables = ImmutableMap.of("title", username
+            + "'s Profile", "results", results);
+
+        return new ModelAndView(variables, "user.ftl");
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      } catch (IOException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+      return null; // shouldn't ever get here?
     }
   }
 

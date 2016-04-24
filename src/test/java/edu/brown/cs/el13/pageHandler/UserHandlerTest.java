@@ -22,12 +22,12 @@ public class UserHandlerTest {
       assertTrue(res.size() == 2);
       assertTrue(res.get(0).get(0).equals("reverse"));
       assertTrue(res.get(0).get(1).equals("true"));
-      assertTrue(res.get(0).get(2).equals("1")); // because thakamor is python
+      assertTrue(res.get(0).get(2).equals("2")); // because thakamor is python
       assertTrue(res.get(0).get(3).equals("java"));
 
       assertTrue(res.get(1).get(0).equals("fibonacci"));
       assertTrue(res.get(1).get(1).equals("false"));
-      assertTrue(res.get(1).get(2).equals("n/a")); // because thakamor is python
+      assertTrue(res.get(1).get(2).equals("n/a"));
       assertTrue(res.get(1).get(3).equals("n/a"));
       assertTrue(res.get(1).get(4).equals("n/a"));
 

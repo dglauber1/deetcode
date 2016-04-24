@@ -3,7 +3,9 @@ package edu.brown.cs.deet.codegolf;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import edu.brown.cs.deet.database.ChallengeDatabase;
+import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
+import edu.brown.cs.deet.pageHandler.UserHandler;
 
 /**
  * Main class that launches Codegolf.
@@ -46,7 +48,10 @@ public class Main {
     if (options.has("gui")) {
       AdminHandler a = new AdminHandler(new ChallengeDatabase(
           "testdata/challengeDatabaseTester.sqlite3"));
+      UserHandler u = new UserHandler(new LeaderboardDatabase(
+          "testdata/challengeDatabaseTester.sqlite3"));
       Server.setAdminHandler(a);
+      Server.setUserHandler(u);
       Server.runSparkServer();
     } else {
       REPL.run();

@@ -67,7 +67,7 @@ public class UserHandler {
         int i = 0;
         for (i = 0; i < topTwenty.size(); i++) {
           if (topTwenty.get(i).get(1).equals(qName)) {
-            oneChallengeInfo.add(((Integer) i).toString());
+            oneChallengeInfo.add(((Integer) (i + 1)).toString());
             break;
           }
         }
