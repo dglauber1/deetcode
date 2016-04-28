@@ -103,25 +103,35 @@ public final class GamePageHandlers {
   public static class SaveSolutionHandler implements Route {
     @Override
     public Object handle(Request req, Response res) {
+      System.out.println("hi");
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
+      System.out.println("hi1");
       String username = req.cookie("user");
+      System.out.println("hi2");
       String language = qm.value("language");
-      boolean passed = qm.value("passed").equals("true");
+      System.out.println("hi3");
+      boolean passed = Boolean.parseBoolean(qm.value("passed"));
+      System.out.println("hi4");
+      String s = qm.value("efficiency");
+      System.out.println(s);
       double efficiency = Double.parseDouble(qm.value("efficiency"));
-      double numLines = Double.parseDouble(qm.value("numLines"));
+      System.out.println("hi5");
+      int numLines = Integer.parseInt(qm.value("numLines"));
+      System.out.println("hi6");
       double timeToSolve = Double.parseDouble(qm.value("timeToSolve"));
-      double aggregate = Double.parseDouble(qm.value("aggregate"));
-
+      System.out.println("hi7");
+      int aggregate = Integer.parseInt(qm.value("aggregate"));
+      System.out.println("hi8");
       // TODO Currently set to the test database.
-      String dbPath = "testdata/solutionDatabaseTest";
+      String dbPath = "testdata/challengeDatabaseTest.sqlite3";
       try (LeaderboardDatabase ld = new LeaderboardDatabase(dbPath)) {
         ld.addSolution(challengeID, username, passed, efficiency, numLines,
             timeToSolve, aggregate, language);
       } catch (SQLException e) {
         return ImmutableMap.of("status", "FAILURE", "message", e.getMessage());
       }
-
+      System.out.println("bye");
       String fileType;
       switch (language) {
         case "python":
@@ -135,13 +145,16 @@ public final class GamePageHandlers {
           return GSON.toJson(variables);
       }
 
+      System.out.println(username);
       String fileName = username + fileType;
       File file = new File(String.format("challenges/%s/%s/solutions/%s",
           challengeID, language, fileName));
+      System.out.println("blah");
       try (PrintWriter printWriter = new PrintWriter(file)) {
         String code = qm.value("input");
         printWriter.print(code);
         printWriter.close();
+        System.out.println("ha");
       } catch (FileNotFoundException e) {
         String msg = "Error in SaveSolutionHandler: File not found.";
         Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
@@ -157,7 +170,6 @@ public final class GamePageHandlers {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object handle(Request req, Response res) {
-      String userID = req.cookie("user");
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
       String language = qm.value("language");
@@ -179,10 +191,11 @@ public final class GamePageHandlers {
           return GSON.toJson(variables);
       }
 
-      String fileName = userID + fileType;
-      System.out.println(challengeID);
-      File file = new File(String.format("challenges/%s/%s/solutions/%s",
-          challengeID, language, fileName));
+      Integer random = (int) (Math.random() * 1000000);
+      String randomFileName = "temp" + random.toString() + fileType;
+      File tempDir = new File("temporary");
+      tempDir.mkdir();
+      File file = new File("temporary/" + randomFileName);
       try (PrintWriter printWriter = new PrintWriter(file)) {
         String code = qm.value("input");
         printWriter.print(code);
@@ -208,7 +221,7 @@ public final class GamePageHandlers {
         Map<String, Object> variables = new ImmutableMap.Builder()
             .put("error", false).put("compiled", "success")
             .put("numLines", numLines).put("testResults", testResults)
-            .put("timeToSolve", time).build();
+            .put("timeToTest", time).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
@@ -222,11 +235,14 @@ public final class GamePageHandlers {
             true).build();
         return GSON.toJson(variables);
       } finally {
+        for (File f : tempDir.listFiles()) {
+          f.delete();
+        }
         try {
-          Files.delete(file.toPath());
+          Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-              .println("error deleting temporary directory in DeetTestsHandler");
+              .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }

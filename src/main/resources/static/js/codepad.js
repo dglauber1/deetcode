@@ -7,6 +7,7 @@ var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("codepad"), {
 
 //Run Code Script
 $('input[type=submit]').click(function(e) {
+	vex.dialog.buttons.YES.text = "OK"; // Need to reinitialize this every click (sometimes it's set to "Submit to Leaderboard!")
    	var timeLeft = $("#CountDownTimer").TimeCircles().getTime();
    	var isTimeOver = (timeLeft <= 0);
    	
@@ -33,17 +34,27 @@ $('input[type=submit]').click(function(e) {
 		var userResultString = "<b>User Test Results</b><br/>";
 		var responseObject = JSON.parse(responseJSON);
 		if (responseObject.error === true) {
-			userResultString += "Error: Failed to compile.";
+			userResultString += "Error occurred with Server. Please contact a DEET administrator.";
+			vex.dialog.alert(userResultString);
+			return;
 		} else {
-			var results = responseObject.runResults;
-			for (var input in results){
-				var output = results[input];
-				var msg = "Input: " + input + " returned output: " + output + "<br/>";
-				userResultString += msg;
+			console.log("not error");
+			var compilationStatus = responseObject.compiled;
+			if (compilationStatus != "success") {
+				userResultString += ("Compilation error:<br>" + compilationStatus);
+				vex.dialog.alert(userResultString);
+				return;
+			} else {
+				var results = responseObject.runResults;
+				for (var input in results){
+					var output = results[input];
+					var msg = "Input: " + input + " returned output: " + output + "<br/>";
+					userResultString += msg;
+				}
 			}
 		}
 				
-	   	postParameters = {"language" : "python", "input" : userCode}
+	   	postParameters = {"language" : "python", "input" : userCode, "challengeID" : challengeID}
 		$.post("/game/deettests", postParameters, function(responseJSON) {
 			console.log("here");
 			var passedAllTests = true;
@@ -52,14 +63,15 @@ $('input[type=submit]').click(function(e) {
 			if (responseObject.error === true) {
 				console.log("error");
 				passedAllTests = false;
-				deetResultString += "Error: Invalid language, could not compile.";
+				deetResultString += "Error occurred with Server. Please contact a DEET administrator.";
 			} else {
 				console.log("not error");
 				var compilationStatus = responseObject.compiled;
 				if (compilationStatus != "success") {
+					deetResultString += ("Compilation Error:<br>" + compilationStatus);
 					passedAllTests = false;
-					deetResultString += ("Error: " + compilationStatus);
 					vex.dialog.alert(deetResultString);
+					return;
 				} else {
 					var results = responseObject.testResults;
 					for (i = 0; i < results.length; i++) {
@@ -83,7 +95,10 @@ $('input[type=submit]').click(function(e) {
 			if (passedAllTests) {
 				$("#CountDownTimer").TimeCircles().stop();
 				deetResultString = "<b>Official Test Results</b><br/>" +
-				"You passed all of the official tests!";
+				"You passed all of the official tests!<br><br>" +
+				"Completed tests in " + responseObject.timeToTest + " milliseconds<br>" +
+				"Brevity: " + responseObject.numLines + " total lines<br>" + 
+				"Time to solve: " +  (120 - $("#CountDownTimer").TimeCircles().getTime()) + " seconds"; //TODO change 120 to whatever initial time was
 				vex.dialog.buttons.YES.text = "Submit to leaderboard!";
 				vex.dialog.buttons.NO.text = "Don't submit.";
 				vex.dialog.open({
@@ -95,10 +110,11 @@ $('input[type=submit]').click(function(e) {
 									"language" : "python",
 									"challengeID" : challengeID,
 									"passed" : true,
-									"efficiency" : 0.0,
-									"numLines" : 10,
-									"timeToSolve" : $("#CountDownTimer").TimeCircles().getTime(),
+									"efficiency" : responseObject.timeToTest,
+									"numLines" : responseObject.numLines,
+									"timeToSolve" : 120 - $("#CountDownTimer").TimeCircles().getTime(), //HERE TOOOOOO (see TODO above)
 									"aggregate" : 100};
+							console.log(leaderboardParameters);
 							$.post("/save", postParameters, function(responseJSON) {
 								responseObject = JSON.parse(responseJSON);
 								if (reponseObject.status === "SUCCESS") {
