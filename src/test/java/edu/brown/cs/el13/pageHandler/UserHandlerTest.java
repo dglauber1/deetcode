@@ -20,6 +20,8 @@ public class UserHandlerTest {
 
       try (UserDatabase udb = new UserDatabase(
           "testdata/challengeDatabaseTester.sqlite3")) {
+        UserHandler.setUserDatabase(udb);
+        UserHandler.setLeaderboardDatabase(db);
         List<List<String>> res = UserHandler.getChallengeInfoForUser("el51");
 
         assertTrue(res.size() == 2);
