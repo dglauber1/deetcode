@@ -4,8 +4,24 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+
+import spark.ExceptionHandler;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 
 import edu.brown.cs.deet.database.ChallengeDatabase;
 
@@ -14,16 +30,249 @@ import edu.brown.cs.deet.database.ChallengeDatabase;
  * editing a pre-existing challenge.
  * @author el13
  */
-public class AdminHandler {
-  private ChallengeDatabase challenges;
+public final class AdminHandler {
+  private static ChallengeDatabase challenges;
+  private static final Gson GSON = new Gson();
 
   /**
-   * Constructor for an AdminHandler.
-   * @param cdb
-   *          A ChallengeDatabase object
+   * Private Constructor for an AdminHandler.
    */
-  public AdminHandler(ChallengeDatabase cdb) {
-    this.challenges = cdb;
+  private AdminHandler() {
+  }
+
+  /**
+   * Statically changes the ChallengeDatabase of the AdminHandler.
+   * @param cdb
+   *          the ChallengeDatabase
+   */
+  public static void setChallengeDatabase(ChallengeDatabase cdb) {
+    challenges = cdb;
+  }
+
+  /**
+   * Shows the Admin_add page.
+   * @author el13
+   */
+  public static class AdminAddHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      Map<String, Object> variables = ImmutableMap.of("title",
+          "Add a Challenge");
+      return new ModelAndView(variables, "newChallenge.ftl");
+    }
+  }
+
+  /**
+   * Handles the input of a new challenge.
+   * @author el13
+   */
+  public static class NewChallengeHandler implements Route {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+
+      // Basic info
+      String category = GSON.fromJson(qm.value("category"), String.class);
+      String pName = GSON.fromJson(qm.value("pName"), String.class);
+      String name = GSON.fromJson(qm.value("name"), String.class);
+      String description = GSON.fromJson(qm.value("description"), String.class);
+
+      Boolean success = false;
+
+      try {
+        success = newBasicInfo(category, pName, name, description);
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      } catch (IOException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      // Java test cases and stub code
+      if (success) {
+        String javaTestnames = GSON.fromJson(qm.value("javaTestName"),
+            String.class);
+        String javaInput = GSON.fromJson(qm.value("javaInput"), String.class);
+        String javaOutput = GSON.fromJson(qm.value("javaOutput"), String.class);
+        String javaStub = GSON.fromJson(qm.value("javaStub"), String.class);
+
+        // Python test cases and stub code
+        String pythonTestnames = GSON.fromJson(qm.value("pythonTestName"),
+            String.class);
+        String pythonInput = GSON.fromJson(qm.value("pythonInput"),
+            String.class);
+        String pythonOutput = GSON.fromJson(qm.value("pythonOutput"),
+            String.class);
+        String pythonStub = GSON.fromJson(qm.value("pythonStub"), String.class);
+
+        // Ruby test cases and stub code
+        String rubyTestnames = GSON.fromJson(qm.value("rubyTestName"),
+            String.class);
+        String rubyInput = GSON.fromJson(qm.value("rubyInput"), String.class);
+        String rubyOutput = GSON.fromJson(qm.value("rubyOutput"), String.class);
+        String rubyStub = GSON.fromJson(qm.value("rubyStub"), String.class);
+
+        // Javascript test cases and stub code
+        String jsTestnames = GSON
+            .fromJson(qm.value("jsTestName"), String.class);
+        String jsInput = GSON.fromJson(qm.value("jsInput"), String.class);
+        String jsOutput = GSON.fromJson(qm.value("jsOutput"), String.class);
+        String jsStub = GSON.fromJson(qm.value("jsStub"), String.class);
+
+        try {
+          // putting all of the code into the directory, but only if something
+          // was entered for those fields on the page
+          if (!javaInput.equals("")) {
+            newTestInfo(pName, javaTestnames, javaInput, javaOutput, javaStub,
+                "java");
+          }
+
+          if (!pythonInput.equals("")) {
+            newTestInfo(pName, pythonTestnames, pythonInput, pythonOutput,
+                pythonStub, "python");
+          }
+
+          if (!rubyInput.equals("")) {
+            newTestInfo(pName, rubyTestnames, rubyInput, rubyOutput, rubyStub,
+                "ruby");
+          }
+
+          if (!jsInput.equals("")) {
+            newTestInfo(pName, jsTestnames, jsInput, jsOutput, jsStub,
+                "javascript");
+          }
+        } catch (IOException e) {
+          new ExceptionPrinter().handle(e, req, res);
+        } catch (SQLException e) {
+          new ExceptionPrinter().handle(e, req, res);
+        }
+      }
+
+      Map<String, Object> variables = new ImmutableMap.Builder().put("success",
+          success).build();
+      return GSON.toJson(variables);
+    }
+  }
+
+  /**
+   * Handler that deletes a challenge.
+   * @author el13
+   */
+  public static class DeleteChallengeHandler implements Route {
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Object handle(Request req, Response res) {
+      String challengeId = req.params(":challengeid");
+      try {
+        deleteChallenge(challengeId);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> variables = new ImmutableMap.Builder().put(
+            "success", true).build();
+        return GSON.toJson(variables);
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> variables = new ImmutableMap.Builder().put(
+            "success", false).build();
+        return GSON.toJson(variables);
+      } catch (IOException e) {
+        new ExceptionPrinter().handle(e, req, res);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> variables = new ImmutableMap.Builder().put(
+            "success", false).build();
+        return GSON.toJson(variables);
+      }
+    }
+
+  }
+
+  /**
+   * Handler that checks if the entered name in the Admin page is already taken.
+   * @author el13
+   */
+  public static class NameCheckHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String name = GSON.fromJson(qm.value("textValue"), String.class);
+      boolean exists = false;
+
+      try {
+        exists = doesChallengeExist(name);
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
+          exists).build();
+      return GSON.toJson(variables);
+    }
+  }
+
+  /**
+   * Handler that gets all of the Categories.
+   * @author el13
+   */
+  public static class AllCategoriesHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      List<String> categories = null;
+      try {
+        categories = getAllCategories();
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      Map<String, Object> variables = new ImmutableMap.Builder().put(
+          "categories", categories).build();
+      return GSON.toJson(variables);
+    }
+
+  }
+
+  /**
+   * Handler that checks if the entered new category already exists.
+   * @author el13
+   */
+  public static class CategoryCheckHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String name = GSON.fromJson(qm.value("textValue"), String.class);
+      boolean exists = false;
+
+      try {
+        exists = doesCategoryExist(name);
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
+          exists).build();
+      return GSON.toJson(variables);
+    }
+  }
+
+  /**
+   * Handles Exceptions.
+   * @author el13
+   */
+  public static class ExceptionPrinter implements ExceptionHandler {
+    @Override
+    public void handle(Exception e, Request req, Response res) {
+      res.status(500);
+      StringWriter stacktrace = new StringWriter();
+      try (PrintWriter pw = new PrintWriter(stacktrace)) {
+        pw.println("<pre>");
+        e.printStackTrace(pw);
+        pw.println("</pre>");
+      }
+      res.body(stacktrace.toString());
+    }
   }
 
   /**
@@ -42,8 +291,8 @@ public class AdminHandler {
    * @throws IOException
    *           If an I/O error occurred with creating a file
    */
-  public boolean newBasicInfo(String category, String pName, String name,
-      String description) throws SQLException, IOException {
+  public static boolean newBasicInfo(String category, String pName,
+      String name, String description) throws SQLException, IOException {
     String path = "challenges/" + pName;
 
     // check if an insert to the database is successful
@@ -96,7 +345,7 @@ public class AdminHandler {
    * @throws SQLException
    *           When the database screws up
    */
-  public boolean newTestInfo(String pName, String testnames,
+  public static boolean newTestInfo(String pName, String testnames,
       String input, String output, String stub, String language)
       throws IOException, SQLException {
 
@@ -177,7 +426,7 @@ public class AdminHandler {
    * @throws SQLException
    *           if something with the database goes awry
    */
-  public boolean doesChallengeExist(String pName) throws SQLException {
+  public static boolean doesChallengeExist(String pName) throws SQLException {
     return challenges.doesChallengeExist(pName);
   }
 
@@ -189,7 +438,7 @@ public class AdminHandler {
    * @throws SQLException
    *           if something with the database goes awry
    */
-  public boolean doesCategoryExist(String qCategory) throws SQLException {
+  public static boolean doesCategoryExist(String qCategory) throws SQLException {
     return challenges.doesCategoryExist(qCategory);
   }
 
@@ -199,7 +448,50 @@ public class AdminHandler {
    * @throws SQLException
    *           if something with the database goes awry
    */
-  public List<String> getAllCategories() throws SQLException {
+  public static List<String> getAllCategories() throws SQLException {
     return challenges.getAllCategories();
+  }
+
+  /**
+   * Deletes a challenge from the Database, including all entries in the test
+   * and solutions tables. This method rests on the assumption that the test and
+   * solution tables have the "ON CASCADE DELETE" options on for its
+   * "challenge_id" foreign keys. Otherwise, there will be zombie entries
+   * leftover in the test and solution tables.
+   * @param challengeName
+   *          the name of the challenge as seen in the challenges directory (NOT
+   *          the one seen by a user)
+   * @throws SQLException
+   *           if something with the database goes awry.
+   * @throws IOException
+   *           when there is an error with deleting the directory associated
+   *           with the challenge
+   */
+  public static void deleteChallenge(String challengeName) throws SQLException,
+      IOException {
+    String directory = "challenges/" + challengeName;
+    File challengeDirectory = new File(directory);
+
+    // delete the directory that contains all the challenge info
+    FileUtils.deleteDirectory(challengeDirectory);
+
+    // delete the challenges from the database
+    challenges.deleteChallenge(challengeName);
+  }
+
+  public static void main(String[] args) throws SQLException {
+    ChallengeDatabase cdb = new ChallengeDatabase(
+        "testdata/deleteChallengeTest.sqlite3");
+    AdminHandler.setChallengeDatabase(cdb);
+
+    try {
+      deleteChallenge("delete-test");
+    } catch (SQLException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 }

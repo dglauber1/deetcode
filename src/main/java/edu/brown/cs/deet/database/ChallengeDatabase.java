@@ -23,8 +23,10 @@ public class ChallengeDatabase implements AutoCloseable {
    * Constructs a new ChallengeDatabase.
    * @param db
    *          the path to the database
+   * @throws SQLException
+   *           When there is error with setting foreign_keys = on
    */
-  public ChallengeDatabase(String db) {
+  public ChallengeDatabase(String db) throws SQLException {
     try {
       // Set up the Connection
       Class.forName("org.sqlite.JDBC");
@@ -36,6 +38,11 @@ public class ChallengeDatabase implements AutoCloseable {
       conn = DriverManager.getConnection("jdbc:sqlite:" + db);
     } catch (SQLException e) {
       throw new IllegalArgumentException("Bad database");
+    }
+
+    String foreignKeys = "PRAGMA FOREIGN_KEYS = ON;";
+    try (PreparedStatement ps = conn.prepareStatement(foreignKeys)) {
+      ps.execute();
     }
   }
 
@@ -220,7 +227,6 @@ public class ChallengeDatabase implements AutoCloseable {
       return categories;
     }
   }
-  
 
   /**
    * Inserts a row into the test table for the challenge and the language

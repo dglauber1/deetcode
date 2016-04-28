@@ -22,8 +22,10 @@ public class LeaderboardDatabase implements AutoCloseable {
    * Constructs a new LeaderboardDatabase.
    * @param db
    *          the path to the database
+   * @throws SQLException
+   *           when there is a problem with turning foreign_keys on
    */
-  public LeaderboardDatabase(String db) {
+  public LeaderboardDatabase(String db) throws SQLException {
     try {
       // Set up the Connection
       Class.forName("org.sqlite.JDBC");
@@ -35,6 +37,12 @@ public class LeaderboardDatabase implements AutoCloseable {
       conn = DriverManager.getConnection("jdbc:sqlite:" + db);
     } catch (SQLException e) {
       throw new IllegalArgumentException("Bad database");
+    }
+
+    // turning foreign_keys on
+    String foreignKeys = "PRAGMA FOREIGN_KEYS = ON;";
+    try (PreparedStatement ps = conn.prepareStatement(foreignKeys)) {
+      ps.execute();
     }
   }
 

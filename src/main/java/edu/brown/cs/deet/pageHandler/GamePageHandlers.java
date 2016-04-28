@@ -13,6 +13,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -26,12 +33,6 @@ import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
 
@@ -85,6 +86,12 @@ public final class GamePageHandlers {
         Map<String, Object> variables = ImmutableMap.of("title", "Game",
             "prompt", promptBuilder.toString());
         return new ModelAndView(variables, "game.ftl");
+      } catch (SQLException e1) {
+        // Eddie added this, but code shouldn't get here either way
+        System.out.println("GamePageHandler ChallengeDatabase");
+        System.exit(1);
+
+        return null; // ?
       }
     }
   }
@@ -201,7 +208,7 @@ public final class GamePageHandlers {
         Map<String, Object> variables = new ImmutableMap.Builder()
             .put("error", false).put("compiled", "success")
             .put("numLines", numLines).put("testResults", testResults)
-        .put("timeToSolve", time).build();
+            .put("timeToSolve", time).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {

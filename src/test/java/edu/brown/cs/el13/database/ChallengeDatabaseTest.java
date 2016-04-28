@@ -181,9 +181,10 @@ public class ChallengeDatabaseTest {
     try (ChallengeDatabase db = new ChallengeDatabase(
         "testdata/challengeDatabaseTester.sqlite3")) {
       List<String> categories = db.getAllCategories();
-      assertTrue(categories.size() == 2);
+      assertTrue(categories.size() == 3);
       assertTrue(categories.get(0).equals("lists"));
       assertTrue(categories.get(1).equals("integers"));
+      assertTrue(categories.get(2).equals(""));
     } catch (SQLException e) {
       assertTrue(false);
     }

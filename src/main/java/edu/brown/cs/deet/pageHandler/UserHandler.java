@@ -1,18 +1,28 @@
 package edu.brown.cs.deet.pageHandler;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
+import spark.TemplateViewRoute;
 
 import com.google.common.base.Charsets;
-import com.google.common.io.Files;
+import com.google.common.collect.ImmutableMap;
 
 import edu.brown.cs.deet.database.LeaderboardDatabase;
+import edu.brown.cs.deet.database.UserDatabase;
+import edu.brown.cs.deet.pageHandler.AdminHandler.ExceptionPrinter;
 
 public class UserHandler {
-  private LeaderboardDatabase leaderboard;
+  private static LeaderboardDatabase leaderboard;
+  private static UserDatabase user;
   private static final int CHALLENGE_NAME = 0;
   private static final int PASSED = 2;
   /**
@@ -21,12 +31,52 @@ public class UserHandler {
   private static final int CHALLENGE_LANGUAGE = 7;
 
   /**
-   * Constructor for an UserHandler.
-   * @param cdb
-   *          A LeaderboardDatabase object
+   * Private constructor for an UserHandler.
    */
-  public UserHandler(LeaderboardDatabase cdb) {
-    this.leaderboard = cdb;
+  private UserHandler() {
+  }
+
+  /**
+   * Sets the LeaderboardDatabase.
+   * @param ldb
+   *          the Leaderboard Database.
+   */
+  public static void setLeaderboardDatabase(LeaderboardDatabase ldb) {
+    leaderboard = ldb;
+  }
+
+  /**
+   * Sets the UserDatabase.
+   * @param udb
+   *          the UserDatabase.
+   */
+  public static void setUserDatabase(UserDatabase udb) {
+    user = udb;
+  }
+
+  /**
+   * Handles user pages.
+   * @author el13
+   */
+  public static class UserPageHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      String username = req.params(":username");
+      try {
+        List<List<String>> results = getChallengeInfoForUser(username);
+        String name = getNameFromUsername(username);
+
+        Map<String, Object> variables = ImmutableMap.of("title", username,
+            "name", name, "results", results);
+
+        return new ModelAndView(variables, "user.ftl");
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      } catch (IOException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+      return null; // shouldn't ever get here?
+    }
   }
 
   /**
@@ -43,7 +93,7 @@ public class UserHandler {
    * @throws IOException
    *           when there is a file read error
    */
-  public List<List<String>> getChallengeInfoForUser(String qName)
+  public static List<List<String>> getChallengeInfoForUser(String qName)
       throws SQLException, IOException {
     List<List<String>> toReturn = new ArrayList<>();
 
@@ -80,11 +130,12 @@ public class UserHandler {
         oneChallengeInfo.add(solution.get(CHALLENGE_LANGUAGE));
 
         // add the user's actual solution
-        File solutionFile = new File("challenges/"
-            + solution.get(CHALLENGE_NAME) + "/"
-            + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName + "."
-            + solution.get(CHALLENGE_LANGUAGE));
-        String code = Files.toString(solutionFile, Charsets.UTF_8);
+        String solutionPath = "challenges/" + solution.get(CHALLENGE_NAME)
+            + "/" + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName
+            + "." + solution.get(CHALLENGE_LANGUAGE);
+
+        byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
+        String code = new String(encoded, Charsets.UTF_8);
         oneChallengeInfo.add(code);
       } else {
         oneChallengeInfo.add("false");
@@ -96,5 +147,17 @@ public class UserHandler {
     }
 
     return toReturn;
+  }
+
+  /**
+   * Returns the name of the user with a certain username.
+   * @param username
+   *          The username of the user
+   * @return the name of the user, or null if the username does not exist
+   * @throws SQLException
+   *           when something has gone wrong with the database
+   */
+  public static String getNameFromUsername(String username) throws SQLException {
+    return user.getNameFromUsername(username);
   }
 }
