@@ -29,13 +29,15 @@
           <div class="page-header" id="title">
             <h2>
               Browse By Category
-              <div class="dropdown pull-right">
-                <select class="selectpicker" data-width="150px" id="filters" title="Filter Options">
-                  <option>Solved</option>
-                  <option>Unsolved</option>
-                  <option>No Filter</option>
-                </select>
-              </div>
+              <#if !isAdmin>
+                <div class="dropdown pull-right">
+                  <select class="selectpicker" data-width="150px" id="filters" title="Filter Options">
+                    <option>Solved</option>
+                    <option>Unsolved</option>
+                    <option>No Filter</option>
+                  </select>
+                </div>
+              </#if>
             </h2>
           </div>
         </div>
