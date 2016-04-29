@@ -67,6 +67,7 @@ final class Server {
     Spark.post("/getallcategories", new AdminHandler.AllCategoriesHandler());
     Spark.post("/game/usertests", new GamePageHandlers.UserTestsHandler());
     Spark.post("/game/deettests", new GamePageHandlers.DeetTestsHandler());
+    Spark.post("/save", new GamePageHandlers.SaveSolutionHandler());
     Spark.get("/categories", new LoginHandlers.CategoriesHandler(), freeMarker);
     Spark.get("/", new LoginHandlers.HomePageHandler(), freeMarker);
     Spark.get("/fblogin", new LoginHandlers.FBHandler());

@@ -106,30 +106,26 @@ public final class GamePageHandlers {
       System.out.println("hi");
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
-      System.out.println("hi1");
+      System.out.println(challengeID);
       String username = req.cookie("user");
-      System.out.println("hi2");
+      // TODO currently hardcoding a username because tyler hasn't yet written
+      // the code to populate the user table
+      username = "el13";
       String language = qm.value("language");
-      System.out.println("hi3");
       boolean passed = Boolean.parseBoolean(qm.value("passed"));
-      System.out.println("hi4");
-      String s = qm.value("efficiency");
-      System.out.println(s);
       double efficiency = Double.parseDouble(qm.value("efficiency"));
-      System.out.println("hi5");
       int numLines = Integer.parseInt(qm.value("numLines"));
-      System.out.println("hi6");
       double timeToSolve = Double.parseDouble(qm.value("timeToSolve"));
-      System.out.println("hi7");
       int aggregate = Integer.parseInt(qm.value("aggregate"));
       System.out.println("hi8");
       // TODO Currently set to the test database.
-      String dbPath = "testdata/challengeDatabaseTest.sqlite3";
+      String dbPath = "testdata/challengeDatabaseTester.sqlite3";
       try (LeaderboardDatabase ld = new LeaderboardDatabase(dbPath)) {
         ld.addSolution(challengeID, username, passed, efficiency, numLines,
             timeToSolve, aggregate, language);
       } catch (SQLException e) {
-        return ImmutableMap.of("status", "FAILURE", "message", e.getMessage());
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
       }
       System.out.println("bye");
       String fileType;
