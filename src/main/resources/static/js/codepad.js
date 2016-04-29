@@ -29,7 +29,7 @@ $('input[type=submit]').click(function(e) {
    	console.log(userTests);
    	console.log(userCode);
    	// testing against user input
-   	var postParameters = {"language" : "python", "input" : userCode, "userTest" : userTests}
+   	var postParameters = {"language" : "python", "input" : userCode, "userTest" : userTests};
 	$.post("/game/usertests", postParameters, function(responseJSON) {
 		var userResultString = "<b>User Test Results</b><br/>";
 		var responseObject = JSON.parse(responseJSON);

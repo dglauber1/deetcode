@@ -259,7 +259,6 @@ public final class GamePageHandlers {
     public Object handle(Request req, Response res) {
       QueryParamsMap qm = req.queryMap();
       String language = qm.value("language");
-
       String fileType;
       Runner myRunner;
       MyCompiler myCompiler;
@@ -276,7 +275,6 @@ public final class GamePageHandlers {
               "error", true).build();
           return GSON.toJson(variables);
       }
-
       Integer random = (int) (Math.random() * 1000000);
       String randomFileName = "temp" + random.toString() + fileType;
       File tempDir = new File("temporary");
@@ -294,6 +292,7 @@ public final class GamePageHandlers {
           return GSON.toJson(variables);
         }
 
+        System.out.println("here0");
         String testInputs = qm.value("userTest");
         List<String> testInputList = Lists.newArrayList(Splitter
             .on(System.getProperty("line.separator")).trimResults()
@@ -301,9 +300,13 @@ public final class GamePageHandlers {
         Map<String, String> runResults = myRunner.run(file.getPath(),
             testInputList);
 
+        System.out.println("here1");
         Map<String, Object> variables = new ImmutableMap.Builder()
             .put("error", false).put("compiled", "success")
             .put("runResults", runResults).build();
+
+        System.out.println("here2");
+
         return GSON.toJson(variables);
 
       } catch (IOException e) {
