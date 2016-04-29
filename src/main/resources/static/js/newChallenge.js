@@ -208,6 +208,29 @@ $("#submit").click(function() {
 		bad = true;
 	}
 
+	// check if test case pages are correct
+	var javaTestNameLines = $("javaTestName").val().split(/\r*\n/).length;
+	var javaInputLines = $("javaInput").val().split(/\r*\n/).length;
+	var javaOutputLines = $("javaOutput").val().split(/\r*\n/).length;
+
+	if (javaTestNameLines != javaInputLines || 
+		javaTestNameLines != javaOutputLines || 
+		javaInputLines != javaOutputLines) {
+		bad = true;
+	}
+
+	var pythonTestNameLines = $("pythonTestName").val().split(/\r*\n/).length;
+	var pythonInputLines = $("pythonInput").val().split(/\r*\n/).length;
+	var pythonOutputLines = $("pythonOutput").val().split(/\r*\n/).length;
+
+	var rubyTestNameLines = $("rubyTestName").val().split(/\r*\n/).length;
+	var rubyInputLines = $("rubyInput").val().split(/\r*\n/).length;
+	var rubyOutputLines = $("rubyOutput").val().split(/\r*\n/).length;
+
+	var jsTestNameLines = $("jsTestName").val().split(/\r*\n/).length;
+	var jsInputLines = $("jsInput").val().split(/\r*\n/).length;
+	var jsOutputLines = $("jsOutput").val().split(/\r*\n/).length;
+
 	// AJAX call only if the not bad input
 	if (!bad) {
 		// parse the rest of the input

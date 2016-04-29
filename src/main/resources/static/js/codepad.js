@@ -29,7 +29,7 @@ $('input[type=submit]').click(function(e) {
    	console.log(userTests);
    	console.log(userCode);
    	// testing against user input
-   	var postParameters = {"language" : "python", "input" : userCode, "userTest" : userTests}
+   	var postParameters = {"language" : "python", "input" : userCode, "userTest" : userTests};
 	$.post("/game/usertests", postParameters, function(responseJSON) {
 		var userResultString = "<b>User Test Results</b><br/>";
 		var responseObject = JSON.parse(responseJSON);
@@ -98,7 +98,8 @@ $('input[type=submit]').click(function(e) {
 				"You passed all of the official tests!<br><br>" +
 				"Completed tests in " + responseObject.timeToTest + " milliseconds<br>" +
 				"Brevity: " + responseObject.numLines + " total lines<br>" + 
-				"Time to solve: " +  (120 - $("#CountDownTimer").TimeCircles().getTime()) + " seconds"; //TODO change 120 to whatever initial time was
+				"Time to solve: " +  (120 - $("#CountDownTimer").TimeCircles().getTime()) + " seconds"; 
+				//TODO change 120 to whatever initial time was
 				vex.dialog.buttons.YES.text = "Submit to leaderboard!";
 				vex.dialog.buttons.NO.text = "Don't submit.";
 				vex.dialog.open({
@@ -112,14 +113,17 @@ $('input[type=submit]').click(function(e) {
 									"passed" : true,
 									"efficiency" : responseObject.timeToTest,
 									"numLines" : responseObject.numLines,
-									"timeToSolve" : 120 - $("#CountDownTimer").TimeCircles().getTime(), //HERE TOOOOOO (see TODO above)
+									"timeToSolve" : 120 - $("#CountDownTimer").TimeCircles().getTime(), 
+									//HERE TOOOOOO (see TODO above)
 									"aggregate" : 100};
 							console.log(leaderboardParameters);
-							$.post("/save", postParameters, function(responseJSON) {
+							$.post("/save", leaderboardParameters, function(responseJSON) {
 								responseObject = JSON.parse(responseJSON);
-								if (reponseObject.status === "SUCCESS") {
+								if (responseObject.status === "SUCCESS") {
+									vex.dialog.buttons.YES = "Let's do another question!";
 									vex.dialog.alert("Succesfully added your solution to the leaderboard.");
 								} else {
+									vex.dialog.buttons.YES = "Close";
 									vex.dialog.alert(responseObject.message);
 								}
 							});

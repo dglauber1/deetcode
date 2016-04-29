@@ -13,6 +13,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -26,12 +33,6 @@ import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
 
@@ -85,6 +86,12 @@ public final class GamePageHandlers {
         Map<String, Object> variables = ImmutableMap.of("title", "Game",
             "prompt", promptBuilder.toString());
         return new ModelAndView(variables, "game.ftl");
+      } catch (SQLException e1) {
+        // Eddie added this, but code shouldn't get here either way
+        System.out.println("GamePageHandler ChallengeDatabase");
+        System.exit(1);
+
+        return null; // ?
       }
     }
   }
@@ -99,30 +106,26 @@ public final class GamePageHandlers {
       System.out.println("hi");
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
-      System.out.println("hi1");
+      System.out.println(challengeID);
       String username = req.cookie("user");
-      System.out.println("hi2");
+      // TODO currently hardcoding a username because tyler hasn't yet written
+      // the code to populate the user table
+      username = "el13";
       String language = qm.value("language");
-      System.out.println("hi3");
       boolean passed = Boolean.parseBoolean(qm.value("passed"));
-      System.out.println("hi4");
-      String s = qm.value("efficiency");
-      System.out.println(s);
       double efficiency = Double.parseDouble(qm.value("efficiency"));
-      System.out.println("hi5");
       int numLines = Integer.parseInt(qm.value("numLines"));
-      System.out.println("hi6");
       double timeToSolve = Double.parseDouble(qm.value("timeToSolve"));
-      System.out.println("hi7");
       int aggregate = Integer.parseInt(qm.value("aggregate"));
       System.out.println("hi8");
       // TODO Currently set to the test database.
-      String dbPath = "testdata/challengeDatabaseTest.sqlite3";
+      String dbPath = "testdata/challengeDatabaseTester.sqlite3";
       try (LeaderboardDatabase ld = new LeaderboardDatabase(dbPath)) {
         ld.addSolution(challengeID, username, passed, efficiency, numLines,
             timeToSolve, aggregate, language);
       } catch (SQLException e) {
-        return ImmutableMap.of("status", "FAILURE", "message", e.getMessage());
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
       }
       System.out.println("bye");
       String fileType;
@@ -214,7 +217,7 @@ public final class GamePageHandlers {
         Map<String, Object> variables = new ImmutableMap.Builder()
             .put("error", false).put("compiled", "success")
             .put("numLines", numLines).put("testResults", testResults)
-        .put("timeToTest", time).build();
+            .put("timeToTest", time).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
@@ -252,7 +255,6 @@ public final class GamePageHandlers {
     public Object handle(Request req, Response res) {
       QueryParamsMap qm = req.queryMap();
       String language = qm.value("language");
-
       String fileType;
       Runner myRunner;
       MyCompiler myCompiler;
@@ -269,7 +271,6 @@ public final class GamePageHandlers {
               "error", true).build();
           return GSON.toJson(variables);
       }
-
       Integer random = (int) (Math.random() * 1000000);
       String randomFileName = "temp" + random.toString() + fileType;
       File tempDir = new File("temporary");
@@ -287,6 +288,7 @@ public final class GamePageHandlers {
           return GSON.toJson(variables);
         }
 
+        System.out.println("here0");
         String testInputs = qm.value("userTest");
         List<String> testInputList = Lists.newArrayList(Splitter
             .on(System.getProperty("line.separator")).trimResults()
@@ -294,9 +296,13 @@ public final class GamePageHandlers {
         Map<String, String> runResults = myRunner.run(file.getPath(),
             testInputList);
 
+        System.out.println("here1");
         Map<String, Object> variables = new ImmutableMap.Builder()
             .put("error", false).put("compiled", "success")
             .put("runResults", runResults).build();
+
+        System.out.println("here2");
+
         return GSON.toJson(variables);
 
       } catch (IOException e) {
