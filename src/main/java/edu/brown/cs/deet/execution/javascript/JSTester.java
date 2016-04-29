@@ -1,7 +1,5 @@
-package edu.brown.cs.deet.execution.python;
+package edu.brown.cs.deet.execution.javascript;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,27 +8,20 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
+import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.Tester;
 
-/**
- * Implementation of a Tester for the python language.
- * @author dglauber
- */
-public class PyTester {// implements Tester {
+public class JSTester {// implements Tester {
 
-  private PyRunner runner;
+  private Runner runner;
 
-  /**
-   * Constructor for a PyRunner object.
-   */
-  public PyTester() {
-    runner = new PyRunner();
+  public JSTester() {
+    runner = new JSRunner();
   }
 
   // @Override
   // public Collection<List<String>> test(String solutionPath, String testDir)
   // throws Exception {
-  //
   // List<String> inputs;
   // List<String> outputs;
   // List<String> testNames;
