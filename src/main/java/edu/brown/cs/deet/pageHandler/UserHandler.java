@@ -8,17 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import spark.ModelAndView;
-import spark.Request;
-import spark.Response;
-import spark.TemplateViewRoute;
-
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 
 import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.pageHandler.AdminHandler.ExceptionPrinter;
+import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
+import spark.TemplateViewRoute;
 
 public class UserHandler {
   private static LeaderboardDatabase leaderboard;
@@ -65,6 +64,8 @@ public class UserHandler {
       try {
         List<List<String>> results = getChallengeInfoForUser(username);
         String name = getNameFromUsername(username);
+        
+        //TODO: Send an error page if the user doesn't exist
 
         Map<String, Object> variables = ImmutableMap.of("title", username,
             "name", name, "results", results);

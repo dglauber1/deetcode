@@ -56,6 +56,10 @@ body.modal-open .modal {
   align-items: center;
 }
 
+.delete-button {
+  margin-right: 10px;
+}
+
 #usernameForm {
   margin-top: 20px;
 }
@@ -73,4 +77,28 @@ input[name=username] {
 
 .modal-header {
   background-color: rgba(0,0,0,.04);
+}
+
+.delete-button, .edit-button {
+  vertical-align: middle;
+  line-height: 27px;
+  background-color: #F5F6FA;;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  color: #757575;
+  cursor: default;
+  font-family: arial,sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 0 12px;
+  text-align: center
+}
+
+.delete-button:hover, .edit-button:hover {
+  border-color: #b9b9b9;
+  color: #2f4f4f;
+}
+
+.delete-button:focus, .edit-button:hover {
+  outline: none;  
 }
