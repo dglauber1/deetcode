@@ -44,14 +44,13 @@
       <div class="row">
         <div class="col-md-10 col-md-offset-1" data-toggle="collapse">
           <div class="list-group categories">
-
             <#list data?keys as key>
-              <a href="#${key}" class="list-group-item" data-toggle="collapse">
+              <a href="#${key}" class="list-group-item category" data-toggle="collapse">
                 <i class="glyphicon glyphicon-chevron-right icon-addon"></i>${key?capitalize}
               </a>
               <div class="list-group collapse questions" id="${key}">
                 <#list data[key] as challenge>
-                  <a href="/game/${challenge.id}" class="list-group-item" data-toggle="collapse">
+                  <a href="/game/${challenge.id}" class="list-group-item challenge">
                     <#if challenge.solved == "true">
                       <span class="pull-right">
                         <button class="leaderboard-button">Leaderboard</button>
@@ -65,57 +64,6 @@
           </div>
         </div>
       </div>
-
-      <!-- <div class="row">
-        <div class="col-md-10 col-md-offset-1" data-toggle="collapse">
-          <div class="list-group categories">
-            <a href="#item-1" class="list-group-item" data-toggle="collapse">
-              <i class="glyphicon glyphicon-chevron-right icon-addon"></i>Item 1
-            </a>
-            <div class="list-group collapse questions" id="item-1">
-              <a href="#" class="list-group-item" data-toggle="collapse">
-                <span class="pull-right">
-                  <button class="leaderboard-button">Leaderboard</button>
-                </span>
-                Sample Solved Problem
-              </a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Problem 3</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">
-                <span class="pull-right">
-                  <button class="leaderboard-button">Leaderboard</button>
-                </span>
-                Another Solved Problem
-              </a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Problem 4</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Problem 5</a>
-            </div>
-            <a href="#item-2" class="list-group-item" data-toggle="collapse">
-              <i class="glyphicon glyphicon-chevron-right icon-addon"></i>Item 1
-            </a>
-            <div class="list-group collapse questions" id="item-2">
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-            </div>
-            <a href="#item-3" class="list-group-item" data-toggle="collapse">
-              <i class="glyphicon glyphicon-chevron-right icon-addon"></i>Item 1
-            </a>
-            <div class="list-group collapse questions" id="item-3">
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-            </div>
-          </div>
-        </div>
-      </div> -->
     </div>
 
     <div id="signupModal" class="modal fade" role="dialog" tabindex="-1" data-backdrop="static" data-keyboard="false">
