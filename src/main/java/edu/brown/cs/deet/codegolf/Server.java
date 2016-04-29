@@ -63,6 +63,8 @@ final class Server {
     Spark.post("/admin/add/results", new AdminHandler.NewChallengeHandler());
     Spark.post("/admin/delete/:challengeid",
         new AdminHandler.DeleteChallengeHandler());
+    Spark.get("/admin/edit/:challengeid",
+        new AdminHandler.ShowChallengeHandler(), freeMarker);
     Spark.post("/namecheck", new AdminHandler.NameCheckHandler());
     Spark.post("/categorycheck", new AdminHandler.CategoryCheckHandler());
     Spark.post("/getallcategories", new AdminHandler.AllCategoriesHandler());

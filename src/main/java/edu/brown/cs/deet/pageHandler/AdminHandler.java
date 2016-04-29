@@ -6,7 +6,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +23,7 @@ import spark.Response;
 import spark.Route;
 import spark.TemplateViewRoute;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
@@ -184,7 +188,25 @@ public final class AdminHandler {
         return GSON.toJson(variables);
       }
     }
+  }
 
+  public static class ShowChallengeHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      String challengeId = req.params(":challengeid");
+      Map<String, Object> variables = null;
+      try {
+        variables = ImmutableMap.of("title", "Edit a Challenge", "info",
+            getChallengeInfo(challengeId), "categories", getAllCategories());
+      } catch (IOException e) {
+        // shouldn't get here?
+        new ExceptionPrinter().handle(e, req, res);
+      } catch (SQLException e) {
+        // shouldn't get here?
+        new ExceptionPrinter().handle(e, req, res);
+      }
+      return new ModelAndView(variables, "editChallenge.ftl");
+    }
   }
 
   /**
@@ -291,12 +313,12 @@ public final class AdminHandler {
    * @throws IOException
    *           If an I/O error occurred with creating a file
    */
-  public static boolean newBasicInfo(String category, String pName,
+  public static boolean newBasicInfo(String category, String challengeId,
       String name, String description) throws SQLException, IOException {
-    String path = "challenges/" + pName;
+    String path = "challenges/" + challengeId;
 
     // check if an insert to the database is successful
-    if (challenges.insertNewChallenge(pName, name, path, category)) {
+    if (challenges.insertNewChallenge(challengeId, name, path, category)) {
       // make the directory for the challenge
       File challengeDir = new File(path);
       challengeDir.mkdir();
@@ -324,7 +346,7 @@ public final class AdminHandler {
    * file may already exist (and will then also skip the creation of the
    * stub.txt file). Therefore, call this ONLY after newBasicInfo is called (and
    * IMMEDIATELY afterwards).
-   * @param pName
+   * @param challengeId
    *          The "path name" of the challenge
    * @param testnames
    *          The names of each of the tests
@@ -345,19 +367,19 @@ public final class AdminHandler {
    * @throws SQLException
    *           When the database screws up
    */
-  public static boolean newTestInfo(String pName, String testnames,
+  public static boolean newTestInfo(String challengeId, String testnames,
       String input, String output, String stub, String language)
       throws IOException, SQLException {
 
-    File directory = new File("challenges/" + pName);
+    File directory = new File("challenges/" + challengeId);
 
     // first checks to see if the directory exists
     if (directory.exists()) {
       // Adding the information to the database
-      challenges.insertTestsForChallenge(pName, language);
+      challenges.insertTestsForChallenge(challengeId, language);
 
       // Make the directory for Language-related stuff
-      String path = "challenges/" + pName + "/" + language;
+      String path = "challenges/" + challengeId + "/" + language;
       File languagePath = new File(path);
 
       if (!languagePath.mkdir()) {
@@ -420,14 +442,15 @@ public final class AdminHandler {
 
   /**
    * Determines if a challenge by a certain name already exists.
-   * @param pName
+   * @param challengeId
    *          the "path name" of the challenge
    * @return True if the challenge already exists, false otherwise.
    * @throws SQLException
    *           if something with the database goes awry
    */
-  public static boolean doesChallengeExist(String pName) throws SQLException {
-    return challenges.doesChallengeExist(pName);
+  public static boolean doesChallengeExist(String challengeId)
+      throws SQLException {
+    return challenges.doesChallengeExist(challengeId);
   }
 
   /**
@@ -458,7 +481,7 @@ public final class AdminHandler {
    * solution tables have the "ON CASCADE DELETE" options on for its
    * "challenge_id" foreign keys. Otherwise, there will be zombie entries
    * leftover in the test and solution tables.
-   * @param challengeName
+   * @param challengeId
    *          the name of the challenge as seen in the challenges directory (NOT
    *          the one seen by a user)
    * @throws SQLException
@@ -467,25 +490,148 @@ public final class AdminHandler {
    *           when there is an error with deleting the directory associated
    *           with the challenge
    */
-  public static void deleteChallenge(String challengeName) throws SQLException,
+  public static void deleteChallenge(String challengeId) throws SQLException,
       IOException {
-    String directory = "challenges/" + challengeName;
+    String directory = "challenges/" + challengeId;
     File challengeDirectory = new File(directory);
 
     // delete the directory that contains all the challenge info
     FileUtils.deleteDirectory(challengeDirectory);
 
     // delete the challenges from the database
-    challenges.deleteChallenge(challengeName);
+    challenges.deleteChallenge(challengeId);
+  }
+
+  /**
+   * Returns all of the information related to a challenge for the edit
+   * challenge handler. This method assumes that the description.txt file
+   * exists. It also assumes that if a directory for the challenge exists then
+   * there is an entry in the challenge table in the database for this
+   * challenge. For other cases, the results of this method are undefined.
+   * @param challengeId
+   *          the name of the challenge as seen in the challenges directory (NOT
+   *          the one seen by a user)
+   * @return A List of a List of Objects where: the first list consists of the
+   *         "basic information" like category, challengeId, actual challenge
+   *         name, and description, in that order, the second list consists of
+   *         all the Java information with test name, input, output, and stub in
+   *         that order, and the third, fourth, and fifth lists contain Python,
+   *         Ruby, and Javascript information, in that order. Returns null if
+   *         the requested challengeId does not exist.
+   * @throws IOException
+   *           when there is an error with deleting the directory associated
+   *           with the challenge
+   * @throws SQLException
+   *           if something with the database goes awry
+   */
+  public static List<List<String>> getChallengeInfo(String challengeId)
+      throws IOException, SQLException {
+    List<List<String>> ret = new ArrayList<>();
+    // GET BASIC INFORMATION
+    String directory = "challenges/" + challengeId;
+    File directoryFile = new File(directory);
+
+    if (directoryFile.exists()) { // if the directory for the challenge exists
+      List<String> basic = new ArrayList<>();
+
+      // Category, challengeId and actual challenge name are assumed to exist
+      List<String> challengeInfo = challenges.getChallenge(challengeId);
+
+      basic.add(challengeInfo.get(3)); // category
+      basic.add(challengeId);
+      basic.add(challengeInfo.get(1)); // real name
+
+      // Description
+      String descriptionFile = directory + "/description.txt";
+      byte[] encoded = Files.readAllBytes(Paths.get(descriptionFile));
+      String encodedString = new String(encoded, Charsets.UTF_8);
+
+      basic.add(encodedString); // description
+
+      ret.add(basic);
+
+      // GET JAVA, PYTHON, RUBY, JAVASCRIPT INFORMATION
+      ret.add(getTestInfo(challengeId, "java"));
+      ret.add(getTestInfo(challengeId, "python"));
+      ret.add(getTestInfo(challengeId, "ruby"));
+      ret.add(getTestInfo(challengeId, "javascript"));
+
+      return ret;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Returns the Test Info for some challenge and language
+   * @param challengeId
+   *          The Id of the challenge
+   * @param language
+   *          The language of the challenge
+   * @return A List of test information information containing test name, input,
+   *         output, and stub in that order, as strings. If the test directory
+   *         does not exist, each entry is an empty String.
+   * @throws IOException
+   *           when there is an error with deleting the directory associated
+   *           with the challenge
+   */
+  private static List<String> getTestInfo(String challengeId, String language)
+      throws IOException {
+    List<String> ret = new ArrayList<>();
+
+    String testPath = "challenges/" + challengeId + "/" + language;
+    File testDirectory = new File(testPath);
+
+    if (testDirectory.exists()) { // get all info if it exists
+      // Test names
+      String testNamePath = testPath + "/testnames.txt";
+      byte[] encoded = Files.readAllBytes(Paths.get(testNamePath));
+      String encodedString = new String(encoded, Charsets.UTF_8);
+
+      ret.add(encodedString);
+
+      // Inputs
+      String inputsPath = testPath + "/input.txt";
+      encoded = Files.readAllBytes(Paths.get(inputsPath));
+      encodedString = new String(encoded, Charsets.UTF_8);
+
+      ret.add(encodedString);
+
+      // Outputs
+      String outputsPath = testPath + "/output.txt";
+      encoded = Files.readAllBytes(Paths.get(outputsPath));
+      encodedString = new String(encoded, Charsets.UTF_8);
+
+      ret.add(encodedString);
+
+      // Stub
+      String stubPath = testPath + "/stub.txt";
+      encoded = Files.readAllBytes(Paths.get(stubPath));
+      encodedString = new String(encoded, Charsets.UTF_8);
+
+      ret.add(encodedString);
+    } else { // otherwise just return empty lists
+      ret.add("");
+      ret.add("");
+      ret.add("");
+      ret.add("");
+    }
+
+    return ret;
   }
 
   public static void main(String[] args) throws SQLException {
     ChallengeDatabase cdb = new ChallengeDatabase(
-        "testdata/deleteChallengeTest.sqlite3");
+        "testdata/challengeDatabaseTester.sqlite3");
     AdminHandler.setChallengeDatabase(cdb);
 
     try {
-      deleteChallenge("delete-test");
+      List<List<String>> res = getChallengeInfo("fib-fast");
+      System.out.println(res.get(0));
+      System.out.println(res.get(1));
+      System.out.println(res.get(2));
+      System.out.println(res.get(3));
+      System.out.println(res.get(4));
     } catch (SQLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
