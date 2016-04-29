@@ -29,13 +29,15 @@
           <div class="page-header" id="title">
             <h2>
               Browse By Category
-              <div class="dropdown pull-right">
-                <select class="selectpicker" data-width="150px" id="filters" title="Filter Options">
-                  <option>Solved</option>
-                  <option>Unsolved</option>
-                  <option>No Filter</option>
-                </select>
-              </div>
+              <#if !isAdmin>
+                <div class="dropdown pull-right">
+                  <select class="selectpicker" data-width="150px" id="filters" title="Filter Options">
+                    <option>Solved</option>
+                    <option>Unsolved</option>
+                    <option>No Filter</option>
+                  </select>
+                </div>
+              </#if>
             </h2>
           </div>
         </div>
@@ -44,50 +46,30 @@
       <div class="row">
         <div class="col-md-10 col-md-offset-1" data-toggle="collapse">
           <div class="list-group categories">
-            <a href="#item-1" class="list-group-item" data-toggle="collapse">
-              <i class="glyphicon glyphicon-chevron-right icon-addon"></i>Item 1
-            </a>
-            <div class="list-group collapse questions" id="item-1">
-              <a href="#" class="list-group-item" data-toggle="collapse">
-                <span class="pull-right">
-                  <button class="leaderboard-button">Leaderboard</button>
-                </span>
-                Sample Solved Problem
+            <#list data?keys as key>
+              <a href="#${key}" class="list-group-item category" data-toggle="collapse">
+                <i class="glyphicon glyphicon-chevron-right icon-addon"></i>${key?capitalize}
               </a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Problem 3</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">
-                <span class="pull-right">
-                  <button class="leaderboard-button">Leaderboard</button>
-                </span>
-                Another Solved Problem
-              </a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Problem 4</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Problem 5</a>
-            </div>
-            <a href="#item-2" class="list-group-item" data-toggle="collapse">
-              <i class="glyphicon glyphicon-chevron-right icon-addon"></i>Item 1
-            </a>
-            <div class="list-group collapse questions" id="item-2">
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-            </div>
-            <a href="#item-3" class="list-group-item" data-toggle="collapse">
-              <i class="glyphicon glyphicon-chevron-right icon-addon"></i>Item 1
-            </a>
-            <div class="list-group collapse questions" id="item-3">
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-              <a href="#" class="list-group-item" data-toggle="collapse">Blah</a>
-            </div>
+              <div class="list-group collapse questions" id="${key}">
+                <#list data[key] as challenge>
+                  <a href="/game/${challenge.id}" class="list-group-item challenge">
+                    <#if isAdmin>
+                      <span class="pull-right">
+                        <button class="edit-button">Edit</button>
+                      </span>
+                      <span class="pull-right">
+                        <button class="delete-button">Delete</button>
+                      </span>
+                    <#elseif challenge.solved == "true">
+                      <span class="pull-right">
+                        <button class="leaderboard-button">Leaderboard</button>
+                      </span>
+                    </#if>
+                    ${challenge.name?capitalize}
+                  </a>
+                </#list>
+              </div>
+            </#list>            
           </div>
         </div>
       </div>

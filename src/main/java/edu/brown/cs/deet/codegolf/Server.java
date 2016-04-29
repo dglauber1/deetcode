@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import spark.Request;
-import spark.Spark;
-import spark.template.freemarker.FreeMarkerEngine;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 import edu.brown.cs.deet.pageHandler.AdminHandler.ExceptionPrinter;
@@ -14,6 +11,9 @@ import edu.brown.cs.deet.pageHandler.GamePageHandlers;
 import edu.brown.cs.deet.pageHandler.LoginHandlers;
 import edu.brown.cs.deet.pageHandler.UserHandler;
 import freemarker.template.Configuration;
+import spark.Request;
+import spark.Spark;
+import spark.template.freemarker.FreeMarkerEngine;
 
 final class Server {
   private static final int PORT = 4567;
@@ -77,27 +77,27 @@ final class Server {
     Spark.post("/add-user", new LoginHandlers.AddUserHandler());
 
     // check authentication before every request
-    // Spark.before((request, response) -> {
-    // String url = request.url();
-    //
-    // Boolean validUser = validCookie(request);
-    //
-    // Boolean staticRequest = url.contains("css") || url.contains("js")
-    // || url.contains("favico");
-    //
-    // Boolean doesntNeedLogin = url.equals("http://localhost:4567/")
-    // || url.equals("http://localhost:4567/fblogin")
-    // || url.equals("http://localhost:4567/add-user");
-    //
-    // Boolean creatingAccount = url.equals("http://localhost:4567/categories")
-    // && (request.session().attribute("adding") != null);
-    //
-    // Boolean badRequest = !validUser && !(staticRequest || doesntNeedLogin);
-    //
-    // if (badRequest && !creatingAccount) {
-    // response.redirect("/");
-    // }
-    // });
+    Spark.before((request, response) -> {
+      String url = request.url();
+
+      Boolean validUser = validCookie(request);
+
+      Boolean staticRequest = url.contains("css") || url.contains("js")
+          || url.contains("favico");
+
+      Boolean doesntNeedLogin = url.equals("http://localhost:4567/")
+          || url.equals("http://localhost:4567/fblogin")
+          || url.equals("http://localhost:4567/add-user");
+
+      Boolean creatingAccount = url.equals("http://localhost:4567/categories")
+          && (request.session().attribute("adding") != null);
+
+      Boolean badRequest = !validUser && !(staticRequest || doesntNeedLogin);
+
+      if (badRequest && !creatingAccount) {
+        response.redirect("/");
+      }
+    });
   }
 
   private static Boolean validCookie(Request request) {

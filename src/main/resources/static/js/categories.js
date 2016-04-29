@@ -1,6 +1,6 @@
 $(function() {
         
-  $('.list-group-item').on('click', function() {
+  $('.category').on('click', function() {
     $('.glyphicon', this)
       .toggleClass('glyphicon-chevron-right')
       .toggleClass('glyphicon-chevron-down');
@@ -41,6 +41,11 @@ $(function() {
         $('#usernameSubmitButton').html('Submit');
       }
     });
+  });
+
+  // not sure why these links don't just click on their own...
+  $('.challenge').click(function(e) {
+    window.location.href = $(e.target).prop('href');
   });
 
   $('#filters').change(function() {

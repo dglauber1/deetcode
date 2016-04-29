@@ -43,7 +43,6 @@ public final class GamePageHandlers {
       .asList(new String[] { "python" });
   private static final MyCompiler pyCompiler = new PyCompiler();
   private static final Runner pyRunner = new PyRunner();
-  private static final Tester pyTester = new PyTester();
   private static final Gson GSON = new Gson();
 
   /**
@@ -241,17 +240,17 @@ public final class GamePageHandlers {
       String language = qm.value("language");
 
       String fileType;
-      Tester myTester;
+      Runner myRunner;
       MyCompiler myCompiler;
       switch (language) {
         case "python":
           fileType = ".py";
-          myTester = pyTester;
+          myRunner = pyRunner;
           myCompiler = pyCompiler;
           break;
         default:
           System.out
-              .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -273,21 +272,21 @@ public final class GamePageHandlers {
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
         String testDir = String.format("challenges/%s/%s", challengeID,
             language);
         long start = System.currentTimeMillis();
-        Collection<List<String>> testResults = myTester.test(file.getPath(),
-            testDir);
+        Collection<List<String>> testResults = Tester.test(file.getPath(),
+            testDir, myRunner);
         long finish = System.currentTimeMillis();
         long time = finish - start; /* in milliseconds */
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("numLines", numLines).put("testResults", testResults)
-            .put("timeToTest", time).build();
+        .put("error", false).put("compiled", "success")
+        .put("numLines", numLines).put("testResults", testResults)
+        .put("timeToTest", time).build();
         return GSON.toJson(variables);
 
       } catch (IOException e) {
@@ -308,7 +307,7 @@ public final class GamePageHandlers {
           Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-              .println("error deleting temporary directory in UserTestsHandler");
+          .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }
@@ -336,7 +335,7 @@ public final class GamePageHandlers {
           break;
         default:
           System.out
-              .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
           Map<String, Object> variables = new ImmutableMap.Builder().put(
               "error", true).build();
           return GSON.toJson(variables);
@@ -354,7 +353,7 @@ public final class GamePageHandlers {
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
           Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          .put("error", false).put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
@@ -368,8 +367,8 @@ public final class GamePageHandlers {
 
         System.out.println("here1");
         Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("runResults", runResults).build();
+        .put("error", false).put("compiled", "success")
+        .put("runResults", runResults).build();
 
         System.out.println("here2");
 
@@ -388,7 +387,7 @@ public final class GamePageHandlers {
           Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-              .println("error deleting temporary directory in UserTestsHandler");
+          .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }
