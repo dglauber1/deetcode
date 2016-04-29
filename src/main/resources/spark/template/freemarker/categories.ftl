@@ -51,7 +51,14 @@
               <div class="list-group collapse questions" id="${key}">
                 <#list data[key] as challenge>
                   <a href="/game/${challenge.id}" class="list-group-item challenge">
-                    <#if challenge.solved == "true">
+                    <#if isAdmin>
+                      <span class="pull-right">
+                        <button class="edit-button">Edit</button>
+                      </span>
+                      <span class="pull-right">
+                        <button class="delete-button">Delete</button>
+                      </span>
+                    <#elseif challenge.solved == "true">
                       <span class="pull-right">
                         <button class="leaderboard-button">Leaderboard</button>
                       </span>

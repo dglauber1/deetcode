@@ -128,6 +128,21 @@ public class UserDatabase implements AutoCloseable {
       }
     }
   }
+  
+  public Boolean isUserAdmin(String id) throws SQLException {
+    String query = "SELECT is_admin FROM user WHERE id = ?;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, id);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return rs.getBoolean(1);
+        }
+
+        return false;
+      }
+    }
+  }
 
   @Override
   public void close() {

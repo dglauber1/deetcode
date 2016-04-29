@@ -69,9 +69,11 @@ public final class LoginHandlers {
             categoryToChallengeMap.put(category, challengeMap);
           }
           
+          Boolean isAdmin = ud.isUserAdmin(id);
+          
           Map<String, Object> variables = ImmutableMap.of("title", "Categories",
               "name", req.cookie("name"), "username", username, "data",
-              categoryToChallengeMap);
+              categoryToChallengeMap, "isAdmin", isAdmin);
           return new ModelAndView(variables, "categories.ftl");
         } catch (SQLException e) {
           e.printStackTrace();
