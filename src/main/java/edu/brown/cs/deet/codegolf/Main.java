@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
@@ -15,6 +16,9 @@ import edu.brown.cs.deet.pageHandler.UserHandler;
  * @author el13
  */
 public class Main {
+  // default database location
+  public static String dbLoc = "data/codegolf.db";
+
   /**
    * Constructs a new Main and runs it.
    * @param args
@@ -44,26 +48,24 @@ public class Main {
    */
   private void run() {
     OptionParser parser = new OptionParser();
-
     parser.accepts("gui");
+    OptionSpec<String> dbSpec = parser.accepts("db").withRequiredArg()
+        .ofType(String.class);
     OptionSet options = parser.parse(args);
+
+    if (options.has(dbSpec)) {
+      dbLoc = options.valueOf(dbSpec);
+    }
 
     if (options.has("gui")) {
       try {
-        AdminHandler.setChallengeDatabase(new ChallengeDatabase(
-            "testdata/challengeDatabaseTester.sqlite3"));
+        AdminHandler.setChallengeDatabase(new ChallengeDatabase(dbLoc));
+        UserHandler.setLeaderboardDatabase(new LeaderboardDatabase(dbLoc));
+        UserHandler.setUserDatabase(new UserDatabase(dbLoc));
       } catch (SQLException e) {
         throw new RuntimeException(e);
       }
-      try {
-        UserHandler.setLeaderboardDatabase(new LeaderboardDatabase(
-            "testdata/challengeDatabaseTester.sqlite3"));
-        UserHandler.setUserDatabase(new UserDatabase(
-            "testdata/challengeDatabaseTester.sqlite3"));
-      } catch (SQLException e) {
-        throw new RuntimeException(e);
-      }
-      Server.runSparkServer();
+      Server.runSparkServer(dbLoc);
     } else {
       REPL.run();
     }
