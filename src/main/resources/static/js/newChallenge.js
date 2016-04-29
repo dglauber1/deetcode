@@ -18,7 +18,8 @@ rubyEditor.setSize('100%', 400);
 rubyEditor.refresh();
 
 var jsArea = $("#jsStub")[0]; 
-var jsEditor = CodeMirror.fromTextArea(jsArea, {lineNumbers: true, 
+var jsEditor = CodeMirror.fromTextArea(jsArea, 
+	{lineNumbers: true, 
 	 lineWrapping: false,
 	 autoRefresh: true,
 	 mode: "javascript"});
@@ -26,7 +27,8 @@ jsEditor.setSize('100%', 400);
 jsEditor.refresh();
 
 var javaArea = $("#javaStub")[0]; 
-var javaEditor = CodeMirror.fromTextArea(javaArea, {lineNumbers: true, 
+var javaEditor = CodeMirror.fromTextArea(javaArea, 
+	{lineNumbers: true, 
 	 lineWrapping: false,
 	 autoRefresh: true,
 	 mode: "text/x-java"});
@@ -158,8 +160,8 @@ $("#newCategory").on('input', function(){
 });
 
 // loads all the current categories into the dropdown
-$(window).load(function() { 
-	console.log(5);
+$(window).load(function() {
+	
 	var postParameters = {};
 
 	$.post("/getallcategories", postParameters, function(responseJSON){
@@ -180,6 +182,9 @@ $(window).load(function() {
         					.attr("value", "Add a new category")
         					.text("Add a new category"));
     });
+
+    javaEditor.refresh();
+	pythonEditor.refresh();
 });
 
 $("#submit").click(function() {
