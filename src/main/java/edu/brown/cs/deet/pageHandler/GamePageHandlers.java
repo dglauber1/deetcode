@@ -27,15 +27,20 @@ import com.google.gson.Gson;
 
 import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.LeaderboardDatabase;
+import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.Tester;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public final class GamePageHandlers {
-
+  // TODO currently set to the test database
+  private static final String dbPath = "testdata/challengeDatabaseTester.sqlite3";
+  private static final List<String> languages = Arrays
+      .asList(new String[] { "python" });
   private static final MyCompiler pyCompiler = new PyCompiler();
   private static final Runner pyRunner = new PyRunner();
   private static final Tester pyTester = new PyTester();
@@ -48,19 +53,13 @@ public final class GamePageHandlers {
   public static class GamePageHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
-      // TODO Currently set to the test database.
-      String dbPath = "testdata/challengeDatabaseTester.sqlite3";
       try (ChallengeDatabase challenges = new ChallengeDatabase(dbPath)) {
-        /*
-         * TODO: This is currently hard-coded in because Tyler and I haven't yet
-         * // set up a system to pass question names/ids from the categories
-         * page // to the game page.
-         */
-        String challengeName = "test";
+        String challengeId = req.params(":challenge-id");
+        // String challengeName = "test";
         String promptPath = null;
         try {
-          if (challenges.doesChallengeExist(challengeName)) {
-            List<String> challengeData = challenges.getChallenge(challengeName);
+          if (challenges.doesChallengeExist(challengeId)) {
+            List<String> challengeData = challenges.getChallenge(challengeId);
             promptPath = challengeData.get(2).concat("/description.txt");
           }
         } catch (SQLException e) {
@@ -68,7 +67,6 @@ public final class GamePageHandlers {
           System.out.println(e.getMessage());
           System.exit(1);
         }
-
         StringBuilder promptBuilder = new StringBuilder();
         try (BufferedReader r = new BufferedReader(new FileReader(promptPath))) {
           String line = r.readLine();
@@ -97,17 +95,95 @@ public final class GamePageHandlers {
   }
 
   /**
-   * Handlers saving the contents of the game page.
+   * Loads user solutions, if available, into the CodeMirror window.
+   * @author el51
+   */
+  public static class LoadSolutionHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      // Obtain username from Facebook id
+      String username = null;
+      try (UserDatabase ud = new UserDatabase(dbPath)) {
+        username = ud.getUsernameFromID(req.cookie("user"));
+      } catch (SQLException e) {
+        e.printStackTrace();
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+      }
+      assert (username != null);
+      username = "el13";
+      QueryParamsMap qm = req.queryMap();
+      String challengeID = qm.value("challengeID");
+      boolean isAttempted = false;
+      String language = null;
+      // Solution is only available if the user has successfully solved
+      // the problem or if time has run out. TODO clarify with group
+      try (LeaderboardDatabase ld = new LeaderboardDatabase(dbPath)) {
+        isAttempted = ld.isChallengeAttempedByUser(challengeID, username);
+        language = ld.getUserChallengeLanguage(challengeID, username);
+      } catch (SQLException e) {
+        e.printStackTrace();
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+      }
+
+      StringBuilder userCode = new StringBuilder();
+      if (isAttempted) {
+        String fileType;
+        switch (language) {
+          case "python":
+            fileType = ".py";
+            break;
+          case "javascript":
+            fileType = ".js";
+            break;
+          default:
+            String msg = "Error in SaveSolutionHandler: "
+                + "language must be either python, ruby, or javascript";
+            Map<String, Object> variables = ImmutableMap.of("status",
+                "FAILURE", "message", msg);
+            return GSON.toJson(variables);
+        }
+        File file = new File(String.format("challenges/%s/%s/solutions/%s",
+            challengeID, language, username + fileType));
+
+        try (BufferedReader rd = new BufferedReader(new FileReader(file))) {
+          String line = rd.readLine();
+          while (line != null) {
+            userCode.append(line).append("\n");
+            line = rd.readLine();
+          }
+        } catch (FileNotFoundException e) {
+          return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+              e.getMessage()));
+        } catch (IOException e) {
+          return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+              e.getMessage()));
+        }
+      }
+
+      return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
+          userCode.toString()));
+    }
+  }
+
+  /**
+   * Handles saving the contents of the game page.
    * @author el51
    */
   public static class SaveSolutionHandler implements Route {
     @Override
     public Object handle(Request req, Response res) {
-      System.out.println("hi");
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
-      System.out.println(challengeID);
-      String username = req.cookie("user");
+      String username = null;
+      try (UserDatabase ud = new UserDatabase(dbPath)) {
+        username = ud.getUsernameFromID(req.cookie("user"));
+      } catch (SQLException e) {
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+      }
+      // assert (username != null);
       // TODO currently hardcoding a username because tyler hasn't yet written
       // the code to populate the user table
       username = "el13";
@@ -117,9 +193,7 @@ public final class GamePageHandlers {
       int numLines = Integer.parseInt(qm.value("numLines"));
       double timeToSolve = Double.parseDouble(qm.value("timeToSolve"));
       int aggregate = Integer.parseInt(qm.value("aggregate"));
-      System.out.println("hi8");
       // TODO Currently set to the test database.
-      String dbPath = "testdata/challengeDatabaseTester.sqlite3";
       try (LeaderboardDatabase ld = new LeaderboardDatabase(dbPath)) {
         ld.addSolution(challengeID, username, passed, efficiency, numLines,
             timeToSolve, aggregate, language);
@@ -127,7 +201,6 @@ public final class GamePageHandlers {
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
             e.getMessage()));
       }
-      System.out.println("bye");
       String fileType;
       switch (language) {
         case "python":
@@ -141,16 +214,13 @@ public final class GamePageHandlers {
           return GSON.toJson(variables);
       }
 
-      System.out.println(username);
       String fileName = username + fileType;
       File file = new File(String.format("challenges/%s/%s/solutions/%s",
           challengeID, language, fileName));
-      System.out.println("blah");
       try (PrintWriter printWriter = new PrintWriter(file)) {
         String code = qm.value("input");
         printWriter.print(code);
         printWriter.close();
-        System.out.println("ha");
       } catch (FileNotFoundException e) {
         String msg = "Error in SaveSolutionHandler: File not found.";
         Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",

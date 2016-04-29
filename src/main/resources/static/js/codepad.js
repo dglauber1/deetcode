@@ -1,8 +1,28 @@
-$.getScript("codemirror/lib/codemirror.js");
-$.getScript("codemirror/mode/javascript/javascript.js");
+$.getScript("/codemirror/lib/codemirror.js");
+$.getScript("/codemirror/mode/javascript/javascript.js");
+
+//parsing URL to get challenge ID
+//note: hardcoding this value later on for now until tyler and i resolve formatting
+var url = document.URL.replace("http://", "");
+url = url.substr(url.indexOf("/") + 1);
+var challengeID = url.substr(url.indexOf("/") + 1);
 
 var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("codepad"), {
-    lineNumbers: true
+    lineNumbers: true,
+    mode: "python",
+});
+
+var loadParameters = {"challengeID" : challengeID};
+$.post("/load", loadParameters, function (responseJSON) {
+	var responseObject = JSON.parse(responseJSON);
+	if (responseObject.status != "SUCCESS") {
+		vex.dialog.alert("Error: " + responseObject.message);
+	} else {
+		var stub = responseObject.code;
+		console.log("here");
+		console.log(stub);
+		myCodeMirror.getDoc().setValue(stub);
+	}
 });
 
 //Run Code Script
@@ -10,18 +30,7 @@ $('input[type=submit]').click(function(e) {
 	vex.dialog.buttons.YES.text = "OK"; // Need to reinitialize this every click (sometimes it's set to "Submit to Leaderboard!")
    	var timeLeft = $("#CountDownTimer").TimeCircles().getTime();
    	var isTimeOver = (timeLeft <= 0);
-   	
-   	// parsing URL to get challenge ID
-   	// note: hardcoding this value later on for now until tyler and i resolve formatting
-    var url = document.URL.replace("http://", "");
-    url = url.substr(url.indexOf("/") + 1);
-    var challengeID = url.indexOf("game" + 1);
-    
-    // temporary hard coding of challengeID!
-    challengeID = "add-one";
-    
-    console.log(challengeID);
-    
+        
    	// note: separate on new line?
    	var userTests = $("#userInput")[0].value;
    	var userCode = myCodeMirror.getValue();

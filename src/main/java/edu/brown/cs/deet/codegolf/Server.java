@@ -51,7 +51,8 @@ final class Server {
     FreeMarkerEngine freeMarker = createEngine();
 
     // Setup Spark Routes
-    Spark.get("/game", new GamePageHandlers.GamePageHandler(), freeMarker);
+    Spark.get("/game/:challenge-id", new GamePageHandlers.GamePageHandler(),
+        freeMarker);
     Spark.get("/admin/add", new AdminHandler.AdminAddHandler(), freeMarker);
     Spark.get("/user/:username", new UserHandler.UserPageHandler(), freeMarker);
     /*
@@ -67,6 +68,7 @@ final class Server {
     Spark.post("/getallcategories", new AdminHandler.AllCategoriesHandler());
     Spark.post("/game/usertests", new GamePageHandlers.UserTestsHandler());
     Spark.post("/game/deettests", new GamePageHandlers.DeetTestsHandler());
+    Spark.post("/load", new GamePageHandlers.LoadSolutionHandler());
     Spark.post("/save", new GamePageHandlers.SaveSolutionHandler());
     Spark.get("/categories", new LoginHandlers.CategoriesHandler(), freeMarker);
     Spark.get("/", new LoginHandlers.HomePageHandler(), freeMarker);

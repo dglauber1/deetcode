@@ -6,15 +6,15 @@
     <!-- In real-world webapps, css is usually minified and
          concatenated. Here, separate normalize from our code, and
          avoid minification for clarity. -->
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/html5bp.css">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-	<link href="css/simple-sidebar.css" rel="stylesheet">       
-    <link rel="stylesheet" href="css/TimeCircles.css" />
-	<link rel="stylesheet" href="codemirror/lib/codemirror.css">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="vex-2.2.1/css/vex.css"/>
-  	<link rel="stylesheet" href="vex-2.2.1/css/vex-theme-os.css"/>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/html5bp.css">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/css/simple-sidebar.css" rel="stylesheet">       
+    <link rel="stylesheet" href="/css/TimeCircles.css" />
+	<link rel="stylesheet" href="/codemirror/lib/codemirror.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/vex-2.2.1/css/vex.css"/>
+  	<link rel="stylesheet" href="/vex-2.2.1/css/vex-theme-os.css"/>
   </head>
   
   <body>
@@ -63,11 +63,11 @@
     <!-- /#wrapper -->
      
      <!-- Again, we're serving up the unminified source for clarity. -->
-     <script src="js/jquery-2.1.1.js"></script>
-     <script type="text/javascript" src="js/TimeCircles.js"></script>
-     <script src="codemirror/lib/codemirror.js"></script>
-   	 <script src="codemirror/mode/javascript/javascript.js"></script>
-   	 <script src="vex-2.2.1/js/vex.combined.min.js"></script>
+     <script src="/js/jquery-2.1.1.js"></script>
+     <script type="text/javascript" src="/js/TimeCircles.js"></script>
+     <script src="/codemirror/lib/codemirror.js"></script>
+   	 <script src="/codemirror/mode/javascript/javascript.js"></script>
+   	 <script src="/vex-2.2.1/js/vex.combined.min.js"></script>
   	 <script>vex.defaultOptions.className = 'vex-theme-os';</script>
   	 
      <!-- Menu Toggle Script -->
@@ -78,16 +78,18 @@
 	     });
      </script>
      
+     <!-- Load stub into the code editor -->
+     <script>
+     	<!-- Combine with the one below -->
+     </script>
+     
      <!-- Load User's progress into code editor -->
      <script>
      </script>
+	
      
-     <!-- Save user's progress when the user leaves/refreshes the page -->
-     <script>
-     </script>
-     
-   	 <script src="js/main.js"></script>
-     <script src="js/timer.js"></script>
-     <script src="js/codepad.js"></script>
+   	 <script src="/js/main.js"></script>
+     <script src="/js/timer.js"></script>
+     <script src="/js/codepad.js"></script>
   </body>
 </html>
