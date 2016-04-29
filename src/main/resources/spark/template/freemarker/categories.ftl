@@ -44,6 +44,31 @@
       <div class="row">
         <div class="col-md-10 col-md-offset-1" data-toggle="collapse">
           <div class="list-group categories">
+
+            <#list data?keys as key>
+              <a href="#${key}" class="list-group-item" data-toggle="collapse">
+                <i class="glyphicon glyphicon-chevron-right icon-addon"></i>${key?capitalize}
+              </a>
+              <div class="list-group collapse questions" id="${key}">
+                <#list data[key] as challenge>
+                  <a href="/game/${challenge.id}" class="list-group-item" data-toggle="collapse">
+                    <#if challenge.solved == "true">
+                      <span class="pull-right">
+                        <button class="leaderboard-button">Leaderboard</button>
+                      </span>
+                    </#if>
+                    ${challenge.name?capitalize}
+                  </a>
+                </#list>
+              </div>
+            </#list>            
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="row">
+        <div class="col-md-10 col-md-offset-1" data-toggle="collapse">
+          <div class="list-group categories">
             <a href="#item-1" class="list-group-item" data-toggle="collapse">
               <i class="glyphicon glyphicon-chevron-right icon-addon"></i>Item 1
             </a>
@@ -90,7 +115,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <div id="signupModal" class="modal fade" role="dialog" tabindex="-1" data-backdrop="static" data-keyboard="false">
