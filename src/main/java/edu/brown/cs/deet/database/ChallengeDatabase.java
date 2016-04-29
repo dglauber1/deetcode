@@ -6,7 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Contains all SQL queries related to the challenge and test tables of the
@@ -225,6 +227,41 @@ public class ChallengeDatabase implements AutoCloseable {
         }
       }
       return categories;
+    }
+  }
+  
+
+  public List<Map<String, String>> categoryToChallenges(String category)
+      throws SQLException {
+    String query = "SELECT question_id, question_name FROM challenge WHERE "
+        + "category=?;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, category);
+      try (ResultSet rs = ps.executeQuery()) {
+        List<Map<String, String>> challenges = new ArrayList<>();
+        while (rs.next()) {
+          Map<String, String> singleChallenge = new HashMap<>();
+          singleChallenge.put("id", rs.getString(1));
+          singleChallenge.put("name", rs.getString(2));
+          challenges.add(singleChallenge);
+        }
+        return challenges;
+      }
+    }
+  }
+  
+  public Boolean hasUserSolvedChallenge(String username, String challenge_id)
+      throws SQLException {
+    String query = "SELECT * FROM solution WHERE challenge_id=? AND username=? "
+        + "AND passed=?;";
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, challenge_id);
+      ps.setString(2, username);
+      ps.setBoolean(3, true);
+      try (ResultSet rs = ps.executeQuery()) {
+        return rs.next();
+      }
     }
   }
 

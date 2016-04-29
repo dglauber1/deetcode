@@ -97,11 +97,13 @@ public class UserDatabase implements AutoCloseable {
 
   public String getUsernameFromID(String id) throws SQLException {
     String query = "SELECT DISTINCT username FROM user WHERE id = ?;";
-
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, id);
       try (ResultSet rs = ps.executeQuery()) {
-        return rs.getString(1);
+        if (rs.next()) {
+          return rs.getString(1);
+        }
+        return null;
       }
     }
   }
@@ -125,6 +127,21 @@ public class UserDatabase implements AutoCloseable {
         }
 
         return null;
+      }
+    }
+  }
+  
+  public Boolean isUserAdmin(String id) throws SQLException {
+    String query = "SELECT is_admin FROM user WHERE id = ?;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, id);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return rs.getBoolean(1);
+        }
+
+        return false;
       }
     }
   }

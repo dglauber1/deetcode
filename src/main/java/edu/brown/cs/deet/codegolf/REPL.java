@@ -11,8 +11,12 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import edu.brown.cs.deet.execution.MyCompiler;
+import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.Tester;
+import edu.brown.cs.deet.execution.javascript.JSCompiler;
+import edu.brown.cs.deet.execution.javascript.JSRunner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
+import edu.brown.cs.deet.execution.python.PyRunner;
 import edu.brown.cs.deet.execution.python.PyTester;
 
 /**
@@ -36,7 +40,9 @@ public final class REPL {
     }
     String input = "";
     MyCompiler pyCompiler = new PyCompiler();
-    Tester pyTester = new PyTester();
+    Runner pyRunner = new PyRunner();
+    MyCompiler jsCompiler = new JSCompiler();
+    Runner jsRunner = new JSRunner();
     try (BufferedReader reader = new BufferedReader(inputReader)) {
       while ((input = reader.readLine()) != null) {
         if (input.length() == 0) {
@@ -51,12 +57,16 @@ public final class REPL {
           continue;
         }
         String language = parsedInput.get(0);
-        Tester myTester;
+        Runner myRunner;
         MyCompiler myCompiler;
         switch (language) {
           case "python":
-            myTester = pyTester;
+            myRunner = pyRunner;
             myCompiler = pyCompiler;
+            break;
+          case "javascript":
+            myCompiler = jsCompiler;
+            myRunner = jsRunner;
             break;
           default:
             System.out
@@ -73,7 +83,7 @@ public final class REPL {
         String testDir = parsedInput.get(2);
         Collection<List<String>> testResults;
         try {
-          testResults = myTester.test(solutionPath, testDir);
+          testResults = Tester.test(solutionPath, testDir, myRunner);
         } catch (Exception e) {
           System.out.println(String.format(
               "ERROR: error occurred running %s on test directory %s",

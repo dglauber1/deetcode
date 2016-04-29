@@ -47,6 +47,59 @@ public class LeaderboardDatabase implements AutoCloseable {
   }
 
   /**
+   * Returns whether or not a challenge has been attempted by a user.
+   * @param cID
+   *          - the ID of the challenge.
+   * @param uID
+   *          - the username of the user.
+   * @return true if the challenge was attempted, false otherwise
+   * @throws SQLException
+   */
+  public boolean isChallengeAttempedByUser(String cID, String uID)
+      throws SQLException {
+    String query = "SELECT * FROM solution WHERE username = ? "
+        + "AND challenge_id = ?;";
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, uID);
+      ps.setString(2, cID);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          // User has attempted the challenge
+          return true;
+        }
+        // User has not attempted the challenge
+        return false;
+      }
+    }
+  }
+
+  /**
+   * Returns the language that a user used to solve a challenge.
+   * @param cID
+   *          - the challenge ID.
+   * @param uID
+   *          - the user ID.
+   * @return the language that the user used, or null if the challenge/user
+   *         wasn't in the database
+   * @throws SQLException
+   */
+  public String getUserChallengeLanguage(String cID, String uID)
+      throws SQLException {
+    String query = "SELECT DISTINCT language FROM solution WHERE username = ? "
+        + "AND challenge_id = ?;";
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, uID);
+      ps.setString(2, cID);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return rs.getString(1);
+        }
+        return null;
+      }
+    }
+  }
+
+  /**
    * Gets all the solution information for a specific user.
    * @param qName
    *          the username of the user

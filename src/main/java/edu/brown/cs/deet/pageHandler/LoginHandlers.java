@@ -8,40 +8,75 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import edu.brown.cs.deet.database.ChallengeDatabase;
+import edu.brown.cs.deet.database.UserDatabase;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 import spark.TemplateViewRoute;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import edu.brown.cs.deet.database.UserDatabase;
-
 public final class LoginHandlers {
 
   private static String appID = "1559408461020162";
   private static String loginRedirectURL = "http://localhost:4567/fblogin";
   private static String appSecret = "9ffcf58f5f448a3e9e723537c476b5eb";
-  private static final String dbPath = "data/codegolf.db";
+  private static final String dbPath = "testdata/challengeDatabaseTester.sqlite3";
   private static final Gson GSON = new Gson();
 
   public static class CategoriesHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
 
-      String username = "Not yet defined";
-      try (UserDatabase ud = new UserDatabase(dbPath)) {
+      String username = "";
+      try (UserDatabase ud = new UserDatabase(dbPath);
+          ChallengeDatabase cd = new ChallengeDatabase(dbPath)) {
         String id = req.cookie("user");
         try {
+          Boolean addingNewUser = true;
+          // get all the categories
+          List<String> categories = cd.getAllCategories();
+
+          // map from categories to lists of challenge maps
+          Map<String, List<Map<String, String>>> categoryToChallengeMap =
+              new HashMap<>();
+          
           if (ud.doesUserExistWithID(id)) {
-            username = ud.getUsernameFromID(req.cookie("user"));
+            username = ud.getUsernameFromID(id);
+            addingNewUser = false;
           }
+
+          for (String category : categories) {
+            // get all the challenges for a given category
+            List<Map<String, String>> challengeMap =
+                cd.categoryToChallenges(category);
+            for (Map<String, String> challenge : challengeMap) {
+              if (addingNewUser) {
+                challenge.put("solved", "false");
+              } else {
+                challenge.put("solved",
+                  cd.hasUserSolvedChallenge(username, challenge.get("id")).toString());
+              }
+            }
+            categoryToChallengeMap.put(category, challengeMap);
+          }
+          
+          Boolean isAdmin = ud.isUserAdmin(id);
+          
+          Map<String, Object> variables = ImmutableMap.of("title", "Categories",
+              "name", req.cookie("name"), "username", username, "data",
+              categoryToChallengeMap, "isAdmin", isAdmin);
+          return new ModelAndView(variables, "categories.ftl");
         } catch (SQLException e) {
+          e.printStackTrace();
           System.out.println(e.getMessage());
           System.exit(1);
         }
@@ -50,10 +85,7 @@ public final class LoginHandlers {
         System.out.println(e1.getMessage());
         System.exit(1);
       }
-
-      Map<String, Object> variables = ImmutableMap.of("title", "Categories",
-          "name", req.cookie("name"), "username", username);
-      return new ModelAndView(variables, "categories.ftl");
+      return null;
     }
   }
 
