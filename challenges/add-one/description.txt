@@ -1,0 +1,1 @@
+Write code that increments a given number by 1.
