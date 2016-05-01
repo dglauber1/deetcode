@@ -25,10 +25,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
-import edu.brown.cs.deet.codegolf.Main;
 import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
+import edu.brown.cs.deet.deetcode.Main;
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.Tester;

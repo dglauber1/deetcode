@@ -1,4 +1,4 @@
-package edu.brown.cs.deet.codegolf;
+package edu.brown.cs.deet.deetcode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
