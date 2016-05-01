@@ -152,7 +152,7 @@ public class ChallengeDatabase implements AutoCloseable {
       String qPath, String qCategory) throws SQLException {
 
     // check if pName already exists or not
-    if (doesChallengeExist(pName)) {
+    if (doesChallengeExist(pName) && !origPName.equals(pName)) {
       return false;
     }
 
@@ -229,7 +229,6 @@ public class ChallengeDatabase implements AutoCloseable {
       return categories;
     }
   }
-  
 
   public List<Map<String, String>> categoryToChallenges(String category)
       throws SQLException {
@@ -250,7 +249,7 @@ public class ChallengeDatabase implements AutoCloseable {
       }
     }
   }
-  
+
   public Boolean hasUserSolvedChallenge(String username, String challenge_id)
       throws SQLException {
     String query = "SELECT * FROM solution WHERE challenge_id=? AND username=? "

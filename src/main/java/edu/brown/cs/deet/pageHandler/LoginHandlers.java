@@ -29,7 +29,7 @@ public final class LoginHandlers {
   private static String appID = "1559408461020162";
   private static String loginRedirectURL = "http://localhost:4567/fblogin";
   private static String appSecret = "9ffcf58f5f448a3e9e723537c476b5eb";
-  private static final String dbPath = "testdata/challengeDatabaseTester.sqlite3";
+  private static final String dbPath = "challengeDatabaseTester.sqlite3";
   private static final Gson GSON = new Gson();
 
   public static class CategoriesHandler implements TemplateViewRoute {

@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -190,14 +192,114 @@ public final class AdminHandler {
     }
   }
 
+  /**
+   * Handler that edits a challenge.
+   * @author eddie
+   */
+  public static class EditChallengeHandler implements Route {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+
+      // Basic info
+      String category = GSON.fromJson(qm.value("category"), String.class);
+      String pName = GSON.fromJson(qm.value("pName"), String.class);
+      String origPName = GSON.fromJson(qm.value("origPName"), String.class);
+      String name = GSON.fromJson(qm.value("name"), String.class);
+      String description = GSON.fromJson(qm.value("description"), String.class);
+
+      Boolean success = false;
+
+      try {
+        success = editBasicInfo(category, pName, name, description, origPName);
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      } catch (IOException e) {
+        new ExceptionPrinter().handle(e, req, res);
+      }
+
+      // Java test cases and stub code
+      if (success) {
+        String javaTestnames = GSON.fromJson(qm.value("javaTestName"),
+            String.class);
+        String javaInput = GSON.fromJson(qm.value("javaInput"), String.class);
+        String javaOutput = GSON.fromJson(qm.value("javaOutput"), String.class);
+        String javaStub = GSON.fromJson(qm.value("javaStub"), String.class);
+
+        // Python test cases and stub code
+        String pythonTestnames = GSON.fromJson(qm.value("pythonTestName"),
+            String.class);
+        String pythonInput = GSON.fromJson(qm.value("pythonInput"),
+            String.class);
+        String pythonOutput = GSON.fromJson(qm.value("pythonOutput"),
+            String.class);
+        String pythonStub = GSON.fromJson(qm.value("pythonStub"), String.class);
+
+        // Ruby test cases and stub code
+        String rubyTestnames = GSON.fromJson(qm.value("rubyTestName"),
+            String.class);
+        String rubyInput = GSON.fromJson(qm.value("rubyInput"), String.class);
+        String rubyOutput = GSON.fromJson(qm.value("rubyOutput"), String.class);
+        String rubyStub = GSON.fromJson(qm.value("rubyStub"), String.class);
+
+        // Javascript test cases and stub code
+        String jsTestnames = GSON
+            .fromJson(qm.value("jsTestName"), String.class);
+        String jsInput = GSON.fromJson(qm.value("jsInput"), String.class);
+        String jsOutput = GSON.fromJson(qm.value("jsOutput"), String.class);
+        String jsStub = GSON.fromJson(qm.value("jsStub"), String.class);
+
+        try {
+          // putting all of the code into the directory, but only if something
+          // was entered for those fields on the page
+          if (!javaInput.equals("")) {
+            editTestInfo(pName, javaTestnames, javaInput, javaOutput, javaStub,
+                "java");
+          }
+
+          if (!pythonInput.equals("")) {
+            editTestInfo(pName, pythonTestnames, pythonInput, pythonOutput,
+                pythonStub, "python");
+          }
+
+          if (!rubyInput.equals("")) {
+            editTestInfo(pName, rubyTestnames, rubyInput, rubyOutput, rubyStub,
+                "ruby");
+          }
+
+          if (!jsInput.equals("")) {
+            editTestInfo(pName, jsTestnames, jsInput, jsOutput, jsStub,
+                "javascript");
+          }
+        } catch (IOException e) {
+          new ExceptionPrinter().handle(e, req, res);
+        } catch (SQLException e) {
+          new ExceptionPrinter().handle(e, req, res);
+        }
+      }
+
+      Map<String, Object> variables = new ImmutableMap.Builder().put("success",
+          success).build();
+      return GSON.toJson(variables);
+    }
+  }
+
+  /**
+   * Handles showing all challenge information when editing one.
+   * @author eddie
+   */
   public static class ShowChallengeHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
       String challengeId = req.params(":challengeid");
       Map<String, Object> variables = null;
       try {
-        variables = ImmutableMap.of("title", "Edit a Challenge", "info",
-            getChallengeInfo(challengeId), "categories", getAllCategories());
+        Map<String, Object> orig = new HashMap<>();
+        orig.put("title", "Edit a Challenge");
+        orig.put("info", getChallengeInfo(challengeId));
+        orig.put("categories", getAllCategories());
+        variables = Collections.unmodifiableMap(orig);
       } catch (IOException e) {
         // shouldn't get here?
         new ExceptionPrinter().handle(e, req, res);
@@ -205,6 +307,7 @@ public final class AdminHandler {
         // shouldn't get here?
         new ExceptionPrinter().handle(e, req, res);
       }
+      System.out.println(variables);
       return new ModelAndView(variables, "editChallenge.ftl");
     }
   }
@@ -441,6 +544,124 @@ public final class AdminHandler {
   }
 
   /**
+   * Edits the basic information for a challenge in the directories and in the
+   * database.
+   * @param category
+   *          The (new) category
+   * @param challengeId
+   *          The (new) challengeId
+   * @param name
+   *          The (new) name
+   * @param description
+   *          The (new) description
+   * @param originalChallengeId
+   *          The old challengeId
+   * @return True if successfully edited, false otherwise.
+   * @throws IOException
+   *           when there is an issue writing to the description.txt file
+   * @throws SQLException
+   *           when something goes awry with the database in editing the
+   *           challenge
+   */
+  public static boolean editBasicInfo(String category, String challengeId,
+      String name, String description, String originalChallengeId)
+      throws IOException, SQLException {
+    String newChallengeDir = "challenges/" + challengeId;
+
+    if (challenges.editChallenge(originalChallengeId, challengeId, name,
+        newChallengeDir, category)) {
+      // rename to new name (does this even if the id name is the same as
+      // before)
+      String origChallengeDir = "challenges/" + originalChallengeId;
+
+      File origDir = new File(origChallengeDir);
+      File newDir = new File(newChallengeDir);
+
+      origDir.renameTo(newDir);
+
+      File challengeDesc = new File(newChallengeDir + "/description.txt");
+
+      try (BufferedWriter bw = new BufferedWriter(new FileWriter(challengeDesc))) {
+        bw.write(description);
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Edits Test Info for a challenge. If a directory for a specifically language
+   * for that test already exists, then the test info is updated per the user's
+   * entry.
+   * @param challengeId
+   *          The new ID of the challenge
+   * @param testnames
+   *          All the test names
+   * @param input
+   *          All the inputs
+   * @param output
+   *          All the outputs
+   * @param stub
+   *          The stub code
+   * @param language
+   *          The language of the test
+   * @return True if successfully changed or added, false otherwise.
+   * @throws IOException
+   *           If there is an issue writing to some file.
+   * @throws SQLException
+   *           If the database goes awry with adding to the Test table, if an
+   *           add was necessary.
+   */
+  public static boolean editTestInfo(String challengeId, String testnames,
+      String input, String output, String stub, String language)
+      throws IOException, SQLException {
+    File directory = new File("challenges/" + challengeId);
+
+    if (directory.exists()) {
+      String path = "challenges/" + challengeId + "/" + language;
+      File languagePath = new File(path);
+
+      if (languagePath.exists()) { // this challenge already supported this new
+                                   // language
+        // Overwrite the testnames file
+        File testnamesFile = new File(path + "/testnames.txt");
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(
+            testnamesFile))) {
+          bw.write(testnames);
+        }
+
+        // Overwrite the input file
+        File inputFile = new File(path + "/input.txt");
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(inputFile))) {
+          bw.write(input);
+        }
+
+        // Overwrite the output file
+        File outputFile = new File(path + "/output.txt");
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile))) {
+          bw.write(output);
+        }
+
+        // Overwrite the stub file
+        File stubFile = new File(path + "/stub.txt");
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(stubFile))) {
+          bw.write(stub);
+        }
+      } else { // this challenge now supports this new language
+        newTestInfo(challengeId, testnames, input, output, stub, language);
+      }
+
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Determines if a challenge by a certain name already exists.
    * @param challengeId
    *          the "path name" of the challenge
@@ -540,6 +761,7 @@ public final class AdminHandler {
       basic.add(challengeInfo.get(3)); // category
       basic.add(challengeId);
       basic.add(challengeInfo.get(1)); // real name
+      System.out.println(basic);
 
       // Description
       String descriptionFile = directory + "/description.txt";

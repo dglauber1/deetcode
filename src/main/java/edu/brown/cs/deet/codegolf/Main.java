@@ -17,7 +17,7 @@ import edu.brown.cs.deet.pageHandler.UserHandler;
  */
 public class Main {
   // default database location
-  public static String dbLoc = "data/codegolf.db";
+  public static String dbLoc = "challengeDatabaseTester.sqlite3";
 
   /**
    * Constructs a new Main and runs it.
@@ -65,7 +65,9 @@ public class Main {
       } catch (SQLException e) {
         throw new RuntimeException(e);
       }
-      Server.runSparkServer(dbLoc);
+//      Server.runSparkServer(dbLoc);
+      System.out.println(dbLoc);
+      Server.runSparkServer();
     } else {
       REPL.run();
     }

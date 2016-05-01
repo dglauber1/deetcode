@@ -7,7 +7,7 @@
     <li><a data-toggle="tab" href="#python">Python</a></li>
     <li><a data-toggle="tab" href="#ruby">Ruby</a></li>
     <li><a data-toggle="tab" href="#javascript">Javascript</a></li>
-    <li><a data-toggle="tab" href="#submit">Submit</a></li>
+    <li><a data-toggle="tab" href="#submitChallenge">Submit</a></li>
   </ul>
 
   <div class="tab-content">
@@ -97,6 +97,10 @@
       </div>
 
       <div class="row">
+        <div class="col-xs-6 col-md-12" id="pythonError"></div>
+      </div>
+
+      <div class="row">
         <div class="col-md-12">
           <h4>Stub Code (in Python):</h4>
           <textarea class="form-control" id="pythonStub"></textarea>
@@ -118,6 +122,10 @@
             <h4>Test Output (one per line):</h4>
             <textarea class="form-control" id="rubyOutput" rows="4"></textarea>
         </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-6 col-md-12" id="rubyError"></div>
       </div>
 
       <div class="row">
@@ -145,6 +153,10 @@
       </div>
 
       <div class="row">
+        <div class="col-xs-6 col-md-12" id="jsError"></div>
+      </div>
+
+      <div class="row">
         <div class="col-md-12">
           <h4>Stub Code (in JavaScript):</h4>
           <textarea class="form-control" id="jsStub"></textarea>
@@ -169,6 +181,10 @@
       </div>
 
       <div class="row">
+        <div class="col-xs-6 col-md-12" id="javaError"></div>
+      </div>
+
+      <div class="row">
         <div class="col-md-12">
           <h4>Stub Code (in Java):</h4>
           <textarea class="form-control" id="javaStub"></textarea>
@@ -176,7 +192,7 @@
       </div>  
     </div>
 
-    <div id="submit" class="tab-pane fade">
+    <div id="submitChallenge" class="tab-pane fade">
       <div class="row">
         <div class="col-xs-2 col-md-2"></div>
         <div class="col-xs-8 col-md-8">
