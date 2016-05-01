@@ -7,5 +7,5 @@ local.properties
 target
 .project
 /target/
-./data/**
-./testdata/**
+data/**
+testdata/**
