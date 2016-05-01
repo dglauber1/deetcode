@@ -7,7 +7,5 @@ local.properties
 target
 .project
 /target/
-testdata/challengeDatabaseTester.sqlite3
-/data/*
-/data/codegolf.db
-
+./data/**
+./testdata/**
