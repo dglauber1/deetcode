@@ -18,6 +18,7 @@ import com.google.gson.reflect.TypeToken;
 
 import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
+import edu.brown.cs.deet.deetcode.Main;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
@@ -29,7 +30,7 @@ public final class LoginHandlers {
   private static String appID = "1559408461020162";
   private static String loginRedirectURL = "http://localhost:4567/fblogin";
   private static String appSecret = "9ffcf58f5f448a3e9e723537c476b5eb";
-  private static final String dbPath = "challengeDatabaseTester.sqlite3";
+  private static final String dbPath = Main.dbLoc;
   private static final Gson GSON = new Gson();
 
   public static class CategoriesHandler implements TemplateViewRoute {

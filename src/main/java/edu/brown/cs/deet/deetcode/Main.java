@@ -2,14 +2,14 @@ package edu.brown.cs.deet.deetcode;
 
 import java.sql.SQLException;
 
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
 import edu.brown.cs.deet.pageHandler.UserHandler;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
 /**
  * Main class that launches Codegolf.
@@ -65,7 +65,6 @@ public class Main {
       } catch (SQLException e) {
         throw new RuntimeException(e);
       }
-//      Server.runSparkServer(dbLoc);
       System.out.println(dbLoc);
       Server.runSparkServer();
     } else {
