@@ -17,10 +17,10 @@ import edu.brown.cs.deet.execution.javascript.JSCompiler;
 import edu.brown.cs.deet.execution.javascript.JSRunner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
-import edu.brown.cs.deet.execution.python.PyTester;
 
 /**
  * Class to allow command line repl testing of codegolf project.
+ * 
  * @author dglauber
  */
 public final class REPL {
@@ -35,7 +35,7 @@ public final class REPL {
       inputReader = new InputStreamReader(System.in, "UTF-8");
     } catch (UnsupportedEncodingException e1) {
       System.out.println("ERROR: Encoding excpetion during read from "
-          + "standard input.");
+        + "standard input.");
       return;
     }
     String input = "";
@@ -48,11 +48,12 @@ public final class REPL {
         if (input.length() == 0) {
           break;
         }
-        List<String> parsedInput = Lists.newArrayList(Splitter.onPattern("\\s")
-            .trimResults().omitEmptyStrings().split(input));
+        List<String> parsedInput =
+          Lists.newArrayList(Splitter.onPattern("\\s").trimResults()
+            .omitEmptyStrings().split(input));
         if (parsedInput.size() != 3) {
           System.out.println("Please enter an input of the following form: "
-              + "language path/to/solution.file path/to/test/directory");
+            + "language path/to/solution.file path/to/test/directory");
           System.out.println();
           continue;
         }
@@ -60,19 +61,19 @@ public final class REPL {
         Runner myRunner;
         MyCompiler myCompiler;
         switch (language) {
-          case "python":
-            myRunner = pyRunner;
-            myCompiler = pyCompiler;
-            break;
-          case "javascript":
-            myCompiler = jsCompiler;
-            myRunner = jsRunner;
-            break;
-          default:
-            System.out
-            .println("language must be either python, ruby, or javascript");
-            System.out.println();
-            continue;
+        case "python":
+          myRunner = pyRunner;
+          myCompiler = pyCompiler;
+          break;
+        case "javascript":
+          myCompiler = jsCompiler;
+          myRunner = jsRunner;
+          break;
+        default:
+          System.out
+          .println("language must be either python, ruby, or javascript");
+          System.out.println();
+          continue;
         }
         String solutionPath = parsedInput.get(1);
         String compileMessage = myCompiler.compile(solutionPath);
@@ -86,8 +87,8 @@ public final class REPL {
           testResults = Tester.test(solutionPath, testDir, myRunner);
         } catch (Exception e) {
           System.out.println(String.format(
-              "ERROR: error occurred running %s on test directory %s",
-              solutionPath, testDir));
+            "ERROR: error occurred running %s on test directory %s",
+            solutionPath, testDir));
           System.out.println();
           continue;
         }
@@ -101,9 +102,9 @@ public final class REPL {
             passedAllTests = false;
           }
           System.out.println(String.format(
-              "%s on %s: on (%s), expected %s, got %s", successOrFailure,
-              testResult.get(3), testResult.get(0), testResult.get(1),
-              testResult.get(2)));
+            "%s on %s: on (%s), expected %s, got %s", successOrFailure,
+            testResult.get(3), testResult.get(0), testResult.get(1),
+            testResult.get(2)));
         }
         if (passedAllTests) {
           System.out.println("All tests passed!");
