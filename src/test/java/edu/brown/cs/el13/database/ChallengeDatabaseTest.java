@@ -18,6 +18,7 @@ public class ChallengeDatabaseTest {
       assertTrue(db.insertNewChallenge("add-one", "addone",
           "/challenges/addone", "Integers"));
       List<String> info = db.getChallenge("add-one");
+
       assertTrue(info.get(0).equals("add-one"));
       assertTrue(info.get(1).equals("addone"));
       assertTrue(info.get(2).equals("/challenges/addone"));

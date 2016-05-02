@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * A bunch of SQL Queries that deal with Leaderboard + User page information.
+ * 
  * @author el13, el51
  */
 public class LeaderboardDatabase implements AutoCloseable {
@@ -20,6 +21,7 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Constructs a new LeaderboardDatabase.
+   * 
    * @param db
    *          the path to the database
    * @throws SQLException
@@ -48,6 +50,7 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Returns whether or not a challenge has been attempted by a user.
+   * 
    * @param cID
    *          - the ID of the challenge.
    * @param uID
@@ -75,6 +78,7 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Returns the language that a user used to solve a challenge.
+   * 
    * @param cID
    *          - the challenge ID.
    * @param uID
@@ -101,6 +105,7 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Gets all the solution information for a specific user.
+   * 
    * @param qName
    *          the username of the user
    * @return a List of List of Strings that represent the solution information
@@ -127,6 +132,7 @@ public class LeaderboardDatabase implements AutoCloseable {
           solution.add(((Double) rs.getDouble(6)).toString());
           solution.add(((Double) rs.getDouble(7)).toString());
           solution.add(rs.getString(8));
+          solution.add(((Double) rs.getDouble(9)).toString());
 
           solutions.add(solution);
         }
@@ -137,17 +143,18 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Inserts a solution into the Leaderboard.
+   * 
    * @param data
    *          - the data associated with the solution. Contains challengeID,
    *          username, passed, efficiency, numLines, timeToSolve, aggregate,
-   *          and language in that order.
+   *          language, and timestamp in that order.
    * @throws SQLException
    * @throws IllegalArgumentException
    */
   public void addSolution(String challengeID, String username, boolean passed,
       double efficiency, double numLines, double timeToSolve, double aggregate,
-      String language) throws SQLException {
-    String query = "INSERT INTO solution VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+      String language, double timeStamp) throws SQLException {
+    String query = "INSERT INTO solution VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeID);
       ps.setString(2, username);
@@ -157,6 +164,7 @@ public class LeaderboardDatabase implements AutoCloseable {
       ps.setDouble(6, timeToSolve);
       ps.setDouble(7, aggregate);
       ps.setString(8, language);
+      ps.setDouble(9, timeStamp);
       ps.addBatch();
       ps.executeBatch();
     }
@@ -164,6 +172,7 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Gets the top twenty entries of a particular challenge given a language.
+   * 
    * @param qName
    *          the name of the challenge
    * @param qLang

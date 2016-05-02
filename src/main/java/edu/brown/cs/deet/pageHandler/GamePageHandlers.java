@@ -42,6 +42,7 @@ public final class GamePageHandlers {
 
   /**
    * Handles loading the game page.
+   * 
    * @author el51
    */
   public static class GamePageHandler implements TemplateViewRoute {
@@ -90,6 +91,7 @@ public final class GamePageHandlers {
 
   /**
    * Loads user solutions, if available, into the CodeMirror window.
+   * 
    * @author el51
    */
   public static class LoadSolutionHandler implements Route {
@@ -125,18 +127,18 @@ public final class GamePageHandlers {
       if (isAttempted) {
         String fileType;
         switch (language) {
-          case "python":
-            fileType = ".py";
-            break;
-          case "javascript":
-            fileType = ".js";
-            break;
-          default:
-            String msg = "Error in SaveSolutionHandler: "
-                + "language must be either python, ruby, or javascript";
-            Map<String, Object> variables = ImmutableMap.of("status",
-                "FAILURE", "message", msg);
-            return GSON.toJson(variables);
+        case "python":
+          fileType = ".py";
+          break;
+        case "javascript":
+          fileType = ".js";
+          break;
+        default:
+          String msg = "Error in SaveSolutionHandler: "
+              + "language must be either python, ruby, or javascript";
+          Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
+              "message", msg);
+          return GSON.toJson(variables);
         }
         File file = new File(String.format("challenges/%s/%s/solutions/%s",
             challengeID, language, username + fileType));
@@ -163,6 +165,7 @@ public final class GamePageHandlers {
 
   /**
    * Handles saving the contents of the game page.
+   * 
    * @author el51
    */
   public static class SaveSolutionHandler implements Route {
@@ -190,22 +193,22 @@ public final class GamePageHandlers {
       // TODO Currently set to the test database.
       try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
         ld.addSolution(challengeID, username, passed, efficiency, numLines,
-            timeToSolve, aggregate, language);
+            timeToSolve, aggregate, language, 2.0); // TODO REMOVE TIMESTSAMP
       } catch (SQLException e) {
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
             e.getMessage()));
       }
       String fileType;
       switch (language) {
-        case "python":
-          fileType = ".py";
-          break;
-        default:
-          String msg = "Error in SaveSolutionHandler: "
-              + "language must be either python, ruby, or javascript";
-          Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
-              "message", msg);
-          return GSON.toJson(variables);
+      case "python":
+        fileType = ".py";
+        break;
+      default:
+        String msg = "Error in SaveSolutionHandler: "
+            + "language must be either python, ruby, or javascript";
+        Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
+            "message", msg);
+        return GSON.toJson(variables);
       }
 
       String fileName = username + fileType;
@@ -238,17 +241,17 @@ public final class GamePageHandlers {
       Runner myRunner;
       MyCompiler myCompiler;
       switch (language) {
-        case "python":
-          fileType = ".py";
-          myRunner = pyRunner;
-          myCompiler = pyCompiler;
-          break;
-        default:
-          System.out
-              .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
-          Map<String, Object> variables = new ImmutableMap.Builder().put(
-              "error", true).build();
-          return GSON.toJson(variables);
+      case "python":
+        fileType = ".py";
+        myRunner = pyRunner;
+        myCompiler = pyCompiler;
+        break;
+      default:
+        System.out
+            .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
+            true).build();
+        return GSON.toJson(variables);
       }
 
       Integer random = (int) (Math.random() * 1000000);
@@ -311,6 +314,7 @@ public final class GamePageHandlers {
   /**
    * Runs a user's code on user-provided input and posts the corresponding
    * output.
+   * 
    * @author dglauber
    */
   public static class UserTestsHandler implements Route {
@@ -323,17 +327,17 @@ public final class GamePageHandlers {
       Runner myRunner;
       MyCompiler myCompiler;
       switch (language) {
-        case "python":
-          fileType = ".py";
-          myRunner = pyRunner;
-          myCompiler = pyCompiler;
-          break;
-        default:
-          System.out
-              .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
-          Map<String, Object> variables = new ImmutableMap.Builder().put(
-              "error", true).build();
-          return GSON.toJson(variables);
+      case "python":
+        fileType = ".py";
+        myRunner = pyRunner;
+        myCompiler = pyCompiler;
+        break;
+      default:
+        System.out
+            .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
+            true).build();
+        return GSON.toJson(variables);
       }
       Integer random = (int) (Math.random() * 1000000);
       String randomFileName = "temp" + random.toString() + fileType;

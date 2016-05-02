@@ -22,16 +22,16 @@
         <div class="row">
           <div class="col-xs-12 col-md-6">
             <div class="dropdown">
-              <select class="form-control" id="editChallengeSelect">
-                <option>Pick a Category</option>
+              <select class="form-control" id="challengeSelect">
+                <option value="Pick a Category">Pick a Category</option>
                 <#list categories as category>
                   <#if info[0][0] == category>
-                    <option selected=${category}>${category}</option>
+                    <option selected=${category} value="${category}">${category}</option>
                   <#else>
-                    <option>${category}</option>   
+                    <option value="${category}">${category}</option>   
                   </#if>  
                 </#list>
-                <option>Add a new category</option>
+                <option value="Add a new category">Add a new category</option>
               </select>
             </div>
           </div>
