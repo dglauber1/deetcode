@@ -198,6 +198,8 @@ public final class LoginHandlers {
     try (UserDatabase ud = new UserDatabase(dbPath)) {
       try {
         Boolean alreadyExists = ud.doesUserExistWithID(fbID);
+        
+        System.out.println("alreadyExists: " + alreadyExists);
 
         res.cookie("name", name);
         res.cookie("user", fbID);
@@ -207,6 +209,7 @@ public final class LoginHandlers {
         } else {
           req.session(true);
           req.session().attribute("adding", "true");
+          System.out.println("session: " + req.session().attribute("adding"));
           res.redirect("/categories#signup");
         }
 
