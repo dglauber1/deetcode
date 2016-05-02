@@ -3,6 +3,7 @@ package edu.brown.cs.deet.deetcode;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.pageHandler.AdminHandler;
@@ -94,8 +95,10 @@ final class Server {
        && (request.session().attribute("adding") != null);
       
        Boolean badRequest = !validUser && !(staticRequest || doesntNeedLogin);
+       
+       Boolean unauthorizedAdminRequest = unauthorizedAdmin(url, request);
       
-       if (badRequest && !creatingAccount) {
+       if ((badRequest && !creatingAccount) || unauthorizedAdminRequest) {
          response.redirect("/");
        }
      });
@@ -120,5 +123,45 @@ final class Server {
     }
 
     return !(noCookie || badCookie);
+  }
+  
+  
+  private static Boolean unauthorizedAdmin(String url, Request request) {
+    
+    // first check if they're an admin
+    String userID = request.cookie("user");
+    Boolean isAdmin = false;
+    try (UserDatabase ud = new UserDatabase(dbPath)) {
+      try {
+        isAdmin = ud.isUserAdmin(userID);
+      } catch (SQLException e) {
+        System.out.println(e.getMessage());
+        System.exit(1);
+      }
+    } catch (SQLException e1) {
+      System.out.println(e1.getMessage());
+      System.exit(1);
+    }
+    
+    // don't need to check anything if they're an admin
+    if (isAdmin) {
+      return false;
+    }
+    
+    // if they're not an admin, make sure they're not accessing restricted
+    // urls
+    String prefix = "http://localhost:4567";
+    String[] restricted = {"/admin/edit/(.*?)",
+        "/admin/add",
+        "/admin/add/results",
+        "/admin/delete/(.*?)",
+        "/admin/edit/results"};
+    List<String> restrictedList = Arrays.asList(restricted);
+    for (String restrictedPattern : restrictedList) {
+      if (url.matches(prefix + restrictedPattern)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

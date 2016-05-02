@@ -199,8 +199,6 @@ public final class LoginHandlers {
       try {
         Boolean alreadyExists = ud.doesUserExistWithID(fbID);
         
-        System.out.println("alreadyExists: " + alreadyExists);
-
         res.cookie("name", name);
         res.cookie("user", fbID);
 
@@ -263,5 +261,6 @@ public final class LoginHandlers {
       return ImmutableMap.of("error", e.getMessage());
     }
   }
+  
 
 }
