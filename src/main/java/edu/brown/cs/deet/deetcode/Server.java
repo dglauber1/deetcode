@@ -24,6 +24,7 @@ final class Server {
 
   /**
    * Class to set up FreeMarker.
+   * 
    * @return a FreeMarkerEngine
    */
   private static FreeMarkerEngine createEngine() {

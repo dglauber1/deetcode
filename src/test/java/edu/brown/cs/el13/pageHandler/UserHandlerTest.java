@@ -22,7 +22,8 @@ public class UserHandlerTest {
           "testdata/challengeDatabaseTester.sqlite3")) {
         UserHandler.setUserDatabase(udb);
         UserHandler.setLeaderboardDatabase(db);
-        List<List<String>> res = UserHandler.getChallengeInfoForUser("el51");
+        List<List<String>> res = UserHandler.getChallengeInfoForUser("el51",
+            "el51");
 
         assertTrue(res.size() == 2);
         assertTrue(res.get(0).get(0).equals("reverse"));
@@ -36,7 +37,7 @@ public class UserHandlerTest {
         assertTrue(res.get(1).get(3).equals("n/a"));
         assertTrue(res.get(1).get(4).equals("n/a"));
 
-        res = UserHandler.getChallengeInfoForUser("jz63");
+        res = UserHandler.getChallengeInfoForUser("jz63", "jz63");
         assertTrue(res.get(0).get(0).equals("fib-fast"));
         assertTrue(res.get(0).get(1).equals("true"));
         assertTrue(res.get(0).get(2).equals("n/a"));
