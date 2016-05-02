@@ -34,6 +34,7 @@ import edu.brown.cs.deet.database.ChallengeDatabase;
 /**
  * Handles all of the Admin-related requests, such as adding a new challenge or
  * editing a pre-existing challenge.
+ * 
  * @author el13
  */
 public final class AdminHandler {
@@ -48,6 +49,7 @@ public final class AdminHandler {
 
   /**
    * Statically changes the ChallengeDatabase of the AdminHandler.
+   * 
    * @param cdb
    *          the ChallengeDatabase
    */
@@ -57,6 +59,7 @@ public final class AdminHandler {
 
   /**
    * Shows the Admin_add page.
+   * 
    * @author el13
    */
   public static class AdminAddHandler implements TemplateViewRoute {
@@ -70,6 +73,7 @@ public final class AdminHandler {
 
   /**
    * Handles the input of a new challenge.
+   * 
    * @author el13
    */
   public static class NewChallengeHandler implements Route {
@@ -162,6 +166,7 @@ public final class AdminHandler {
 
   /**
    * Handler that deletes a challenge.
+   * 
    * @author el13
    */
   public static class DeleteChallengeHandler implements Route {
@@ -194,6 +199,7 @@ public final class AdminHandler {
 
   /**
    * Handler that edits a challenge.
+   * 
    * @author eddie
    */
   public static class EditChallengeHandler implements Route {
@@ -287,6 +293,7 @@ public final class AdminHandler {
 
   /**
    * Handles showing all challenge information when editing one.
+   * 
    * @author eddie
    */
   public static class ShowChallengeHandler implements TemplateViewRoute {
@@ -307,13 +314,13 @@ public final class AdminHandler {
         // shouldn't get here?
         new ExceptionPrinter().handle(e, req, res);
       }
-      System.out.println(variables);
       return new ModelAndView(variables, "editChallenge.ftl");
     }
   }
 
   /**
    * Handler that checks if the entered name in the Admin page is already taken.
+   * 
    * @author el13
    */
   public static class NameCheckHandler implements Route {
@@ -338,6 +345,7 @@ public final class AdminHandler {
 
   /**
    * Handler that gets all of the Categories.
+   * 
    * @author el13
    */
   public static class AllCategoriesHandler implements Route {
@@ -360,6 +368,7 @@ public final class AdminHandler {
 
   /**
    * Handler that checks if the entered new category already exists.
+   * 
    * @author el13
    */
   public static class CategoryCheckHandler implements Route {
@@ -384,6 +393,7 @@ public final class AdminHandler {
 
   /**
    * Handles Exceptions.
+   * 
    * @author el13
    */
   public static class ExceptionPrinter implements ExceptionHandler {
@@ -402,6 +412,7 @@ public final class AdminHandler {
 
   /**
    * Processes the new "basic" information for a new challenge.
+   * 
    * @param category
    *          The new category
    * @param pName
@@ -449,6 +460,7 @@ public final class AdminHandler {
    * file may already exist (and will then also skip the creation of the
    * stub.txt file). Therefore, call this ONLY after newBasicInfo is called (and
    * IMMEDIATELY afterwards).
+   * 
    * @param challengeId
    *          The "path name" of the challenge
    * @param testnames
@@ -546,6 +558,7 @@ public final class AdminHandler {
   /**
    * Edits the basic information for a challenge in the directories and in the
    * database.
+   * 
    * @param category
    *          The (new) category
    * @param challengeId
@@ -594,6 +607,7 @@ public final class AdminHandler {
    * Edits Test Info for a challenge. If a directory for a specifically language
    * for that test already exists, then the test info is updated per the user's
    * entry.
+   * 
    * @param challengeId
    *          The new ID of the challenge
    * @param testnames
@@ -663,6 +677,7 @@ public final class AdminHandler {
 
   /**
    * Determines if a challenge by a certain name already exists.
+   * 
    * @param challengeId
    *          the "path name" of the challenge
    * @return True if the challenge already exists, false otherwise.
@@ -676,6 +691,7 @@ public final class AdminHandler {
 
   /**
    * Determines if a category already exists.
+   * 
    * @param qCategory
    *          the category
    * @return True if the category already exists, false otherwise.
@@ -688,6 +704,7 @@ public final class AdminHandler {
 
   /**
    * Gets all the categories that exist.
+   * 
    * @return all the categories in a List
    * @throws SQLException
    *           if something with the database goes awry
@@ -702,6 +719,7 @@ public final class AdminHandler {
    * solution tables have the "ON CASCADE DELETE" options on for its
    * "challenge_id" foreign keys. Otherwise, there will be zombie entries
    * leftover in the test and solution tables.
+   * 
    * @param challengeId
    *          the name of the challenge as seen in the challenges directory (NOT
    *          the one seen by a user)
@@ -729,6 +747,7 @@ public final class AdminHandler {
    * exists. It also assumes that if a directory for the challenge exists then
    * there is an entry in the challenge table in the database for this
    * challenge. For other cases, the results of this method are undefined.
+   * 
    * @param challengeId
    *          the name of the challenge as seen in the challenges directory (NOT
    *          the one seen by a user)
@@ -786,6 +805,7 @@ public final class AdminHandler {
 
   /**
    * Returns the Test Info for some challenge and language
+   * 
    * @param challengeId
    *          The Id of the challenge
    * @param language
