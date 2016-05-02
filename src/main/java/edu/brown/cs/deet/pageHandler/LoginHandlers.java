@@ -95,6 +95,16 @@ public final class LoginHandlers {
     public ModelAndView handle(Request req, Response res) {
       Map<String, Object> variables = ImmutableMap.of("title", "Home",
           "loginURL", getFBURL());
+      try (UserDatabase ud = new UserDatabase(dbPath)) {
+        String id = req.cookie("user");
+        if (ud.doesUserExistWithID(id)) {
+          res.redirect("/categories");
+        }
+      } catch (SQLException e) {
+        e.printStackTrace();
+        System.out.println(e.getMessage());
+        System.exit(1);
+      }
       return new ModelAndView(variables, "landing.ftl");
     }
   }
