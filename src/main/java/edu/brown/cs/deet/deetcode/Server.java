@@ -3,6 +3,7 @@ package edu.brown.cs.deet.deetcode;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import edu.brown.cs.deet.database.UserDatabase;
