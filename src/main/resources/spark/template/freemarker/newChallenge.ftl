@@ -13,18 +13,17 @@
   <div class="tab-content">
     <div id="basic" class="tab-pane fade in active">
       <div class="row">
-        <div class="col-xs-12 col-md-6">
+        <div class="col-xs-12 col-md-12">
           <h4>Challenge Category</h4>
-          <div class="dropdown">
-            <select class="form-control" id="challengeSelect">
-              <option>Trees</option>
-              <option>Lists</option>
-              <option>Sorting</option>
-              <option>Add a new category</option>
-            </select>
-          </div>
-          <div class="col-xs-6 col-md-6"></div>
         </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-md-6">
+          <div class="dropdown">
+            <select class="form-control" id="challengeSelect"></select>
+          </div>
+        </div>
+        <div class="col-xs-6 col-md-6" id="categoryError"></div>
       </div>
 
       <div class="row" id="newCategoryDivTitle">

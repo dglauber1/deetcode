@@ -174,6 +174,11 @@ $(window).load(function() {
         var dropdown = $("#challengeSelect");
         dropdown.find('option').remove().end();
 
+        // default value
+        dropdown.append($("<option></option>")
+        					.attr("value", "Pick a Category")
+        					.text("Pick a Category"));
+
         for (var i = 0; i < categories.length; i++) {
         	var category = categories[i];
         	dropdown.append($("<option></option>")
@@ -220,6 +225,11 @@ $("#submit").click(function() {
 		bad = true;
 	}
 
+	if ($("#challengeSelect").val() == "Pick a Category") {
+		document.getElementById("categoryError").innerHTML = "Please pick a category.";
+		bad = true;
+	}
+
 	// check if test case pages are correct
 	var javaTestNameLines = $("#javaTestName").val().split(/\n/).length;
 	var javaInputLines = $("#javaInput").val().split(/\n/).length;
@@ -227,7 +237,9 @@ $("#submit").click(function() {
 
 	if (javaTestNameLines != javaInputLines || 
 		javaTestNameLines != javaOutputLines || 
-		javaInputLines != javaOutputLines) {
+		javaInputLines != javaOutputLines ||
+		(($("#javaTestName").val() === "" || $("#javaInput").val() === "" || $("#javaOutput").val() === "") &&
+		 ($("#javaTestName").val() != "" || $("#javaInput").val() != "" || $("#javaOutput").val() != ""))) {
 		document.getElementById("javaError").innerHTML = "Number of test names, inputs, and outputs must match.";
 		bad = true;
 	} else {
@@ -243,7 +255,9 @@ $("#submit").click(function() {
 
 	if (pythonTestNameLines != pythonInputLines || 
 		pythonTestNameLines != pythonOutputLines || 
-		pythonInputLines != pythonOutputLines) {
+		pythonInputLines != pythonOutputLines ||
+		(($("#pythonTestName").val() === "" || $("#pythonInput").val() === "" || $("#pythonOutput").val() === "") &&
+		 ($("#pythonTestName").val() != "" || $("#pythonInput").val() != "" || $("#pythonOutput").val() != ""))) {
 		document.getElementById("pythonError").innerHTML = "Number of test names, inputs, and outputs must match.";
 		bad = true;
 	} else {
@@ -256,7 +270,9 @@ $("#submit").click(function() {
 
 	if (rubyTestNameLines != rubyInputLines || 
 		rubyTestNameLines != rubyOutputLines || 
-		rubyInputLines != rubyOutputLines) {
+		rubyInputLines != rubyOutputLines ||
+		(($("#rubyTestName").val() === "" || $("#rubyInput").val() === "" || $("#rubyOutput").val() === "") &&
+		 ($("#rubyTestName").val() != "" || $("#rubyInput").val() != "" || $("#rubyOutput").val() != ""))) {
 		document.getElementById("rubyError").innerHTML = "Number of test names, inputs, and outputs must match.";
 		bad = true;
 	} else {
@@ -269,7 +285,9 @@ $("#submit").click(function() {
 
 	if (jsTestNameLines != jsInputLines || 
 		jsTestNameLines != jsOutputLines || 
-		jsInputLines != jsOutputLines) {
+		jsInputLines != jsOutputLines ||
+		(($("#jsTestName").val() === "" || $("#jsInput").val() === "" || $("#jsOutput").val() === "") &&
+		 ($("#jsTestName").val() != "" || $("#jsInput").val() != "" || $("#jsOutput").val() != ""))) {
 		document.getElementById("jsError").innerHTML = "Number of test names, inputs, and outputs must match.";
 		bad = true;
 	} else {
@@ -359,6 +377,11 @@ $("#editSubmit").click(function() {
 	}
 
 	if (document.getElementById("newCategoryError").innerHTML != "") {
+		bad = true;
+	}
+
+	if ($("#editChallengeSelect").val() == "Pick a Category") {
+		document.getElementById("categoryError").innerHTML = "Please pick a category.";
 		bad = true;
 	}
 

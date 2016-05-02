@@ -5,19 +5,20 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
-
-import edu.brown.cs.deet.database.LeaderboardDatabase;
-import edu.brown.cs.deet.database.UserDatabase;
-import edu.brown.cs.deet.pageHandler.AdminHandler.ExceptionPrinter;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.TemplateViewRoute;
+
+import com.google.common.base.Charsets;
+
+import edu.brown.cs.deet.database.LeaderboardDatabase;
+import edu.brown.cs.deet.database.UserDatabase;
+import edu.brown.cs.deet.pageHandler.AdminHandler.ExceptionPrinter;
 
 public class UserHandler {
   private static LeaderboardDatabase leaderboard;
@@ -37,6 +38,7 @@ public class UserHandler {
 
   /**
    * Sets the LeaderboardDatabase.
+   * 
    * @param ldb
    *          the Leaderboard Database.
    */
@@ -46,6 +48,7 @@ public class UserHandler {
 
   /**
    * Sets the UserDatabase.
+   * 
    * @param udb
    *          the UserDatabase.
    */
@@ -55,20 +58,27 @@ public class UserHandler {
 
   /**
    * Handles user pages.
+   * 
    * @author el13
    */
   public static class UserPageHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
       String username = req.params(":username");
-      try {
-        List<List<String>> results = getChallengeInfoForUser(username);
-        String name = getNameFromUsername(username);
-        
-        //TODO: Send an error page if the user doesn't exist
 
-        Map<String, Object> variables = ImmutableMap.of("title", username,
-            "name", name, "results", results);
+      try {
+        // Get the username of user viewing page to determine what to show
+        // String currUserUsername = user.getUsernameFromID(req.cookie("user"));
+        String currUserUsername = "dglauber";
+        List<List<String>> results = getChallengeInfoForUser(username,
+            currUserUsername);
+        String name = getNameFromUsername(username);
+
+        Map<String, Object> variables = new HashMap<>();
+
+        variables.put("title", username);
+        variables.put("name", name);
+        variables.put("results", results);
 
         return new ModelAndView(variables, "user.ftl");
       } catch (SQLException e) {
@@ -82,8 +92,11 @@ public class UserHandler {
 
   /**
    * Gets all of the attempted challenge info for a user.
+   * 
    * @param qName
-   *          the username of the user
+   *          the username of the user whose page is being requested
+   * @param currUser
+   *          the username of the user viewing the User Page
    * @return A List of a List of Strings, where each inner list contains
    *         information for one challenge for that user. The information will
    *         be in this order in the list: name of the challenge, whether they
@@ -94,8 +107,8 @@ public class UserHandler {
    * @throws IOException
    *           when there is a file read error
    */
-  public static List<List<String>> getChallengeInfoForUser(String qName)
-      throws SQLException, IOException {
+  public static List<List<String>> getChallengeInfoForUser(String qName,
+      String currUser) throws SQLException, IOException {
     List<List<String>> toReturn = new ArrayList<>();
 
     List<List<String>> solutionsForUser = leaderboard
@@ -130,14 +143,21 @@ public class UserHandler {
         // add the language user's solution is in
         oneChallengeInfo.add(solution.get(CHALLENGE_LANGUAGE));
 
-        // add the user's actual solution
-        String solutionPath = "challenges/" + solution.get(CHALLENGE_NAME)
-            + "/" + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName
-            + "." + solution.get(CHALLENGE_LANGUAGE);
+        // add the user's actual solution if "current user" has done the
+        // challenge
+        if (leaderboard.isChallengeAttempedByUser(solution.get(CHALLENGE_NAME),
+            currUser)) {
+          String solutionPath = "challenges/" + solution.get(CHALLENGE_NAME)
+              + "/" + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName
+              + "." + solution.get(CHALLENGE_LANGUAGE);
 
-        byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
-        String code = new String(encoded, Charsets.UTF_8);
-        oneChallengeInfo.add(code);
+          byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
+          String code = new String(encoded, Charsets.UTF_8);
+          oneChallengeInfo.add(code);
+        } else {
+          oneChallengeInfo
+              .add("You must attempt the challenge before you can see the solution.");
+        }
       } else {
         oneChallengeInfo.add("false");
         oneChallengeInfo.add("n/a");
@@ -152,6 +172,7 @@ public class UserHandler {
 
   /**
    * Returns the name of the user with a certain username.
+   * 
    * @param username
    *          The username of the user
    * @return the name of the user, or null if the username does not exist
