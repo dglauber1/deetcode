@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.Test;
 
 import edu.brown.cs.deet.database.ChallengeDatabase;
-import edu.brown.cs.deet.pageHandler.AdminHandler;
+import edu.brown.cs.deet.deetcode.pageHandler.AdminHandler;
 
 public class AdminHandlerTest {
   @Test

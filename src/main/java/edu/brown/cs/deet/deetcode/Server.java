@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import edu.brown.cs.deet.database.UserDatabase;
-import edu.brown.cs.deet.pageHandler.AdminHandler;
-import edu.brown.cs.deet.pageHandler.AdminHandler.ExceptionPrinter;
-import edu.brown.cs.deet.pageHandler.GamePageHandlers;
-import edu.brown.cs.deet.pageHandler.LoginHandlers;
-import edu.brown.cs.deet.pageHandler.UserHandler;
+import edu.brown.cs.deet.deetcode.pageHandler.AdminHandler;
+import edu.brown.cs.deet.deetcode.pageHandler.GamePageHandlers;
+import edu.brown.cs.deet.deetcode.pageHandler.LoginHandlers;
+import edu.brown.cs.deet.deetcode.pageHandler.UserHandler;
+import edu.brown.cs.deet.deetcode.pageHandler.AdminHandler.ExceptionPrinter;
 import freemarker.template.Configuration;
 import spark.Request;
 import spark.Spark;

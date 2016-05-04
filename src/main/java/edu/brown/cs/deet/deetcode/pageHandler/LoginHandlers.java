@@ -1,4 +1,4 @@
-package edu.brown.cs.deet.pageHandler;
+package edu.brown.cs.deet.deetcode.pageHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;

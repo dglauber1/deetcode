@@ -13,7 +13,7 @@ import edu.brown.cs.deet.execution.Runner;
 
 /**
  * Implementation of Runner for the python language.
- * 
+ *
  * @author dglauber
  */
 public class PyRunner implements Runner {
@@ -33,7 +33,7 @@ public class PyRunner implements Runner {
 
   @Override
   public Map<String, String>
-    run(String solutionPath, Collection<String> inputs) {
+  run(String solutionPath, Collection<String> inputs) {
     Path userInputFile = Paths.get(solutionPath);
     String file = userInputFile.getFileName().toString();
     String module = file.replaceAll("\\..*", "");
@@ -43,7 +43,9 @@ public class PyRunner implements Runner {
 
     Map<String, String> toReturn = new HashMap<>();
     for (String input : inputs) {
+      System.out.println("hi");
       PyObject runOutput = interpreter.eval("run(" + input + ")");
+      System.out.println("hi1");
       toReturn.put(input, runOutput.toString());
     }
     interpreter.exec(String.format("sys.path.remove('%s')", inputFileDir));

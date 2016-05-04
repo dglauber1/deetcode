@@ -1,4 +1,4 @@
-package edu.brown.cs.deet.pageHandler;
+package edu.brown.cs.deet.deetcode.pageHandler;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import spark.ModelAndView;
 import spark.QueryParamsMap;
@@ -32,17 +33,21 @@ import edu.brown.cs.deet.deetcode.Main;
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.Tester;
+import edu.brown.cs.deet.execution.javascript.JSCompiler;
+import edu.brown.cs.deet.execution.javascript.JSRunner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 
 public final class GamePageHandlers {
   private static final MyCompiler pyCompiler = new PyCompiler();
   private static final Runner pyRunner = new PyRunner();
+  private static final MyCompiler jsCompiler = new JSCompiler();
+  private static final Runner jsRunner = new JSRunner();
   private static final Gson GSON = new Gson();
 
   /**
    * Handles loading the game page.
-   * 
+   *
    * @author el51
    */
   public static class GamePageHandler implements TemplateViewRoute {
@@ -52,32 +57,41 @@ public final class GamePageHandlers {
         String challengeId = req.params(":challenge-id");
         // String challengeName = "test";
         String promptPath = null;
+        String prompt =
+            String.format("No challenge exists for %s!", challengeId);
         try {
           if (challenges.doesChallengeExist(challengeId)) {
             List<String> challengeData = challenges.getChallenge(challengeId);
             promptPath = challengeData.get(2).concat("/description.txt");
+            StringBuilder promptBuilder = new StringBuilder();
+            try (BufferedReader r =
+              new BufferedReader(new FileReader(promptPath))) {
+              String line = r.readLine();
+              while (line != null) {
+                promptBuilder.append(line).append("\n");
+                line = r.readLine();
+              }
+              prompt = promptBuilder.toString();
+            } catch (FileNotFoundException e) {
+              System.out.println("File not found: " + promptPath);
+              System.exit(1);
+            } catch (IOException e) {
+              System.out.println("I/O Exception at: " + promptPath);
+              System.exit(1);
+            }
+          } else {
+            Map<String, Object> variables =
+                ImmutableMap.of("errorMessage",
+                  String.format("No challenge exists for %s!", challengeId));
+            return new ModelAndView(variables, "not-found.ftl");
           }
         } catch (SQLException e) {
           System.out.println("GamePageHandler");
           System.out.println(e.getMessage());
           System.exit(1);
         }
-        StringBuilder promptBuilder = new StringBuilder();
-        try (BufferedReader r = new BufferedReader(new FileReader(promptPath))) {
-          String line = r.readLine();
-          while (line != null) {
-            promptBuilder.append(line).append("\n");
-            line = r.readLine();
-          }
-        } catch (FileNotFoundException e) {
-          System.out.println("File not found: " + promptPath);
-          System.exit(1);
-        } catch (IOException e) {
-          System.out.println("I/O Exception at: " + promptPath);
-          System.exit(1);
-        }
-        Map<String, Object> variables = ImmutableMap.of("title", "Game",
-            "prompt", promptBuilder.toString());
+        Map<String, Object> variables =
+          ImmutableMap.of("title", "Game", "prompt", prompt);
         return new ModelAndView(variables, "game.ftl");
       } catch (SQLException e1) {
         // Eddie added this, but code shouldn't get here either way
@@ -90,8 +104,9 @@ public final class GamePageHandlers {
   }
 
   /**
-   * Loads user solutions, if available, into the CodeMirror window.
-   * 
+   * Loads user solutions, if available, into the CodeMirror window. Else, loads
+   * in the challenge stub.
+   *
    * @author el51
    */
   public static class LoadSolutionHandler implements Route {
@@ -104,27 +119,37 @@ public final class GamePageHandlers {
       } catch (SQLException e) {
         e.printStackTrace();
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
-            e.getMessage()));
+          e.getMessage()));
       }
       assert (username != null);
-      username = "el13";
+      username = "el13"; // TODO fix hardcode
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
       boolean isAttempted = false;
-      String language = null;
-      // Solution is only available if the user has successfully solved
-      // the problem or if time has run out. TODO clarify with group
-      try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
-        isAttempted = ld.isChallengeAttempedByUser(challengeID, username);
-        language = ld.getUserChallengeLanguage(challengeID, username);
+      String language;
+      try (ChallengeDatabase cd = new ChallengeDatabase(Main.dbLoc)) {
+        language = cd.getLanguagesSupported(challengeID).get(0);
       } catch (SQLException e) {
         e.printStackTrace();
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
-            e.getMessage()));
+          e.getMessage()));
+      }
+      // Solution is only available if the user has successfully solved
+      // the problem or if time has run out. TODO clarify with group
+      try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
+        isAttempted =
+          ld.isChallengeAttempedByUser(challengeID, username, language);
+        // language = ld.getUserChallengeLanguage(challengeID, username);
+        // TODO what if a user solved a challenge in multiple different
+        // languages? -Dan
+      } catch (SQLException e) {
+        e.printStackTrace();
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
       }
 
-      StringBuilder userCode = new StringBuilder();
       if (isAttempted) {
+        StringBuilder userCode = new StringBuilder();
         String fileType;
         switch (language) {
         case "python":
@@ -134,14 +159,16 @@ public final class GamePageHandlers {
           fileType = ".js";
           break;
         default:
-          String msg = "Error in SaveSolutionHandler: "
+          String msg =
+            "Error in SaveSolutionHandler: "
               + "language must be either python, ruby, or javascript";
-          Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
-              "message", msg);
+          Map<String, Object> variables =
+            ImmutableMap.of("status", "FAILURE", "message", msg);
           return GSON.toJson(variables);
         }
-        File file = new File(String.format("challenges/%s/%s/solutions/%s",
-            challengeID, language, username + fileType));
+        File file =
+          new File(String.format("challenges/%s/%s/solutions/%s", challengeID,
+            language, username + fileType));
 
         try (BufferedReader rd = new BufferedReader(new FileReader(file))) {
           String line = rd.readLine();
@@ -151,21 +178,41 @@ public final class GamePageHandlers {
           }
         } catch (FileNotFoundException e) {
           return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
-              e.getMessage()));
+            e.getMessage()));
         } catch (IOException e) {
           return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
-              e.getMessage()));
+            e.getMessage()));
         }
+        return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
+          userCode.toString(), "language", language));
+      } else {
+        StringBuilder stubCode = new StringBuilder();
+        File file =
+          new File(String.format("challenges/%s/%s/stub.txt", challengeID,
+            language));
+        try (BufferedReader rd = new BufferedReader(new FileReader(file))) {
+          String line = rd.readLine();
+          while (line != null) {
+            stubCode.append(line).append("\n");
+            line = rd.readLine();
+          }
+        } catch (FileNotFoundException e) {
+          return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+        } catch (IOException e) {
+          return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+        }
+        return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
+          stubCode.toString(), "language", language));
       }
 
-      return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
-          userCode.toString()));
     }
   }
 
   /**
    * Handles saving the contents of the game page.
-   * 
+   *
    * @author el51
    */
   public static class SaveSolutionHandler implements Route {
@@ -178,7 +225,7 @@ public final class GamePageHandlers {
         username = ud.getUsernameFromID(req.cookie("user"));
       } catch (SQLException e) {
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
-            e.getMessage()));
+          e.getMessage()));
       }
       // assert (username != null);
       // TODO currently hardcoding a username because tyler hasn't yet written
@@ -193,10 +240,10 @@ public final class GamePageHandlers {
       // TODO Currently set to the test database.
       try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
         ld.addSolution(challengeID, username, passed, efficiency, numLines,
-            timeToSolve, aggregate, language, 2.0); // TODO REMOVE TIMESTSAMP
+          timeToSolve, aggregate, language, 2.0); // TODO REMOVE TIMESTSAMP
       } catch (SQLException e) {
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
-            e.getMessage()));
+          e.getMessage()));
       }
       String fileType;
       switch (language) {
@@ -204,24 +251,26 @@ public final class GamePageHandlers {
         fileType = ".py";
         break;
       default:
-        String msg = "Error in SaveSolutionHandler: "
+        String msg =
+          "Error in SaveSolutionHandler: "
             + "language must be either python, ruby, or javascript";
-        Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
-            "message", msg);
+        Map<String, Object> variables =
+          ImmutableMap.of("status", "FAILURE", "message", msg);
         return GSON.toJson(variables);
       }
 
       String fileName = username + fileType;
-      File file = new File(String.format("challenges/%s/%s/solutions/%s",
-          challengeID, language, fileName));
+      File file =
+        new File(String.format("challenges/%s/%s/solutions/%s", challengeID,
+          language, fileName));
       try (PrintWriter printWriter = new PrintWriter(file)) {
         String code = qm.value("input");
         printWriter.print(code);
         printWriter.close();
       } catch (FileNotFoundException e) {
         String msg = "Error in SaveSolutionHandler: File not found.";
-        Map<String, Object> variables = ImmutableMap.of("status", "FAILURE",
-            "message", msg);
+        Map<String, Object> variables =
+          ImmutableMap.of("status", "FAILURE", "message", msg);
         return GSON.toJson(variables);
       }
 
@@ -246,14 +295,18 @@ public final class GamePageHandlers {
         myRunner = pyRunner;
         myCompiler = pyCompiler;
         break;
+      case "javascript":
+        fileType = ".js";
+        myRunner = jsRunner;
+        myCompiler = jsCompiler;
+        break;
       default:
         System.out
-            .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
-        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
-            true).build();
+          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
         return GSON.toJson(variables);
       }
-
       Integer random = (int) (Math.random() * 1000000);
       String randomFileName = "temp" + random.toString() + fileType;
       File tempDir = new File("temporary");
@@ -269,33 +322,40 @@ public final class GamePageHandlers {
         lnr.close();
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
-          Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          Map<String, Object> variables =
+            new ImmutableMap.Builder().put("error", false)
+              .put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
-        String testDir = String.format("challenges/%s/%s", challengeID,
-            language);
+        String testDir =
+          String.format("challenges/%s/%s", challengeID, language);
         long start = System.currentTimeMillis();
-        Collection<List<String>> testResults = Tester.test(file.getPath(),
-            testDir, myRunner);
+        Collection<List<String>> testResults =
+          Tester.test(file.getPath(), testDir, myRunner);
+        System.out.println("hi1");
         long finish = System.currentTimeMillis();
         long time = finish - start; /* in milliseconds */
-        Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("numLines", numLines).put("testResults", testResults)
-            .put("timeToTest", time).build();
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", false)
+            .put("compiled", "success").put("numLines", numLines)
+            .put("testResults", testResults).put("timeToTest", time).build();
         return GSON.toJson(variables);
-
       } catch (IOException e) {
         System.out.println("ERROR: IOException in DeetTestsHandler");
-        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
-            true).build();
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
+        return GSON.toJson(variables);
+      } catch (TimeoutException e) {
+        String message = e.getMessage();
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", false)
+            .put("compiled", message).build();
         return GSON.toJson(variables);
       } catch (Exception e) {
         System.out.println("ERROR: Tester error occurred in DeetTestsHandler");
-        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
-            true).build();
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
         return GSON.toJson(variables);
       } finally {
         for (File f : tempDir.listFiles()) {
@@ -305,7 +365,7 @@ public final class GamePageHandlers {
           Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-              .println("error deleting temporary directory in UserTestsHandler");
+            .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }
@@ -314,7 +374,7 @@ public final class GamePageHandlers {
   /**
    * Runs a user's code on user-provided input and posts the corresponding
    * output.
-   * 
+   *
    * @author dglauber
    */
   public static class UserTestsHandler implements Route {
@@ -332,11 +392,16 @@ public final class GamePageHandlers {
         myRunner = pyRunner;
         myCompiler = pyCompiler;
         break;
+      case "javascript":
+        fileType = ".js";
+        myRunner = jsRunner;
+        myCompiler = jsCompiler;
+        break;
       default:
         System.out
-            .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
-        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
-            true).build();
+          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
         return GSON.toJson(variables);
       }
       Integer random = (int) (Math.random() * 1000000);
@@ -351,23 +416,24 @@ public final class GamePageHandlers {
         printWriter.close();
         String errorMessage = myCompiler.compile(file.getPath());
         if (errorMessage != null) {
-          Map<String, Object> variables = new ImmutableMap.Builder()
-              .put("error", false).put("compiled", errorMessage).build();
+          Map<String, Object> variables =
+            new ImmutableMap.Builder().put("error", false)
+              .put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
         System.out.println("here0");
         String testInputs = qm.value("userTest");
-        List<String> testInputList = Lists.newArrayList(Splitter
-            .on(System.getProperty("line.separator")).trimResults()
-            .omitEmptyStrings().split(testInputs));
-        Map<String, String> runResults = myRunner.run(file.getPath(),
-            testInputList);
+        List<String> testInputList =
+          Lists.newArrayList(Splitter.on(System.getProperty("line.separator"))
+            .trimResults().omitEmptyStrings().split(testInputs));
+        Map<String, String> runResults =
+          myRunner.run(file.getPath(), testInputList);
 
         System.out.println("here1");
-        Map<String, Object> variables = new ImmutableMap.Builder()
-            .put("error", false).put("compiled", "success")
-            .put("runResults", runResults).build();
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", false)
+            .put("compiled", "success").put("runResults", runResults).build();
 
         System.out.println("here2");
 
@@ -375,8 +441,13 @@ public final class GamePageHandlers {
 
       } catch (IOException e) {
         System.out.println("IOException in UserTestsHandler");
-        Map<String, Object> variables = new ImmutableMap.Builder().put("error",
-            true).build();
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
+        return GSON.toJson(variables);
+      } catch (TimeoutException e) {
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", false)
+            .put("compiled", e.getMessage()).build();
         return GSON.toJson(variables);
       } finally {
         for (File f : tempDir.listFiles()) {
@@ -386,7 +457,7 @@ public final class GamePageHandlers {
           Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-              .println("error deleting temporary directory in UserTestsHandler");
+            .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }
