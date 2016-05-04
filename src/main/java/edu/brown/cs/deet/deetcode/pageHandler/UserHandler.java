@@ -71,7 +71,7 @@ public class UserHandler {
         String currUserUsername = user.getUsernameFromID(req.cookie("user"));
         // String currUserUsername = "dglauber";
         List<List<String>> results =
-          getChallengeInfoForUser(username, currUserUsername);
+            getChallengeInfoForUser(username, currUserUsername);
         String name = getNameFromUsername(username);
 
         Map<String, Object> variables = new HashMap<>();
@@ -112,7 +112,7 @@ public class UserHandler {
     List<List<String>> toReturn = new ArrayList<>();
 
     List<List<String>> solutionsForUser =
-      leaderboard.getSolutionsForUser(qName);
+        leaderboard.getSolutionsForUser(qName);
 
     for (List<String> solution : solutionsForUser) {
       // create a new inner list for the return list of lists
@@ -124,8 +124,8 @@ public class UserHandler {
 
         // get the top twenty entries for the current challenge
         List<List<String>> topTwenty =
-          leaderboard.topTwentyOfChallengeLanguage(
-            solution.get(CHALLENGE_NAME), solution.get(CHALLENGE_LANGUAGE));
+            leaderboard.topTwentyOfChallengeLanguage(
+              solution.get(CHALLENGE_NAME), solution.get(CHALLENGE_LANGUAGE));
 
         // add the rank, if it exists
         int i = 0;
@@ -150,16 +150,16 @@ public class UserHandler {
         if (leaderboard.isChallengeAttempedByUser(solution.get(CHALLENGE_NAME),
           currUser, solution.get(CHALLENGE_LANGUAGE))) {
           String solutionPath =
-            "challenges/" + solution.get(CHALLENGE_NAME) + "/"
-              + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName + "."
-              + solution.get(CHALLENGE_LANGUAGE);
+              "challenges/" + solution.get(CHALLENGE_NAME) + "/"
+                  + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName + "."
+                  + solution.get(CHALLENGE_LANGUAGE);
 
           byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
           String code = new String(encoded, Charsets.UTF_8);
           oneChallengeInfo.add(code);
         } else {
           oneChallengeInfo
-            .add("You must attempt the challenge before you can see the solution.");
+          .add("You must attempt the challenge before you can see the solution.");
         }
       } else {
         oneChallengeInfo.add("false");

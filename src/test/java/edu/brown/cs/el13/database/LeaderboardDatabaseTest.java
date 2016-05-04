@@ -21,8 +21,8 @@ public class LeaderboardDatabaseTest {
       assertTrue(res.get(0).get(1).equals("el51"));
       assertTrue(res.get(0).get(2).equals("true"));
       assertTrue(res.get(0).get(3).equals("1.0"));
-      assertTrue(res.get(0).get(4).equals("1.0"));
-      assertTrue(res.get(0).get(5).equals("1.0"));
+      assertTrue(res.get(0).get(4).equals("3.0"));
+      assertTrue(res.get(0).get(5).equals("3.0"));
       assertTrue(res.get(0).get(6).equals("3.0"));
       assertTrue(res.get(0).get(7).equals("java"));
 
@@ -42,8 +42,8 @@ public class LeaderboardDatabaseTest {
       assertTrue(res.get(0).get(0).equals("reverse"));
       assertTrue(res.get(0).get(1).equals("el13"));
       assertTrue(res.get(0).get(2).equals("true"));
-      assertTrue(res.get(0).get(3).equals("1.0"));
-      assertTrue(res.get(0).get(4).equals("1.0"));
+      assertTrue(res.get(0).get(3).equals("2.0"));
+      assertTrue(res.get(0).get(4).equals("2.0"));
       assertTrue(res.get(0).get(5).equals("1.0"));
       assertTrue(res.get(0).get(6).equals("3.0"));
       assertTrue(res.get(0).get(7).equals("java"));

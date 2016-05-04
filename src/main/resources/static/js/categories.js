@@ -43,8 +43,23 @@ $(function() {
     });
   });
 
+  $('.edit-button').click(function(e) {
+    var link = $(e.target).parent().parent()[0].href;
+    var challenge_id = link.substr(link.lastIndexOf("/") + 1);
+    window.location.href = "http://localhost:4567/admin/edit/" + challenge_id;
+    return false;
+  });
+
+  $('.delete-button').click(function(e) {
+    var link = $(e.target).parent().parent()[0].href;
+    var challenge_id = link.substr(link.lastIndexOf("/") + 1);
+    window.location.href = "http://localhost:4567/admin/delete/" + challenge_id;
+    return false;
+  });
+
   // not sure why these links don't just click on their own...
   $('.challenge').click(function(e) {
+    e.preventDefault();
     window.location.href = $(e.target).prop('href');
   });
 

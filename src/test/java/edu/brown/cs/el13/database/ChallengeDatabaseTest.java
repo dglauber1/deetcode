@@ -141,20 +141,21 @@ public class ChallengeDatabaseTest {
     try (ChallengeDatabase db = new ChallengeDatabase(
         "testdata/challengeDatabaseTester.sqlite3")) {
       // inserting tests
-      db.insertTestsForChallenge("reverse", "Java");
-      db.insertTestsForChallenge("reverse", "Python");
+      db.insertTestsForChallenge("reverse", "java");
+      db.insertTestsForChallenge("reverse", "python");
 
       List<String> languages = db.getLanguagesSupported("reverse");
 
       // checking if the tests were inserted correctly and if
       // getLangaugesSupported works
-      assertTrue(languages.size() == 2);
-      assertTrue(languages.get(0).equals("Java"));
-      assertTrue(languages.get(1).equals("Python"));
+      assertTrue(languages.size() == 3);
+      assertTrue(languages.get(0).equals("java"));
+      assertTrue(languages.get(1).equals("java"));
+      assertTrue(languages.get(2).equals("python"));
 
       // deletes languages supported and checks if it is done correctly
-      db.deleteLanguageSupported("reverse", "Java");
-      db.deleteLanguageSupported("reverse", "Python");
+      db.deleteLanguageSupported("reverse", "java");
+      db.deleteLanguageSupported("reverse", "python");
 
       languages = db.getLanguagesSupported("reverse");
 
