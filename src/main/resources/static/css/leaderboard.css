@@ -1,0 +1,23 @@
+.btn {
+	border-radius: 0px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.dropdown {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+span.label.label-success {
+	vertical-align: top;
+}
+
+#header {
+	background-color: #eeeeee;
+	margin-bottom: 20px;
+}
+
+td {
+	vertical-align:top;
+}

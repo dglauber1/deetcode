@@ -6,24 +6,40 @@ $.getScript("/codemirror/mode/javascript/javascript.js");
 var url = document.URL.replace("http://", "");
 url = url.substr(url.indexOf("/") + 1);
 var challengeID = url.substr(url.indexOf("/") + 1);
+var currentLanguage = "python"; //Initialized from dropdown, which is initialized
 
 var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("codepad"), {
     lineNumbers: true,
-    mode: "python",
+    mode: currentLanguage
 });
 
-var loadParameters = {"challengeID" : challengeID};
-$.post("/load", loadParameters, function (responseJSON) {
-	var responseObject = JSON.parse(responseJSON);
-	if (responseObject.status != "SUCCESS") {
-		vex.dialog.alert("Error: " + responseObject.message);
-	} else {
-		var stub = responseObject.code;
-		console.log("here");
-		console.log(stub);
-		myCodeMirror.getDoc().setValue(stub);
-	}
-});
+myCodeMirror.getDoc().setValue("Loading code...");
+
+loadPage();
+
+function loadPage() {
+	//TODO: OVERLAY "Loading Page..."
+	var loadParameters = {"challengeID" : challengeID};
+	$.post("/load", loadParameters, function (responseJSON) {
+		var responseObject = JSON.parse(responseJSON);
+		if (responseObject.status != "SUCCESS") {
+			vex.dialog.alert("Error: " + responseObject.message);
+		} else {
+			var stubOrUserSolution = responseObject.code;
+			console.log("here");
+			console.log(stubOrUserSolution);
+			console.log(currentLanguage);
+			currentLanguage = responseObject.language;
+			console.log(currentLanguage);
+			//TODO set dropdown to current language
+			myCodeMirror.setOption("mode", currentLanguage);
+			myCodeMirror.getDoc().setValue(stubOrUserSolution);
+		}
+		//TODO: GET RID OF OVERLAY! & start clock
+	});
+}
+
+//TODO: write changeLanguage post function. should be similar to "/load" post
 
 //Run Code Script
 $('input[type=submit]').click(function(e) {
@@ -38,7 +54,7 @@ $('input[type=submit]').click(function(e) {
    	console.log(userTests);
    	console.log(userCode);
    	// testing against user input
-   	var postParameters = {"language" : "python", "input" : userCode, "userTest" : userTests};
+   	var postParameters = {"language" : currentLanguage, "input" : userCode, "userTest" : userTests};
 	$.post("/game/usertests", postParameters, function(responseJSON) {
 		var userResultString = "<b>User Test Results</b><br/>";
 		var responseObject = JSON.parse(responseJSON);
@@ -63,18 +79,19 @@ $('input[type=submit]').click(function(e) {
 			}
 		}
 				
-	   	postParameters = {"language" : "python", "input" : userCode, "challengeID" : challengeID}
+	   	postParameters = {"language" : currentLanguage, "input" : userCode, "challengeID" : challengeID}
 		$.post("/game/deettests", postParameters, function(responseJSON) {
 			console.log("here");
 			var passedAllTests = true;
 			var deetResultString = "<b>Official Test Results</b><br/>";
+			console.log(responseJSON);
 			var responseObject = JSON.parse(responseJSON);
 			if (responseObject.error === true) {
 				console.log("error");
 				passedAllTests = false;
 				deetResultString += "Error occurred with Server. Please contact a DEET administrator.";
 			} else {
-				console.log("not error");
+				console.log("not error yay");
 				var compilationStatus = responseObject.compiled;
 				if (compilationStatus != "success") {
 					deetResultString += ("Compilation Error:<br>" + compilationStatus);
@@ -117,7 +134,7 @@ $('input[type=submit]').click(function(e) {
 						if (value) {
 							// this is currently hard coded in
 							var leaderboardParameters = {"input" : userCode,
-									"language" : "python",
+									"language" : currentLanguage,
 									"challengeID" : challengeID,
 									"passed" : true,
 									"efficiency" : responseObject.timeToTest,

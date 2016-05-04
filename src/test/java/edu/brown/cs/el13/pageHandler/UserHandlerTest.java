@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
-import edu.brown.cs.deet.pageHandler.UserHandler;
+import edu.brown.cs.deet.deetcode.pageHandler.UserHandler;
 
 public class UserHandlerTest {
   @Test
@@ -42,7 +42,6 @@ public class UserHandlerTest {
         assertTrue(res.get(0).get(1).equals("true"));
         assertTrue(res.get(0).get(2).equals("n/a"));
         assertTrue(res.get(0).get(3).equals("java"));
-        assertTrue(res.get(0).get(4).equals(""));
         assertTrue(res.size() == 1);
       }
     } catch (SQLException e) {
