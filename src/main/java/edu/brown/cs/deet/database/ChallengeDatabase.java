@@ -13,6 +13,7 @@ import java.util.Map;
 /**
  * Contains all SQL queries related to the challenge and test tables of the
  * database.
+ * 
  * @author el13
  */
 public class ChallengeDatabase implements AutoCloseable {
@@ -23,6 +24,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Constructs a new ChallengeDatabase.
+   * 
    * @param db
    *          the path to the database
    * @throws SQLException
@@ -50,6 +52,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Inserts a new challenge into the database.
+   * 
    * @param pName
    *          the unique "path" name of the challenge
    * @param qName
@@ -86,6 +89,7 @@ public class ChallengeDatabase implements AutoCloseable {
   /**
    * Gets the basic information for a challenge, such as name, path, and
    * category.
+   * 
    * @param pName
    *          The "path name" of the challenge
    * @return A List of Strings containing the path name, real name, path, and
@@ -116,7 +120,8 @@ public class ChallengeDatabase implements AutoCloseable {
   /**
    * Deletes the basic information for a challenge, specifically name, path and
    * category, from the challenge table.
-   * @param pName
+   * 
+   * @param qName
    *          the "path name" of the challenge
    * @throws SQLException
    *           when something goes wrong with the database
@@ -133,6 +138,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Edits a challenge currently in the database.
+   * 
    * @param origPName
    *          the original unique name of the challenge
    * @param pName
@@ -174,6 +180,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Determines if a challenge already exists in the database.
+   * 
    * @param pName
    *          the "path name" of the challenge
    * @return true if already exists, false otherwise
@@ -193,6 +200,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Determines if a category already exists in the database.
+   * 
    * @param qCategory
    *          the category in question
    * @return True if the category already exists, False otherwise
@@ -212,6 +220,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Gets all the Categories that exist on the site.
+   * 
    * @return A List of Strings each representing a category
    * @throws SQLException
    *           when something has gone wrong with the database
@@ -267,6 +276,7 @@ public class ChallengeDatabase implements AutoCloseable {
   /**
    * Inserts a row into the test table for the challenge and the language
    * corresponding to the challenge.
+   * 
    * @param pName
    *          the "path name" of the challenge
    * @param language
@@ -288,6 +298,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Gets all the languages that are supported for a particular challenge.
+   * 
    * @param pName
    *          the "path name" of the challenge
    * @return a List of the languages that are supported for the challenge
@@ -312,6 +323,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   /**
    * Deletes a supported language for a challenge.
+   * 
    * @param oName
    *          the "path name" of the challenge
    * @param language

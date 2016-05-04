@@ -13,6 +13,7 @@ import edu.brown.cs.deet.execution.Runner;
 
 /**
  * Implementation of Runner for the python language.
+ * 
  * @author dglauber
  */
 public class PyRunner implements Runner {
@@ -26,12 +27,13 @@ public class PyRunner implements Runner {
     this.interpreter = new PythonInterpreter();
     interpreter.setErr(System.err);
     interpreter.exec("import sys");
-    interpreter.exec("if not 'bin' in sys.path : sys.path.append('bin')");
+    interpreter.exec("if not 'my_bin' in sys.path : sys.path.append('my_bin')");
     interpreter.exec("from runner import *");
   }
 
   @Override
-  public Map<String, String> run(String solutionPath, Collection<String> inputs) {
+  public Map<String, String>
+    run(String solutionPath, Collection<String> inputs) {
     Path userInputFile = Paths.get(solutionPath);
     String file = userInputFile.getFileName().toString();
     String module = file.replaceAll("\\..*", "");

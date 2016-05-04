@@ -68,8 +68,8 @@ public class UserHandler {
 
       try {
         // Get the username of user viewing page to determine what to show
-        // String currUserUsername = user.getUsernameFromID(req.cookie("user"));
-        String currUserUsername = "dglauber";
+        String currUserUsername = user.getUsernameFromID(req.cookie("user"));
+        // String currUserUsername = "dglauber";
         List<List<String>> results = getChallengeInfoForUser(username,
             currUserUsername);
         String name = getNameFromUsername(username);

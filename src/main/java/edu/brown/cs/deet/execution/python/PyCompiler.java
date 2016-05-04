@@ -7,6 +7,7 @@ import edu.brown.cs.deet.execution.MyCompiler;
 
 /**
  * Implementation of a MyCompiler for the python language.
+ * 
  * @author dglauber
  */
 public class PyCompiler implements MyCompiler {
@@ -20,14 +21,14 @@ public class PyCompiler implements MyCompiler {
     this.interpreter = new PythonInterpreter();
     interpreter.setErr(System.err);
     interpreter.exec("import sys");
-    interpreter.exec("if not 'bin' in sys.path : sys.path.append('bin')");
+    interpreter.exec("if not 'my_bin' in sys.path : sys.path.append('my_bin')");
     interpreter.exec("from my_compiler import *");
   }
 
   @Override
   public String compile(String filePath) {
-    PyObject compileOutput = interpreter.eval(String.format(
-        "compile_mod('%s')", filePath));
+    PyObject compileOutput =
+      interpreter.eval(String.format("compile_mod('%s')", filePath));
     if (compileOutput.isInteger()) {
       // compile_mod() returned 0, code successfully compiled
       return null;

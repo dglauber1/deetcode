@@ -225,7 +225,7 @@ $("#submit").click(function() {
 		bad = true;
 	}
 
-	if ($("#challengeSelect").val() == "Pick a Category") {
+	if ($("#challengeSelect").val() === "Pick a Category") {
 		document.getElementById("categoryError").innerHTML = "Please pick a category.";
 		bad = true;
 	}
@@ -380,7 +380,7 @@ $("#editSubmit").click(function() {
 		bad = true;
 	}
 
-	if ($("#editChallengeSelect").val() == "Pick a Category") {
+	if ($("#challengeSelect").val() === "Pick a Category") {
 		document.getElementById("categoryError").innerHTML = "Please pick a category.";
 		bad = true;
 	}
@@ -411,10 +411,10 @@ $("#editSubmit").click(function() {
 	// AJAX call only if the not bad input
 	if (!bad) {
 		// parse the rest of the input
-		if ($("#editChallengeSelect").val() == "Add a new category") {
+		if ($("#challengeSelect").val() == "Add a new category") {
 			var cat = $("#newCategory")[0].value;
 		} else {
-			var cat = $("#editChallengeSelect :selected").text();
+			var cat = $("#challengeSelect :selected").text();
 		}
 
 		var postParameters = {
