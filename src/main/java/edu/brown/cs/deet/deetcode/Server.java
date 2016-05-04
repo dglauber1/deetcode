@@ -13,6 +13,7 @@ import edu.brown.cs.deet.pageHandler.GamePageHandlers;
 import edu.brown.cs.deet.pageHandler.LoginHandlers;
 import edu.brown.cs.deet.pageHandler.UserHandler;
 import freemarker.template.Configuration;
+import spark.ModelAndView;
 import spark.Request;
 import spark.Spark;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -78,6 +79,10 @@ final class Server {
     Spark.get("/fblogin", new LoginHandlers.FBHandler());
     Spark.get("/logout", new LoginHandlers.LogoutHandler());
     Spark.post("/add-user", new LoginHandlers.AddUserHandler());
+    
+    Spark.get("/bug-test", (request, response) -> {
+      return new ModelAndView(null, "bug-test.ftl");
+    }, freeMarker);
 
      // check authentication before every request
      Spark.before((request, response) -> {
