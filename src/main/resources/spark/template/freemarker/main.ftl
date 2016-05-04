@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="/css/TimeCircles.css" />
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/newChallenge.css">
+    <link rel="stylesheet" href="/css/leaderboard.css">
     <link rel="stylesheet" type="text/css" href="http://w2ui.com/src/w2ui-1.4.2.min.css"/>
   </head>
   <body>
@@ -84,5 +85,6 @@
      <script src="/js/main.js"></script>
      <script src="/js/timer.js"></script>
      <script src="/js/newChallenge.js"></script>
+     <script src="/js/leaderboard.js"></script>
   </body>
 </html>

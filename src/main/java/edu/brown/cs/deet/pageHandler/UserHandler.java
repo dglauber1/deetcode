@@ -156,7 +156,7 @@ public class UserHandler {
           oneChallengeInfo.add(code);
         } else {
           oneChallengeInfo
-              .add("You must attempt the challenge before you can see the solution.");
+              .add("You must attempt the challenge before you can see a solution.");
         }
       } else {
         oneChallengeInfo.add("false");

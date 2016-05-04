@@ -172,6 +172,7 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Gets the top twenty entries of a particular challenge given a language.
+   * They are ordered by the aggregate score.
    * 
    * @param qName
    *          the name of the challenge
@@ -192,6 +193,132 @@ public class LeaderboardDatabase implements AutoCloseable {
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, qName);
+      ps.setString(2, qLang);
+
+      List<List<String>> topTwenty = new ArrayList<>();
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          List<String> entry = new ArrayList<>();
+          entry.add(rs.getString(1));
+          entry.add(rs.getString(2));
+          entry.add(((Double) rs.getDouble(3)).toString());
+          entry.add(rs.getString(4));
+
+          topTwenty.add(entry);
+        }
+
+        return topTwenty;
+      }
+    }
+  }
+
+  /**
+   * Gets the top twenty entries of a particular challenge given a language.
+   * They are ordered by the code efficiency score.
+   * 
+   * @param qName
+   *          the name of the challenge
+   * @param qLang
+   *          the language to query for
+   * @return A List of a List of Strings, where each inner List contains the
+   *         follow information in this order: challenge name, username,
+   *         efficiency score, language. The inner lists are ordered by code
+   *         efficiency score and there is a limit of 20.
+   * @throws SQLException
+   *           when something goes awry with the database
+   */
+  public List<List<String>> topTwentyOfChallengeLanguageEfficiency(
+      String qName, String qLang) throws SQLException {
+    String query = "SELECT challenge_id, username, efficiency, language "
+        + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
+        + "ORDER BY efficiency ASC LIMIT 20;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, qName);
+      ps.setString(2, qLang);
+
+      List<List<String>> topTwenty = new ArrayList<>();
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          List<String> entry = new ArrayList<>();
+          entry.add(rs.getString(1));
+          entry.add(rs.getString(2));
+          entry.add(((Double) rs.getDouble(3)).toString());
+          entry.add(rs.getString(4));
+
+          topTwenty.add(entry);
+        }
+
+        return topTwenty;
+      }
+    }
+  }
+
+  /**
+   * Gets the top twenty entries of a particular challenge given a language.
+   * They are ordered by the code num_lines score.
+   * 
+   * @param qName
+   *          the name of the challenge
+   * @param qLang
+   *          the language to query for
+   * @return A List of a List of Strings, where each inner List contains the
+   *         follow information in this order: challenge name, username,
+   *         num_lines score, language. The inner lists are ordered by num_lines
+   *         score and there is a limit of 20.
+   * @throws SQLException
+   *           when something goes awry with the database
+   */
+  public List<List<String>> topTwentyOfChallengeLanguageNumLines(String qName,
+      String qLang) throws SQLException {
+    String query = "SELECT challenge_id, username, num_lines, language "
+        + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
+        + "ORDER BY num_lines ASC LIMIT 20;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, qName);
+      ps.setString(2, qLang);
+
+      List<List<String>> topTwenty = new ArrayList<>();
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          List<String> entry = new ArrayList<>();
+          entry.add(rs.getString(1));
+          entry.add(rs.getString(2));
+          entry.add(((Double) rs.getDouble(3)).toString());
+          entry.add(rs.getString(4));
+
+          topTwenty.add(entry);
+        }
+
+        return topTwenty;
+      }
+    }
+  }
+
+  /**
+   * Gets the top twenty entries of a particular challenge given a language.
+   * They are ordered by the code time_to_solve score.
+   * 
+   * @param challengeId
+   *          the id of the challenge
+   * @param qLang
+   *          the language to query for
+   * @return A List of a List of Strings, where each inner List contains the
+   *         follow information in this order: challenge name, username,
+   *         time_to_solve score, language. The inner lists are ordered by
+   *         time_to_solve score and there is a limit of 20.
+   * @throws SQLException
+   *           when something goes awry with the database
+   */
+  public List<List<String>> topTwentyOfChallengeLanguageTimeSolve(
+      String challengeId, String qLang) throws SQLException {
+    String query = "SELECT challenge_id, username, time_to_solve, language "
+        + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
+        + "ORDER BY time_to_solve ASC LIMIT 20;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, challengeId);
       ps.setString(2, qLang);
 
       List<List<String>> topTwenty = new ArrayList<>();
