@@ -25,8 +25,8 @@
               <select class="form-control" id="challengeSelect">
                 <option value="Pick a Category">Pick a Category</option>
                 <#list categories as category>
-                  <#if info[0][0] == category>
-                    <option selected=${category} value="${category}">${category}</option>
+                  <#if category == info[0][0]>
+                    <option value="${category}" selected>${category}</option>
                   <#else>
                     <option value="${category}">${category}</option>   
                   </#if>  
