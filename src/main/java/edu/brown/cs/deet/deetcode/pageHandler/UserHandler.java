@@ -145,10 +145,8 @@ public class UserHandler {
 
         // add the user's actual solution if "current user" has done the
         // challenge
-        // TODO I (Dan) changed this slightly because I changed the method
-        // signature for isChallengeAttemptedByUser()
         if (leaderboard.isChallengeAttempedByUser(solution.get(CHALLENGE_NAME),
-          currUser, solution.get(CHALLENGE_LANGUAGE))) {
+          currUser)) {
           String solutionPath =
               "challenges/" + solution.get(CHALLENGE_NAME) + "/"
                   + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName + "."

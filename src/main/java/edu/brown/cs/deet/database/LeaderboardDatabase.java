@@ -55,6 +55,34 @@ public class LeaderboardDatabase implements AutoCloseable {
    *          - the ID of the challenge.
    * @param uID
    *          - the username of the user.
+   * @return true if the challenge was attempted, false otherwise
+   * @throws SQLException
+   */
+  public boolean isChallengeAttempedByUser(String cID, String uID)
+      throws SQLException {
+    String query =
+        "SELECT * FROM solution WHERE username = ? " + "AND challenge_id = ?;";
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, uID);
+      ps.setString(2, cID);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          // User has attempted the challenge
+          return true;
+        }
+        // User has not attempted the challenge
+        return false;
+      }
+    }
+  }
+
+  /**
+   * Returns whether or not a challenge has been attempted by a user.
+   *
+   * @param cID
+   *          - the ID of the challenge.
+   * @param uID
+   *          - the username of the user.
    * @param language
    *          - the language to check
    * @return true if the challenge was attempted, false otherwise
@@ -177,12 +205,12 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Gets the top twenty entries of a particular challenge given a language.
-<<<<<<< HEAD
+   * <<<<<<< HEAD
    *
-=======
-   * They are ordered by the aggregate score.
-   * 
->>>>>>> 3377c03b21386249644bd65273f97aabecf80ef1
+   * ======= They are ordered by the aggregate score.
+   *
+   * >>>>>>> 3377c03b21386249644bd65273f97aabecf80ef1
+   *
    * @param qName
    *          the name of the challenge
    * @param qLang
@@ -225,7 +253,7 @@ public class LeaderboardDatabase implements AutoCloseable {
   /**
    * Gets the top twenty entries of a particular challenge given a language.
    * They are ordered by the code efficiency score.
-   * 
+   *
    * @param qName
    *          the name of the challenge
    * @param qLang
@@ -238,10 +266,11 @@ public class LeaderboardDatabase implements AutoCloseable {
    *           when something goes awry with the database
    */
   public List<List<String>> topTwentyOfChallengeLanguageEfficiency(
-      String qName, String qLang) throws SQLException {
-    String query = "SELECT challenge_id, username, efficiency, language "
-        + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
-        + "ORDER BY efficiency ASC LIMIT 20;";
+    String qName, String qLang) throws SQLException {
+    String query =
+        "SELECT challenge_id, username, efficiency, language "
+            + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
+            + "ORDER BY efficiency ASC LIMIT 20;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, qName);
@@ -267,7 +296,7 @@ public class LeaderboardDatabase implements AutoCloseable {
   /**
    * Gets the top twenty entries of a particular challenge given a language.
    * They are ordered by the code num_lines score.
-   * 
+   *
    * @param qName
    *          the name of the challenge
    * @param qLang
@@ -280,10 +309,11 @@ public class LeaderboardDatabase implements AutoCloseable {
    *           when something goes awry with the database
    */
   public List<List<String>> topTwentyOfChallengeLanguageNumLines(String qName,
-      String qLang) throws SQLException {
-    String query = "SELECT challenge_id, username, num_lines, language "
-        + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
-        + "ORDER BY num_lines ASC LIMIT 20;";
+    String qLang) throws SQLException {
+    String query =
+        "SELECT challenge_id, username, num_lines, language "
+            + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
+            + "ORDER BY num_lines ASC LIMIT 20;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, qName);
@@ -309,7 +339,7 @@ public class LeaderboardDatabase implements AutoCloseable {
   /**
    * Gets the top twenty entries of a particular challenge given a language.
    * They are ordered by the code time_to_solve score.
-   * 
+   *
    * @param challengeId
    *          the id of the challenge
    * @param qLang
@@ -322,10 +352,11 @@ public class LeaderboardDatabase implements AutoCloseable {
    *           when something goes awry with the database
    */
   public List<List<String>> topTwentyOfChallengeLanguageTimeSolve(
-      String challengeId, String qLang) throws SQLException {
-    String query = "SELECT challenge_id, username, time_to_solve, language "
-        + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
-        + "ORDER BY time_to_solve ASC LIMIT 20;";
+    String challengeId, String qLang) throws SQLException {
+    String query =
+        "SELECT challenge_id, username, time_to_solve, language "
+            + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
+            + "ORDER BY time_to_solve ASC LIMIT 20;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
