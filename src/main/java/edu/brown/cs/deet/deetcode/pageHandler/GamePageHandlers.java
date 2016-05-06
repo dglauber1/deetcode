@@ -14,13 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -37,6 +30,12 @@ import edu.brown.cs.deet.execution.javascript.JSCompiler;
 import edu.brown.cs.deet.execution.javascript.JSRunner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
   private static final MyCompiler pyCompiler = new PyCompiler();
@@ -122,7 +121,6 @@ public final class GamePageHandlers {
           e.getMessage()));
       }
       assert (username != null);
-      username = "el13"; // TODO fix hardcode
       QueryParamsMap qm = req.queryMap();
       String challengeID = qm.value("challengeID");
       boolean isAttempted = false;
