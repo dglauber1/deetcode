@@ -2,21 +2,22 @@
 <div class="container">
   <ul class="nav nav-tabs">
     <h3>New Challenge</h3>
-    <li class="active"><a data-toggle="tab" href="#basic">Description</a></li>
-    <li><a data-toggle="tab" href="#java">Java</a></li>
-    <li><a data-toggle="tab" href="#python">Python</a></li>
-    <li><a data-toggle="tab" href="#ruby">Ruby</a></li>
-    <li><a data-toggle="tab" href="#javascript">Javascript</a></li>
-    <li><a data-toggle="tab" href="#submitChallenge">Submit</a></li>
+    <li class="descTab active" disabled><a href="#basic">Description</a></li>
+    <li class="langTab disabled"><a href="#java" >Java</a></li>
+    <li class="langTab disabled"><a href="#python">Python</a></li>
+    <li class="langTab disabled"><a href="#ruby">Ruby</a></li>
+    <li class="langTab disabled"><a href="#javascript">Javascript</a></li>
+    <li class="submitTab disabled"><a href="#submitChallenge">Submit</a></li>
   </ul>
 
   <div class="tab-content">
     <div id="basic" class="tab-pane fade in active">
       <div class="row">
-        <div class="col-xs-12 col-md-12">
+        <div class="col-xs-12 col-md-6">
           <h4>Challenge Category</h4>
         </div>
       </div>
+
       <div class="row">
         <div class="col-xs-12 col-md-6">
           <div class="dropdown">
@@ -77,6 +78,8 @@
         </div>
         <div class="col-xs-6 col-md-6" id="descriptionError"></div>
       </div>
+
+      <a class="btn btn-default btnNext">Next</a>
     </div>
 
     <div id="python" class="tab-pane fade">
@@ -104,7 +107,10 @@
           <h4>Stub Code (in Python):</h4>
           <textarea class="form-control" id="pythonStub"></textarea>
         </div>
-      </div>  
+      </div> 
+
+      <a class="btn btn-default btnPrevious">Back</a>
+      <a class="btn btn-default btnNext">Next</a> 
     </div>
 
     <div id="ruby" class="tab-pane fade">
@@ -133,6 +139,9 @@
           <textarea class="form-control" id="rubyStub"></textarea>
         </div>
       </div>  
+
+      <a class="btn btn-default btnPrevious">Back</a>
+      <a class="btn btn-default btnNext">Next</a> 
     </div>
 
     <div id="javascript" class="tab-pane fade">
@@ -160,7 +169,10 @@
           <h4>Stub Code (in JavaScript):</h4>
           <textarea class="form-control" id="jsStub"></textarea>
         </div>
-      </div>  
+      </div>
+
+      <a class="btn btn-default btnPrevious">Back</a>
+      <a class="btn btn-default btnNext">Next</a>  
     </div>
 
     <div id="java" class="tab-pane fade">
@@ -188,25 +200,26 @@
           <h4>Stub Code (in Java):</h4>
           <textarea class="form-control" id="javaStub"></textarea>
         </div>
-      </div>  
+      </div> 
+
+      <a class="btn btn-default btnPrevious">Back</a>
+      <a class="btn btn-default btnNext">Next</a> 
     </div>
 
     <div id="submitChallenge" class="tab-pane fade">
       <div class="row">
-        <div class="col-xs-2 col-md-2"></div>
-        <div class="col-xs-8 col-md-8">
+        <div class="col-xs-8 col-md-12">
           <h4>Are you sure you want to submit this challenge?</h4>
-          <button type="button" class="btn btn-primary" id="submit">Submit Challenge</button>
+          <a class="btn btn-default btnPrevious">Back</a>
+          <a class="btn btn-default" id="submit">Submit Challenge</a>
         </div>
         <div class="col-xs-2 col-md-2"></div>
       </div>
-
-      <div class="row">
-        <div class="col-xs-2 col-md-2"></div>
-        <div class="col-xs-2 col-md-8" id="submitError"></div>
-        <div class="col-xs-2 col-md-2"></div>
-      </div>
     </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-2 col-md-12" id="submitError"></div>
   </div>
 </div>
 

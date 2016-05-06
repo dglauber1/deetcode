@@ -67,7 +67,7 @@
                         <td>No</td>
                       </#if>
                       <td>${result[2]}</td>
-                      <td>${result[3]}</td>
+                      <td>${result[3]?capitalize}</td>
                       <#if result[3] != "n/a">
                         <td><button type="button" class="btn btn-primary" value="${result[4]}" onclick="popup(this)">Solution</button></td>
                       <#else>
