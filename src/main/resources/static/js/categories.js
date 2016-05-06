@@ -1,4 +1,6 @@
 $(function() {
+
+  var bugs = new SpiderController();
         
   $('.category').on('click', function() {
     $('.glyphicon', this)

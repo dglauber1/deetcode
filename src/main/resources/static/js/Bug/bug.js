@@ -345,8 +345,8 @@ var SpiderController = function() {
         maxDelay: 2000,
         minSpeed: 6,
         maxSpeed: 13,
-        minBugs: 10,
-        maxBugs: 20
+        minBugs: 3,
+        maxBugs: 10
     };
     this.options = mergeOptions(this.options, spiderOptions);
     this.initialize.apply(this, arguments);

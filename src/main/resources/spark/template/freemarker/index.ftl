@@ -38,7 +38,7 @@
                 <div class="header-content-inner">
                     <h1>DEETCODE</h1>
                     <hr>
-                    <p>DEETCODE is a unique coding + gaming platform that allows programmers at all levels to develop their coding skills, smashing some pesky bugs along the way. Join this invigorating and welcoming community today!</p>
+                    <p>DeetCode is a unique coding + gaming platform that allows programmers at all levels to develop their coding skills, smashing some pesky bugs along the way. Join this invigorating and welcoming community today!</p>
                     <a href="${loginURL}" class="btn btn-primary btn-xl page-scroll">Login / Sign Up</a>
                 </div>
             </div>
