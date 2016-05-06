@@ -41,13 +41,18 @@ javaEditor.refresh();
 // When "Add a new category" is a selected under Challenge Category
 $("#newCategoryDiv").hide();
 $("#newCategoryDivTitle").hide();
+
 $("#challengeSelect").change(function() {
 	if ($(this).val() == "Add a new category") {
 		$("#newCategoryDiv").show();
 		$("#newCategoryDivTitle").show();
+		document.getElementById("categoryError").innerHTML = "";
+	} else if ($(this).val() == "Pick a Category") {
+		document.getElementById("categoryError").innerHTML = "Please pick a category.";
 	} else {
 		$("#newCategoryDiv").hide();
 		$("#newCategoryDivTitle").hide();
+		document.getElementById("categoryError").innerHTML = "";
 	}
 });
 
@@ -196,264 +201,221 @@ $(window).load(function() {
 
 // submit for adding a challenge
 $("#submit").click(function() {
-	// check if the challenge path name is valid
-	var pName = $("#pName")[0];
-	var pNameValue = pName.value;
-	var bad = false;
-	
-	// extra, get RID OF ****
-	if (pNameValue === "") {
-		document.getElementById("pNameError").innerHTML = "This field is empty.";
-		bad = true;
-	}
-
-	if (document.getElementById("pNameError").innerHTML != "") {
-		bad = true;
-	}
-
-	if ($("#name")[0].value === "") {
-		document.getElementById("nameError").innerHTML = "This field is empty.";
-		bad = true;
-	}
-
-	if ($("#description")[0].value === "") {
-		document.getElementById("descriptionError").innerHTML = "This field is empty.";
-		bad = true;
-	}
-
-	if (document.getElementById("newCategoryError").innerHTML != "") {
-		bad = true;
-	}
-
-	if ($("#challengeSelect").val() === "Pick a Category") {
-		document.getElementById("categoryError").innerHTML = "Please pick a category.";
-		bad = true;
-	}
-
-	// check if test case pages are correct
-	var javaTestNameLines = $("#javaTestName").val().split(/\n/).length;
-	var javaInputLines = $("#javaInput").val().split(/\n/).length;
-	var javaOutputLines = $("#javaOutput").val().split(/\n/).length;
-
-	if (javaTestNameLines != javaInputLines || 
-		javaTestNameLines != javaOutputLines || 
-		javaInputLines != javaOutputLines ||
-		(($("#javaTestName").val() === "" || $("#javaInput").val() === "" || $("#javaOutput").val() === "") &&
-		 ($("#javaTestName").val() != "" || $("#javaInput").val() != "" || $("#javaOutput").val() != ""))) {
-		document.getElementById("javaError").innerHTML = "Number of test names, inputs, and outputs must match.";
-		bad = true;
+	// parse the rest of the input
+	if ($("#challengeSelect").val() == "Add a new category") {
+		var cat = $("#newCategory")[0].value;
 	} else {
-		document.getElementById("javaError").innerHTML = "";
+		var cat = $("#challengeSelect :selected").text();
 	}
 
-	var pythonTestNameLines = $("#pythonTestName").val().split(/\n/).length;
-	var pythonInputLines = $("#pythonInput").val().split(/\n/).length;
-	var pythonOutputLines = $("#pythonOutput").val().split(/\n/).length;
+	var postParameters = {
+	    category: JSON.stringify(cat),
+	    name: JSON.stringify($("#name")[0].value),
+	    pName: JSON.stringify($("#pName")[0].value),
+	    description: JSON.stringify($("#description").val()),
+	    javaTestName: JSON.stringify($("#javaTestName").val()),
+	    javaInput: JSON.stringify($("#javaInput").val()),
+	    javaOutput: JSON.stringify($("#javaOutput").val()),
+	    javaStub: JSON.stringify(javaEditor.getValue()),
+	    pythonTestName: JSON.stringify($("#pythonTestName").val()),
+	    pythonInput: JSON.stringify($("#pythonInput").val()),
+	    pythonOutput: JSON.stringify($("#pythonOutput").val()),
+	    pythonStub: JSON.stringify(pythonEditor.getValue()),
+	    rubyTestName: JSON.stringify($("#rubyTestName").val()),
+	    rubyInput: JSON.stringify($("#rubyInput").val()),
+	    rubyOutput: JSON.stringify($("#rubyOutput").val()),
+	    rubyStub: JSON.stringify(rubyEditor.getValue()),
+	    jsTestName: JSON.stringify($("#jsTestName").val()),
+	    jsInput: JSON.stringify($("#jsInput").val()),
+	    jsOutput: JSON.stringify($("#jsOutput").val()),
+	    jsStub: JSON.stringify(jsEditor.getValue())
+    };
 
-	console.log(pythonTestNameLines);
-	console.log(pythonInputLines);
-
-	if (pythonTestNameLines != pythonInputLines || 
-		pythonTestNameLines != pythonOutputLines || 
-		pythonInputLines != pythonOutputLines ||
-		(($("#pythonTestName").val() === "" || $("#pythonInput").val() === "" || $("#pythonOutput").val() === "") &&
-		 ($("#pythonTestName").val() != "" || $("#pythonInput").val() != "" || $("#pythonOutput").val() != ""))) {
-		document.getElementById("pythonError").innerHTML = "Number of test names, inputs, and outputs must match.";
-		bad = true;
-	} else {
-		document.getElementById("pythonError").innerHTML = "";
-	}
-
-	var rubyTestNameLines = $("#rubyTestName").val().split(/\n/).length;
-	var rubyInputLines = $("#rubyInput").val().split(/\n/).length;
-	var rubyOutputLines = $("#rubyOutput").val().split(/\n/).length;
-
-	if (rubyTestNameLines != rubyInputLines || 
-		rubyTestNameLines != rubyOutputLines || 
-		rubyInputLines != rubyOutputLines ||
-		(($("#rubyTestName").val() === "" || $("#rubyInput").val() === "" || $("#rubyOutput").val() === "") &&
-		 ($("#rubyTestName").val() != "" || $("#rubyInput").val() != "" || $("#rubyOutput").val() != ""))) {
-		document.getElementById("rubyError").innerHTML = "Number of test names, inputs, and outputs must match.";
-		bad = true;
-	} else {
-		document.getElementById("rubyError").innerHTML = "";
-	}
-
-	var jsTestNameLines = $("#jsTestName").val().split(/\n/).length;
-	var jsInputLines = $("#jsInput").val().split(/\n/).length;
-	var jsOutputLines = $("#jsOutput").val().split(/\n/).length;
-
-	if (jsTestNameLines != jsInputLines || 
-		jsTestNameLines != jsOutputLines || 
-		jsInputLines != jsOutputLines ||
-		(($("#jsTestName").val() === "" || $("#jsInput").val() === "" || $("#jsOutput").val() === "") &&
-		 ($("#jsTestName").val() != "" || $("#jsInput").val() != "" || $("#jsOutput").val() != ""))) {
-		document.getElementById("jsError").innerHTML = "Number of test names, inputs, and outputs must match.";
-		bad = true;
-	} else {
-		document.getElementById("jsError").innerHTML = "";
-	}
-
-	// AJAX call only if the not bad input
-	if (!bad) {
-		// parse the rest of the input
-		if ($("#challengeSelect").val() == "Add a new category") {
-			var cat = $("#newCategory")[0].value;
-		} else {
-			var cat = $("#challengeSelect :selected").text();
-		}
-
-		var postParameters = {
-		    category: JSON.stringify(cat),
-		    name: JSON.stringify($("#name")[0].value),
-		    pName: JSON.stringify($("#pName")[0].value),
-		    description: JSON.stringify($("#description").val()),
-		    javaTestName: JSON.stringify($("#javaTestName").val()),
-		    javaInput: JSON.stringify($("#javaInput").val()),
-		    javaOutput: JSON.stringify($("#javaOutput").val()),
-		    javaStub: JSON.stringify(javaEditor.getValue()),
-		    pythonTestName: JSON.stringify($("#pythonTestName").val()),
-		    pythonInput: JSON.stringify($("#pythonInput").val()),
-		    pythonOutput: JSON.stringify($("#pythonOutput").val()),
-		    pythonStub: JSON.stringify(pythonEditor.getValue()),
-		    rubyTestName: JSON.stringify($("#rubyTestName").val()),
-		    rubyInput: JSON.stringify($("#rubyInput").val()),
-		    rubyOutput: JSON.stringify($("#rubyOutput").val()),
-		    rubyStub: JSON.stringify(rubyEditor.getValue()),
-		    jsTestName: JSON.stringify($("#jsTestName").val()),
-		    jsInput: JSON.stringify($("#jsInput").val()),
-		    jsOutput: JSON.stringify($("#jsOutput").val()),
-		    jsStub: JSON.stringify(jsEditor.getValue())
-	    };
-
-	    $.post("/admin/add/results", postParameters, function(responseJSON){
-	    	$("#description").val("");
-	    	$("#pName")[0].value = "";
-	    	$("#name")[0].value = "";
-	    	$("#javaTestName").val("");
-	    	$("#javaInput").val("");
-	    	$("#javaOutput").val("");
-	    	$("#pythonTestName").val("");
-	    	$("#pythonInput").val("");
-	    	$("#pythonOutput").val("");
-	    	$("#rubyTestName").val("");
-	    	$("#rubyInput").val("");
-	    	$("#rubyOutput").val("");
-	    	$("#jsTestName").val("");
-	    	$("#jsInput").val("");
-	    	$("#jsOutput").val("");
-	    	location.reload();
-	    });
-	} else {
-		document.getElementById("submitError").innerHTML = "Errors with the submission. Find and try again.";
-	}
+    $.post("/admin/add/results", postParameters, function(responseJSON){
+    	$("#description").val("");
+    	$("#pName")[0].value = "";
+    	$("#name")[0].value = "";
+    	$("#javaTestName").val("");
+    	$("#javaInput").val("");
+    	$("#javaOutput").val("");
+    	$("#pythonTestName").val("");
+    	$("#pythonInput").val("");
+    	$("#pythonOutput").val("");
+    	$("#rubyTestName").val("");
+    	$("#rubyInput").val("");
+    	$("#rubyOutput").val("");
+    	$("#jsTestName").val("");
+    	$("#jsInput").val("");
+    	$("#jsOutput").val("");
+    	location.reload();
+    });
 });
 
 // submit for editing a challenge
 $("#editSubmit").click(function() {
-	// check if the challenge path name is valid
-	var pName = $("#pName")[0];
-	var pNameValue = pName.value;
+	// parse the rest of the input
+	if ($("#challengeSelect").val() == "Add a new category") {
+		var cat = $("#newCategory")[0].value;
+	} else {
+		var cat = $("#challengeSelect :selected").text();
+	}
+
+	var postParameters = {
+	    category: JSON.stringify(cat),
+	    name: JSON.stringify($("#name")[0].value),
+	    origPName: JSON.stringify(ORIG_CHALLENGE_DIR_NAME),
+	    pName: JSON.stringify($("#pName")[0].value),
+	    description: JSON.stringify($("#description").val()),
+	    javaTestName: JSON.stringify($("#javaTestName").val()),
+	    javaInput: JSON.stringify($("#javaInput").val()),
+	    javaOutput: JSON.stringify($("#javaOutput").val()),
+	    javaStub: JSON.stringify(javaEditor.getValue()),
+	    pythonTestName: JSON.stringify($("#pythonTestName").val()),
+	    pythonInput: JSON.stringify($("#pythonInput").val()),
+	    pythonOutput: JSON.stringify($("#pythonOutput").val()),
+	    pythonStub: JSON.stringify(pythonEditor.getValue()),
+	    rubyTestName: JSON.stringify($("#rubyTestName").val()),
+	    rubyInput: JSON.stringify($("#rubyInput").val()),
+	    rubyOutput: JSON.stringify($("#rubyOutput").val()),
+	    rubyStub: JSON.stringify(rubyEditor.getValue()),
+	    jsTestName: JSON.stringify($("#jsTestName").val()),
+	    jsInput: JSON.stringify($("#jsInput").val()),
+	    jsOutput: JSON.stringify($("#jsOutput").val()),
+	    jsStub: JSON.stringify(jsEditor.getValue())
+    };
+
+    $.post("/admin/edit/results", postParameters, function(responseJSON){
+    	// unlike admin/add/results, does not clear every field
+    	if ($("#pName")[0].value === ORIG_CHALLENGE_DIR_NAME) {
+    		location.reload();
+    	} else {
+    		window.location.href = "http://localhost:4567/admin/edit/" + $("#pName")[0].value;
+    	}
+    });
+});
+
+function isBad(whichTab) {
 	var bad = false;
-	
-	// extra, get RID OF ****
-	if (pNameValue === "") {
-		document.getElementById("pNameError").innerHTML = "This field is empty.";
-		bad = true;
-	}
 
-	if (document.getElementById("pNameError").innerHTML != "") {
-		bad = true;
-	}
-
-	if ($("#name")[0].value === "") {
-		document.getElementById("nameError").innerHTML = "This field is empty.";
-		bad = true;
-	}
-
-	if ($("#description")[0].value === "") {
-		document.getElementById("descriptionError").innerHTML = "This field is empty.";
-		bad = true;
-	}
-
-	if (document.getElementById("newCategoryError").innerHTML != "") {
-		bad = true;
-	}
-
-	if ($("#challengeSelect").val() === "Pick a Category") {
-		document.getElementById("categoryError").innerHTML = "Please pick a category.";
-		bad = true;
-	}
-
-	// check if test case pages are correct
-	var javaTestNameLines = $("#javaTestName").val().split(/\r*\n/).length;
-	var javaInputLines = $("#javaInput").val().split(/\r*\n/).length;
-	var javaOutputLines = $("#javaOutput").val().split(/\r*\n/).length;
-
-	if (javaTestNameLines != javaInputLines || 
-		javaTestNameLines != javaOutputLines || 
-		javaInputLines != javaOutputLines) {
-		bad = true;
-	}
-
-	var pythonTestNameLines = $("#pythonTestName").val().split(/\r*\n/).length;
-	var pythonInputLines = $("#pythonInput").val().split(/\r*\n/).length;
-	var pythonOutputLines = $("#pythonOutput").val().split(/\r*\n/).length;
-
-	var rubyTestNameLines = $("#rubyTestName").val().split(/\r*\n/).length;
-	var rubyInputLines = $("#rubyInput").val().split(/\r*\n/).length;
-	var rubyOutputLines = $("#rubyOutput").val().split(/\r*\n/).length;
-
-	var jsTestNameLines = $("#jsTestName").val().split(/\r*\n/).length;
-	var jsInputLines = $("#jsInput").val().split(/\r*\n/).length;
-	var jsOutputLines = $("#jsOutput").val().split(/\r*\n/).length;
-
-	// AJAX call only if the not bad input
-	if (!bad) {
-		// parse the rest of the input
-		if ($("#challengeSelect").val() == "Add a new category") {
-			var cat = $("#newCategory")[0].value;
-		} else {
-			var cat = $("#challengeSelect :selected").text();
+	if (whichTab === "#basic") {
+		// check if the challenge path name is valid
+		var pName = $("#pName")[0];
+		var pNameValue = pName.value;
+		
+		// extra, get RID OF ****
+		if (pNameValue === "") {
+			document.getElementById("pNameError").innerHTML = "This field is empty.";
+			bad = true;
 		}
 
-		var postParameters = {
-		    category: JSON.stringify(cat),
-		    name: JSON.stringify($("#name")[0].value),
-		    origPName: JSON.stringify(ORIG_CHALLENGE_DIR_NAME),
-		    pName: JSON.stringify($("#pName")[0].value),
-		    description: JSON.stringify($("#description").val()),
-		    javaTestName: JSON.stringify($("#javaTestName").val()),
-		    javaInput: JSON.stringify($("#javaInput").val()),
-		    javaOutput: JSON.stringify($("#javaOutput").val()),
-		    javaStub: JSON.stringify(javaEditor.getValue()),
-		    pythonTestName: JSON.stringify($("#pythonTestName").val()),
-		    pythonInput: JSON.stringify($("#pythonInput").val()),
-		    pythonOutput: JSON.stringify($("#pythonOutput").val()),
-		    pythonStub: JSON.stringify(pythonEditor.getValue()),
-		    rubyTestName: JSON.stringify($("#rubyTestName").val()),
-		    rubyInput: JSON.stringify($("#rubyInput").val()),
-		    rubyOutput: JSON.stringify($("#rubyOutput").val()),
-		    rubyStub: JSON.stringify(rubyEditor.getValue()),
-		    jsTestName: JSON.stringify($("#jsTestName").val()),
-		    jsInput: JSON.stringify($("#jsInput").val()),
-		    jsOutput: JSON.stringify($("#jsOutput").val()),
-		    jsStub: JSON.stringify(jsEditor.getValue())
-	    };
+		if (document.getElementById("pNameError").innerHTML != "") {
+			bad = true;
+		}
 
-	    $.post("/admin/edit/results", postParameters, function(responseJSON){
-	    	// unlike admin/add/results, does not clear every field
-	    	if ($("#pName")[0].value === ORIG_CHALLENGE_DIR_NAME) {
-	    		location.reload();
-	    	} else {
-	    		window.location.href = "http://localhost:4567/admin/edit/" + $("#pName")[0].value;
-	    	}
-	    });
+		if ($("#name")[0].value === "") {
+			document.getElementById("nameError").innerHTML = "This field is empty.";
+			bad = true;
+		}
+
+		if ($("#description")[0].value === "") {
+			document.getElementById("descriptionError").innerHTML = "This field is empty.";
+			bad = true;
+		}
+
+		if (document.getElementById("newCategoryError").innerHTML != "") {
+			bad = true;
+		}
+
+		if ($("#challengeSelect").val() === "Add a new category" && 
+			$("#newCategory")[0].value === "") {
+			document.getElementById("newCategoryError").innerHTML = "This field is empty.";
+			bad = true;
+		}
+
+		if ($("#challengeSelect").val() === "Pick a Category") {
+			document.getElementById("categoryError").innerHTML = "Please pick a category.";
+			bad = true;
+		}
+	} else if (whichTab === "#java") {
+		// check if test case pages are correct
+		var javaTestNameLines = $("#javaTestName").val().split(/\n/).length;
+		var javaInputLines = $("#javaInput").val().split(/\n/).length;
+		var javaOutputLines = $("#javaOutput").val().split(/\n/).length;
+
+		if (javaTestNameLines != javaInputLines || 
+			javaTestNameLines != javaOutputLines || 
+			javaInputLines != javaOutputLines ||
+			(($("#javaTestName").val() === "" || $("#javaInput").val() === "" || $("#javaOutput").val() === "") &&
+			 ($("#javaTestName").val() != "" || $("#javaInput").val() != "" || $("#javaOutput").val() != ""))) {
+			document.getElementById("javaError").innerHTML = "Number of test names, inputs, and outputs must match.";
+			bad = true;
+		} else {
+			document.getElementById("javaError").innerHTML = "";
+		}
+	} else if (whichTab === "#python") {
+		var pythonTestNameLines = $("#pythonTestName").val().split(/\n/).length;
+		var pythonInputLines = $("#pythonInput").val().split(/\n/).length;
+		var pythonOutputLines = $("#pythonOutput").val().split(/\n/).length;
+
+		if (pythonTestNameLines != pythonInputLines || 
+			pythonTestNameLines != pythonOutputLines || 
+			pythonInputLines != pythonOutputLines ||
+			(($("#pythonTestName").val() === "" || $("#pythonInput").val() === "" || $("#pythonOutput").val() === "") &&
+			 ($("#pythonTestName").val() != "" || $("#pythonInput").val() != "" || $("#pythonOutput").val() != ""))) {
+			document.getElementById("pythonError").innerHTML = "Number of test names, inputs, and outputs must match.";
+			bad = true;
+		} else {
+			document.getElementById("pythonError").innerHTML = "";
+		}
+	} else if (whichTab === "#ruby") {
+		var rubyTestNameLines = $("#rubyTestName").val().split(/\n/).length;
+		var rubyInputLines = $("#rubyInput").val().split(/\n/).length;
+		var rubyOutputLines = $("#rubyOutput").val().split(/\n/).length;
+
+		if (rubyTestNameLines != rubyInputLines || 
+			rubyTestNameLines != rubyOutputLines || 
+			rubyInputLines != rubyOutputLines ||
+			(($("#rubyTestName").val() === "" || $("#rubyInput").val() === "" || $("#rubyOutput").val() === "") &&
+			 ($("#rubyTestName").val() != "" || $("#rubyInput").val() != "" || $("#rubyOutput").val() != ""))) {
+			document.getElementById("rubyError").innerHTML = "Number of test names, inputs, and outputs must match.";
+			bad = true;
+		} else {
+			document.getElementById("rubyError").innerHTML = "";
+		}
+	} else if (whichTab === "#javascript") {
+		var jsTestNameLines = $("#jsTestName").val().split(/\n/).length;
+		var jsInputLines = $("#jsInput").val().split(/\n/).length;
+		var jsOutputLines = $("#jsOutput").val().split(/\n/).length;
+
+		if (jsTestNameLines != jsInputLines || 
+			jsTestNameLines != jsOutputLines || 
+			jsInputLines != jsOutputLines ||
+			(($("#jsTestName").val() === "" || $("#jsInput").val() === "" || $("#jsOutput").val() === "") &&
+			 ($("#jsTestName").val() != "" || $("#jsInput").val() != "" || $("#jsOutput").val() != ""))) {
+			document.getElementById("jsError").innerHTML = "Number of test names, inputs, and outputs must match.";
+			bad = true;
+		} else {
+			document.getElementById("jsError").innerHTML = "";
+		}
+	}
+
+	return bad;
+}
+
+// continue and previous buttons
+$('.btnNext').click(function(){
+	var whichTab = $('.nav-tabs > .active').find('a').attr("href");
+	var bad = isBad(whichTab);
+
+	if (bad) {
+		document.getElementById("submitError").innerHTML = "Please fix errors and try again.";
 	} else {
-		document.getElementById("submitError").innerHTML = "Errors with the submission. Find and try again.";
+		document.getElementById("submitError").innerHTML = "";
+		$('.nav-tabs > .active').next('li').find('a').tab('show');
 	}
 });
 
-
-
+$('.btnPrevious').click(function(){
+  $('.nav-tabs > .active').prev('li').find('a').tab('show');
+});
 

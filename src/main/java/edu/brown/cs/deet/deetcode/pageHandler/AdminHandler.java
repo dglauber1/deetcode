@@ -50,8 +50,7 @@ public final class AdminHandler {
   /**
    * Statically changes the ChallengeDatabase of the AdminHandler.
    *
-   * @param cdb
-   *          the ChallengeDatabase
+   * @param cdb the ChallengeDatabase
    */
   public static void setChallengeDatabase(ChallengeDatabase cdb) {
     challenges = cdb;
@@ -65,8 +64,8 @@ public final class AdminHandler {
   public static class AdminAddHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
-      Map<String, Object> variables =
-        ImmutableMap.of("title", "Add a Challenge");
+      Map<String, Object> variables = ImmutableMap.of("title",
+          "Add a Challenge");
       return new ModelAndView(variables, "newChallenge.ftl");
     }
   }
@@ -100,31 +99,31 @@ public final class AdminHandler {
 
       // Java test cases and stub code
       if (success) {
-        String javaTestnames =
-          GSON.fromJson(qm.value("javaTestName"), String.class);
+        String javaTestnames = GSON.fromJson(qm.value("javaTestName"),
+            String.class);
         String javaInput = GSON.fromJson(qm.value("javaInput"), String.class);
         String javaOutput = GSON.fromJson(qm.value("javaOutput"), String.class);
         String javaStub = GSON.fromJson(qm.value("javaStub"), String.class);
 
         // Python test cases and stub code
-        String pythonTestnames =
-          GSON.fromJson(qm.value("pythonTestName"), String.class);
-        String pythonInput =
-          GSON.fromJson(qm.value("pythonInput"), String.class);
-        String pythonOutput =
-          GSON.fromJson(qm.value("pythonOutput"), String.class);
+        String pythonTestnames = GSON.fromJson(qm.value("pythonTestName"),
+            String.class);
+        String pythonInput = GSON.fromJson(qm.value("pythonInput"),
+            String.class);
+        String pythonOutput = GSON.fromJson(qm.value("pythonOutput"),
+            String.class);
         String pythonStub = GSON.fromJson(qm.value("pythonStub"), String.class);
 
         // Ruby test cases and stub code
-        String rubyTestnames =
-          GSON.fromJson(qm.value("rubyTestName"), String.class);
+        String rubyTestnames = GSON.fromJson(qm.value("rubyTestName"),
+            String.class);
         String rubyInput = GSON.fromJson(qm.value("rubyInput"), String.class);
         String rubyOutput = GSON.fromJson(qm.value("rubyOutput"), String.class);
         String rubyStub = GSON.fromJson(qm.value("rubyStub"), String.class);
 
         // Javascript test cases and stub code
-        String jsTestnames =
-          GSON.fromJson(qm.value("jsTestName"), String.class);
+        String jsTestnames = GSON
+            .fromJson(qm.value("jsTestName"), String.class);
         String jsInput = GSON.fromJson(qm.value("jsInput"), String.class);
         String jsOutput = GSON.fromJson(qm.value("jsOutput"), String.class);
         String jsStub = GSON.fromJson(qm.value("jsStub"), String.class);
@@ -134,22 +133,22 @@ public final class AdminHandler {
           // was entered for those fields on the page
           if (!javaInput.equals("")) {
             newTestInfo(pName, javaTestnames, javaInput, javaOutput, javaStub,
-              "java");
+                "java");
           }
 
           if (!pythonInput.equals("")) {
             newTestInfo(pName, pythonTestnames, pythonInput, pythonOutput,
-              pythonStub, "python");
+                pythonStub, "python");
           }
 
           if (!rubyInput.equals("")) {
             newTestInfo(pName, rubyTestnames, rubyInput, rubyOutput, rubyStub,
-              "ruby");
+                "ruby");
           }
 
           if (!jsInput.equals("")) {
             newTestInfo(pName, jsTestnames, jsInput, jsOutput, jsStub,
-              "javascript");
+                "javascript");
           }
         } catch (IOException e) {
           new ExceptionPrinter().handle(e, req, res);
@@ -158,8 +157,8 @@ public final class AdminHandler {
         }
       }
 
-      Map<String, Object> variables =
-        new ImmutableMap.Builder().put("success", success).build();
+      Map<String, Object> variables = new ImmutableMap.Builder().put("success",
+          success).build();
       return GSON.toJson(variables);
     }
   }
@@ -178,20 +177,20 @@ public final class AdminHandler {
         deleteChallenge(challengeId);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> variables =
-          new ImmutableMap.Builder().put("success", true).build();
+        Map<String, Object> variables = new ImmutableMap.Builder().put(
+            "success", true).build();
         return GSON.toJson(variables);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);
         @SuppressWarnings("unchecked")
-        Map<String, Object> variables =
-          new ImmutableMap.Builder().put("success", false).build();
+        Map<String, Object> variables = new ImmutableMap.Builder().put(
+            "success", false).build();
         return GSON.toJson(variables);
       } catch (IOException e) {
         new ExceptionPrinter().handle(e, req, res);
         @SuppressWarnings("unchecked")
-        Map<String, Object> variables =
-          new ImmutableMap.Builder().put("success", false).build();
+        Map<String, Object> variables = new ImmutableMap.Builder().put(
+            "success", false).build();
         return GSON.toJson(variables);
       }
     }
@@ -227,31 +226,31 @@ public final class AdminHandler {
 
       // Java test cases and stub code
       if (success) {
-        String javaTestnames =
-          GSON.fromJson(qm.value("javaTestName"), String.class);
+        String javaTestnames = GSON.fromJson(qm.value("javaTestName"),
+            String.class);
         String javaInput = GSON.fromJson(qm.value("javaInput"), String.class);
         String javaOutput = GSON.fromJson(qm.value("javaOutput"), String.class);
         String javaStub = GSON.fromJson(qm.value("javaStub"), String.class);
 
         // Python test cases and stub code
-        String pythonTestnames =
-          GSON.fromJson(qm.value("pythonTestName"), String.class);
-        String pythonInput =
-          GSON.fromJson(qm.value("pythonInput"), String.class);
-        String pythonOutput =
-          GSON.fromJson(qm.value("pythonOutput"), String.class);
+        String pythonTestnames = GSON.fromJson(qm.value("pythonTestName"),
+            String.class);
+        String pythonInput = GSON.fromJson(qm.value("pythonInput"),
+            String.class);
+        String pythonOutput = GSON.fromJson(qm.value("pythonOutput"),
+            String.class);
         String pythonStub = GSON.fromJson(qm.value("pythonStub"), String.class);
 
         // Ruby test cases and stub code
-        String rubyTestnames =
-          GSON.fromJson(qm.value("rubyTestName"), String.class);
+        String rubyTestnames = GSON.fromJson(qm.value("rubyTestName"),
+            String.class);
         String rubyInput = GSON.fromJson(qm.value("rubyInput"), String.class);
         String rubyOutput = GSON.fromJson(qm.value("rubyOutput"), String.class);
         String rubyStub = GSON.fromJson(qm.value("rubyStub"), String.class);
 
         // Javascript test cases and stub code
-        String jsTestnames =
-          GSON.fromJson(qm.value("jsTestName"), String.class);
+        String jsTestnames = GSON
+            .fromJson(qm.value("jsTestName"), String.class);
         String jsInput = GSON.fromJson(qm.value("jsInput"), String.class);
         String jsOutput = GSON.fromJson(qm.value("jsOutput"), String.class);
         String jsStub = GSON.fromJson(qm.value("jsStub"), String.class);
@@ -261,22 +260,22 @@ public final class AdminHandler {
           // was entered for those fields on the page
           if (!javaInput.equals("")) {
             editTestInfo(pName, javaTestnames, javaInput, javaOutput, javaStub,
-              "java");
+                "java");
           }
 
           if (!pythonInput.equals("")) {
             editTestInfo(pName, pythonTestnames, pythonInput, pythonOutput,
-              pythonStub, "python");
+                pythonStub, "python");
           }
 
           if (!rubyInput.equals("")) {
             editTestInfo(pName, rubyTestnames, rubyInput, rubyOutput, rubyStub,
-              "ruby");
+                "ruby");
           }
 
           if (!jsInput.equals("")) {
             editTestInfo(pName, jsTestnames, jsInput, jsOutput, jsStub,
-              "javascript");
+                "javascript");
           }
         } catch (IOException e) {
           new ExceptionPrinter().handle(e, req, res);
@@ -285,8 +284,8 @@ public final class AdminHandler {
         }
       }
 
-      Map<String, Object> variables =
-        new ImmutableMap.Builder().put("success", success).build();
+      Map<String, Object> variables = new ImmutableMap.Builder().put("success",
+          success).build();
       return GSON.toJson(variables);
     }
   }
@@ -337,8 +336,8 @@ public final class AdminHandler {
       }
 
       @SuppressWarnings({ "rawtypes", "unchecked" })
-      Map<String, Object> variables =
-        new ImmutableMap.Builder().put("exists", exists).build();
+      Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
+          exists).build();
       return GSON.toJson(variables);
     }
   }
@@ -359,8 +358,8 @@ public final class AdminHandler {
       }
 
       @SuppressWarnings({ "rawtypes", "unchecked" })
-      Map<String, Object> variables =
-        new ImmutableMap.Builder().put("categories", categories).build();
+      Map<String, Object> variables = new ImmutableMap.Builder().put(
+          "categories", categories).build();
       return GSON.toJson(variables);
     }
 
@@ -385,8 +384,8 @@ public final class AdminHandler {
       }
 
       @SuppressWarnings({ "rawtypes", "unchecked" })
-      Map<String, Object> variables =
-        new ImmutableMap.Builder().put("exists", exists).build();
+      Map<String, Object> variables = new ImmutableMap.Builder().put("exists",
+          exists).build();
       return GSON.toJson(variables);
     }
   }
@@ -412,23 +411,17 @@ public final class AdminHandler {
 
   /**
    * Processes the new "basic" information for a new challenge.
-   *
-   * @param category
-   *          The new category
-   * @param pName
-   *          The "path name" of the challenge
-   * @param name
-   *          The new name
-   * @param description
-   *          The new description
+   * 
+   * @param category The new category
+   * @param challengeId The "path name" of the challenge
+   * @param name The new name
+   * @param description The new description
    * @return True if the information was successfully edited, false otherwise
-   * @throws SQLException
-   *           if the database is messed up somehow
-   * @throws IOException
-   *           If an I/O error occurred with creating a file
+   * @throws SQLException if the database is messed up somehow
+   * @throws IOException If an I/O error occurred with creating a file
    */
   public static boolean newBasicInfo(String category, String challengeId,
-    String name, String description) throws SQLException, IOException {
+      String name, String description) throws SQLException, IOException {
     String path = "challenges/" + challengeId;
 
     // check if an insert to the database is successful
@@ -441,8 +434,7 @@ public final class AdminHandler {
       File challengeDesc = new File(path + "/description.txt");
       challengeDesc.createNewFile();
 
-      try (BufferedWriter bw =
-        new BufferedWriter(new FileWriter(challengeDesc))) {
+      try (BufferedWriter bw = new BufferedWriter(new FileWriter(challengeDesc))) {
         bw.write(description);
       }
 
@@ -462,30 +454,22 @@ public final class AdminHandler {
    * stub.txt file). Therefore, call this ONLY after newBasicInfo is called (and
    * IMMEDIATELY afterwards).
    *
-   * @param challengeId
-   *          The "path name" of the challenge
-   * @param testnames
-   *          The names of each of the tests
-   * @param input
-   *          The input for the test cases
-   * @param output
-   *          The output for the test cases
-   * @param stub
-   *          The stub code for the test cases
-   * @param language
-   *          The language that this information is related to
+   * @param challengeId The "path name" of the challenge
+   * @param testnames The names of each of the tests
+   * @param input The input for the test cases
+   * @param output The output for the test cases
+   * @param stub The stub code for the test cases
+   * @param language The language that this information is related to
    * @return True if all the test info was properly entered into the challenges
    *         directory, false otherwise. A False may occur when the challenge
    *         directory with name "name" doesn't exist. Or a file for some txt
    *         file/directory for the Language already exists.
-   * @throws IOException
-   *           If an I/O error occurred with creating a file
-   * @throws SQLException
-   *           When the database screws up
+   * @throws IOException If an I/O error occurred with creating a file
+   * @throws SQLException When the database screws up
    */
   public static boolean newTestInfo(String challengeId, String testnames,
-    String input, String output, String stub, String language)
-    throws IOException, SQLException {
+      String input, String output, String stub, String language)
+      throws IOException, SQLException {
 
     File directory = new File("challenges/" + challengeId);
 
@@ -513,8 +497,7 @@ public final class AdminHandler {
         return false;
       }
 
-      try (BufferedWriter bw =
-        new BufferedWriter(new FileWriter(testnamesFile))) {
+      try (BufferedWriter bw = new BufferedWriter(new FileWriter(testnamesFile))) {
         bw.write(testnames);
       }
 
@@ -560,31 +543,25 @@ public final class AdminHandler {
   /**
    * Edits the basic information for a challenge in the directories and in the
    * database.
-   *
-   * @param category
-   *          The (new) category
-   * @param challengeId
-   *          The (new) challengeId
-   * @param name
-   *          The (new) name
-   * @param description
-   *          The (new) description
-   * @param originalChallengeId
-   *          The old challengeId
+   * 
+   * @param category The (new) category
+   * @param challengeId The (new) challengeId
+   * @param name The (new) name
+   * @param description The (new) description
+   * @param originalChallengeId The old challengeId
    * @return True if successfully edited, false otherwise.
-   * @throws IOException
-   *           when there is an issue writing to the description.txt file
-   * @throws SQLException
-   *           when something goes awry with the database in editing the
-   *           challenge
+   * @throws IOException when there is an issue writing to the description.txt
+   *           file
+   * @throws SQLException when something goes awry with the database in editing
+   *           the challenge
    */
   public static boolean editBasicInfo(String category, String challengeId,
-    String name, String description, String originalChallengeId)
-    throws IOException, SQLException {
+      String name, String description, String originalChallengeId)
+      throws IOException, SQLException {
     String newChallengeDir = "challenges/" + challengeId;
 
     if (challenges.editChallenge(originalChallengeId, challengeId, name,
-      newChallengeDir, category)) {
+        newChallengeDir, category)) {
       // rename to new name (does this even if the id name is the same as
       // before)
       String origChallengeDir = "challenges/" + originalChallengeId;
@@ -596,8 +573,7 @@ public final class AdminHandler {
 
       File challengeDesc = new File(newChallengeDir + "/description.txt");
 
-      try (BufferedWriter bw =
-        new BufferedWriter(new FileWriter(challengeDesc))) {
+      try (BufferedWriter bw = new BufferedWriter(new FileWriter(challengeDesc))) {
         bw.write(description);
       }
       return true;
@@ -610,29 +586,21 @@ public final class AdminHandler {
    * Edits Test Info for a challenge. If a directory for a specifically language
    * for that test already exists, then the test info is updated per the user's
    * entry.
-   *
-   * @param challengeId
-   *          The new ID of the challenge
-   * @param testnames
-   *          All the test names
-   * @param input
-   *          All the inputs
-   * @param output
-   *          All the outputs
-   * @param stub
-   *          The stub code
-   * @param language
-   *          The language of the test
+   * 
+   * @param challengeId The new ID of the challenge
+   * @param testnames All the test names
+   * @param input All the inputs
+   * @param output All the outputs
+   * @param stub The stub code
+   * @param language The language of the test
    * @return True if successfully changed or added, false otherwise.
-   * @throws IOException
-   *           If there is an issue writing to some file.
-   * @throws SQLException
-   *           If the database goes awry with adding to the Test table, if an
-   *           add was necessary.
+   * @throws IOException If there is an issue writing to some file.
+   * @throws SQLException If the database goes awry with adding to the Test
+   *           table, if an add was necessary.
    */
   public static boolean editTestInfo(String challengeId, String testnames,
-    String input, String output, String stub, String language)
-    throws IOException, SQLException {
+      String input, String output, String stub, String language)
+      throws IOException, SQLException {
     File directory = new File("challenges/" + challengeId);
 
     if (directory.exists()) {
@@ -644,8 +612,8 @@ public final class AdminHandler {
         // Overwrite the testnames file
         File testnamesFile = new File(path + "/testnames.txt");
 
-        try (BufferedWriter bw =
-          new BufferedWriter(new FileWriter(testnamesFile))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(
+            testnamesFile))) {
           bw.write(testnames);
         }
 
@@ -680,26 +648,22 @@ public final class AdminHandler {
 
   /**
    * Determines if a challenge by a certain name already exists.
-   *
-   * @param challengeId
-   *          the "path name" of the challenge
+   * 
+   * @param challengeId the "path name" of the challenge
    * @return True if the challenge already exists, false otherwise.
-   * @throws SQLException
-   *           if something with the database goes awry
+   * @throws SQLException if something with the database goes awry
    */
   public static boolean doesChallengeExist(String challengeId)
-    throws SQLException {
+      throws SQLException {
     return challenges.doesChallengeExist(challengeId);
   }
 
   /**
    * Determines if a category already exists.
-   *
-   * @param qCategory
-   *          the category
+   * 
+   * @param qCategory the category
    * @return True if the category already exists, false otherwise.
-   * @throws SQLException
-   *           if something with the database goes awry
+   * @throws SQLException if something with the database goes awry
    */
   public static boolean doesCategoryExist(String qCategory) throws SQLException {
     return challenges.doesCategoryExist(qCategory);
@@ -709,8 +673,7 @@ public final class AdminHandler {
    * Gets all the categories that exist.
    *
    * @return all the categories in a List
-   * @throws SQLException
-   *           if something with the database goes awry
+   * @throws SQLException if something with the database goes awry
    */
   public static List<String> getAllCategories() throws SQLException {
     return challenges.getAllCategories();
@@ -723,17 +686,14 @@ public final class AdminHandler {
    * "challenge_id" foreign keys. Otherwise, there will be zombie entries
    * leftover in the test and solution tables.
    *
-   * @param challengeId
-   *          the name of the challenge as seen in the challenges directory (NOT
-   *          the one seen by a user)
-   * @throws SQLException
-   *           if something with the database goes awry.
-   * @throws IOException
-   *           when there is an error with deleting the directory associated
-   *           with the challenge
+   * @param challengeId the name of the challenge as seen in the challenges
+   *          directory (NOT the one seen by a user)
+   * @throws SQLException if something with the database goes awry.
+   * @throws IOException when there is an error with deleting the directory
+   *           associated with the challenge
    */
   public static void deleteChallenge(String challengeId) throws SQLException,
-    IOException {
+      IOException {
     String directory = "challenges/" + challengeId;
     File challengeDirectory = new File(directory);
 
@@ -750,10 +710,9 @@ public final class AdminHandler {
    * exists. It also assumes that if a directory for the challenge exists then
    * there is an entry in the challenge table in the database for this
    * challenge. For other cases, the results of this method are undefined.
-   *
-   * @param challengeId
-   *          the name of the challenge as seen in the challenges directory (NOT
-   *          the one seen by a user)
+   * 
+   * @param challengeId the name of the challenge as seen in the challenges
+   *          directory (NOT the one seen by a user)
    * @return A List of a List of Objects where: the first list consists of the
    *         "basic information" like category, challengeId, actual challenge
    *         name, and description, in that order, the second list consists of
@@ -761,14 +720,12 @@ public final class AdminHandler {
    *         that order, and the third, fourth, and fifth lists contain Python,
    *         Ruby, and Javascript information, in that order. Returns null if
    *         the requested challengeId does not exist.
-   * @throws IOException
-   *           when there is an error with deleting the directory associated
-   *           with the challenge
-   * @throws SQLException
-   *           if something with the database goes awry
+   * @throws IOException when there is an error with deleting the directory
+   *           associated with the challenge
+   * @throws SQLException if something with the database goes awry
    */
   public static List<List<String>> getChallengeInfo(String challengeId)
-    throws IOException, SQLException {
+      throws IOException, SQLException {
     List<List<String>> ret = new ArrayList<>();
     // GET BASIC INFORMATION
     String directory = "challenges/" + challengeId;
@@ -800,6 +757,9 @@ public final class AdminHandler {
       ret.add(getTestInfo(challengeId, "ruby"));
       ret.add(getTestInfo(challengeId, "javascript"));
 
+      System.out.println("edit");
+      System.out.println(ret);
+
       return ret;
     } else {
       return null;
@@ -808,20 +768,17 @@ public final class AdminHandler {
 
   /**
    * Returns the Test Info for some challenge and language
-   *
-   * @param challengeId
-   *          The Id of the challenge
-   * @param language
-   *          The language of the challenge
+   * 
+   * @param challengeId The Id of the challenge
+   * @param language The language of the challenge
    * @return A List of test information information containing test name, input,
    *         output, and stub in that order, as strings. If the test directory
    *         does not exist, each entry is an empty String.
-   * @throws IOException
-   *           when there is an error with deleting the directory associated
-   *           with the challenge
+   * @throws IOException when there is an error with deleting the directory
+   *           associated with the challenge
    */
   private static List<String> getTestInfo(String challengeId, String language)
-    throws IOException {
+      throws IOException {
     List<String> ret = new ArrayList<>();
 
     String testPath = "challenges/" + challengeId + "/" + language;
@@ -866,8 +823,8 @@ public final class AdminHandler {
   }
 
   public static void main(String[] args) throws SQLException {
-    ChallengeDatabase cdb =
-      new ChallengeDatabase("testdata/challengeDatabaseTester.sqlite3");
+    ChallengeDatabase cdb = new ChallengeDatabase(
+        "testdata/challengeDatabaseTester.sqlite3");
     AdminHandler.setChallengeDatabase(cdb);
 
     try {

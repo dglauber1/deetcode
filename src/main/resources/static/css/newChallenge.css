@@ -39,6 +39,66 @@ textarea {
 	resize: none;
 }
 
-#submit .row {
+#submitDiv {
 	margin-top: 20px;
 }
+
+#submitError, #descriptionError, #categoryError, #newCategoryError, #pNameError, #nameError, #pythonError, #javaError, #jsError, #rubyError {
+	color:red;
+}
+
+.btn.btn-default {
+	margin-top: 20px;
+}
+
+/* description tabs */
+/*.descTab>a {
+	background-color: #6b6b6b; 
+  	border-color: #000000;
+  	color:#fff; 
+}*/
+
+/* language tabs */
+/*.langTab>a {
+  	color:#FFFFFF; 
+  	background-color: #5bc0de; 
+}*/
+
+/* text color for non-active tabs */
+/*.nav>li.disabled>a {
+    color: #FFFFFF;
+}
+*/
+/* active tabs */
+/*.nav-tabs>li.active>a {
+	color: #000000;
+  	background-color: #FFFFFF;
+  	border: 1px solid #888888;
+}*/
+
+/* submit tab */
+/*.submitTab>a, .descTab>a {
+	background-color: #6b6b6b; 
+  	border-color: #000000;
+  	color:#fff; 
+}*/
+
+/* hover */
+/*.nav>li.disabled>a:hover {
+    color: #FFFFFF;
+  	background-color: #5bc0de;
+}*/
+
+/* hover over submit */
+/*.descTab>a:hover, .submitTab>a:hover {
+	background-color: #6b6b6b; 
+  	border-color: #000000;
+  	color:#fff; 
+}*/
+
+/* hover active */
+/*.nav-tabs>li.active>a:hover {
+	color: #000000;
+  	background-color: #FFFFFF;
+  	border: 1px solid #888888;
+}*/

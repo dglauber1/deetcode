@@ -64,7 +64,7 @@
      <script src="/js/user.js"></script>
      <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-     <script src="/js/jquery-2.1.1.js"></script>
+     <!-- <script src="/js/jquery-2.1.1.js"></script> -->
      <script type="text/javascript" src="/js/TimeCircles.js"></script>
      <script type="text/javascript" src="http://w2ui.com/src/w2ui-1.4.2.min.js"></script>
 
@@ -74,6 +74,7 @@
      <script src="/js/codemirror-5.14.2/mode/python/python.js"></script>
      <script src="/js/codemirror-5.14.2/mode/ruby/ruby.js"></script>
      <script src="/js/codemirror-5.14.2/mode/clike/clike.js"></script>
+     
      <!-- Menu Toggle Script -->
      <script>
 	     $("#menu-toggle").click(function(e) {
