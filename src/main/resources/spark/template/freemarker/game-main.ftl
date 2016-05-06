@@ -49,7 +49,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a> 
-                        <input type="submit" class="btn btn-default" value="Run code">	 	                           
+                        <input type="submit" id="run-button" class="btn btn-default" value="Run code">	 	                           
                     </div>
                     <div class="col-lg-12">
                          ${content}
