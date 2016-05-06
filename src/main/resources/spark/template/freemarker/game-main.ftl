@@ -12,9 +12,10 @@
 	<link href="/css/simple-sidebar.css" rel="stylesheet">       
     <link rel="stylesheet" href="/css/TimeCircles.css" />
 	<link rel="stylesheet" href="/codemirror/lib/codemirror.css">
-    <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/vex-2.2.1/css/vex.css"/>
   	<link rel="stylesheet" href="/vex-2.2.1/css/vex-theme-os.css"/>
+  	<link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/game.css">
   </head>
   
   <body>
@@ -49,7 +50,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a> 
-                        <input type="submit" class="btn btn-default" value="Run code">	 	                           
+                        <input type="submit" id="run-button" class="btn btn-default" value="Run code">	 	                           
                     </div>
                     <div class="col-lg-12">
                          ${content}

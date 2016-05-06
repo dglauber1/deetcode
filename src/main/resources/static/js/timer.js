@@ -1,5 +1,5 @@
 $("#CountDownTimer").TimeCircles({ count_past_zero : false, time: { Days: { show: false }, Hours: { show: false } }});
-$("#CountDownTimer").TimeCircles().start();
+$("#CountDownTimer").TimeCircles().stop();
 var isTimeRemaining = true;
 $(function checkTimer() {
 	var timeLeft = $("#CountDownTimer").TimeCircles().getTime();
