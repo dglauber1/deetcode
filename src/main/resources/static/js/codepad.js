@@ -29,10 +29,10 @@ function loadPage() {
 			console.log("here");
 			console.log(stubOrUserSolution);
 			console.log(currentLanguage);
-			currentLanguage = "javascript";
+			currentLanguage = responseObject.language;
 			console.log(currentLanguage);
 			//TODO set dropdown to current language
-			myCodeMirror.setOption("mode", "javascript");
+			myCodeMirror.setOption("mode", currentLanguage);
 			myCodeMirror.getDoc().setValue(stubOrUserSolution);
 		}
 		//TODO: GET RID OF OVERLAY! & start clock
