@@ -77,8 +77,8 @@ public final class LeaderboardHandler {
 
         // get leaderboard info
         leaderboardInfo =
-          getLeaderboardInfo(currUserUsername, challengeId, "aggregate",
-            primary);
+            getLeaderboardInfo(currUserUsername, challengeId, "aggregate",
+              primary);
 
         name = challenge.getNameFromId(challengeId);
       } catch (SQLException e) {
@@ -118,11 +118,11 @@ public final class LeaderboardHandler {
         QueryParamsMap qm = req.queryMap();
         String type = GSON.fromJson(qm.value("type"), String.class);
         String language =
-          GSON.fromJson(qm.value("language"), String.class).toLowerCase();
+            GSON.fromJson(qm.value("language"), String.class).toLowerCase();
 
         // get leaderboard info
         leaderboardInfo =
-          getLeaderboardInfo(currUserUsername, challengeId, type, language);
+            getLeaderboardInfo(currUserUsername, challengeId, type, language);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);
       } catch (IOException e) {
@@ -130,7 +130,7 @@ public final class LeaderboardHandler {
       }
 
       Map<String, Object> variables =
-        ImmutableMap.of("title", "Leaderboard", "info", leaderboardInfo);
+          ImmutableMap.of("title", "Leaderboard", "info", leaderboardInfo);
       return GSON.toJson(variables);
     }
 
@@ -220,14 +220,14 @@ public final class LeaderboardHandler {
       sqlRes = leaderboard.topTwentyOfChallengeLanguage(challengeId, language);
     } else if (infoType.equals("efficiency")) {
       sqlRes =
-        leaderboard.topTwentyOfChallengeLanguageEfficiency(challengeId,
-        language);
+          leaderboard.topTwentyOfChallengeLanguageEfficiency(challengeId,
+          language);
     } else if (infoType.equals("brevity")) {
       sqlRes =
-        leaderboard.topTwentyOfChallengeLanguageNumLines(challengeId, language);
+          leaderboard.topTwentyOfChallengeLanguageNumLines(challengeId, language);
     } else if (infoType.equals("speed")) {
       sqlRes =
-        leaderboard
+          leaderboard
           .topTwentyOfChallengeLanguageTimeSolve(challengeId, language);
     } else {
       sqlRes = null;
@@ -245,9 +245,9 @@ public final class LeaderboardHandler {
 
         // get the solution if necessary
         if (leaderboard.isChallengeAttempedByUser(res.get(CHALLENGE_ID),
-          currUser, res.get(LANGUAGE))) { // TODO changed! -Dan
+          currUser)) {
           String solutionPath =
-            "challenges/" + res.get(CHALLENGE_ID) + "/" + res.get(LANGUAGE)
+              "challenges/" + res.get(CHALLENGE_ID) + "/" + res.get(LANGUAGE)
               + "/solutions/" + res.get(USERNAME) + "." + res.get(LANGUAGE);
 
           byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
@@ -255,7 +255,7 @@ public final class LeaderboardHandler {
           newInfo.add(code);
         } else {
           newInfo
-            .add("You must attempt the challenge before you can see a solution.");
+          .add("You must attempt the challenge before you can see a solution.");
         }
         leaderboardInfo.add(newInfo);
       }

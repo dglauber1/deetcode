@@ -127,6 +127,8 @@ public final class GamePageHandlers {
       String challengeID = qm.value("challengeID");
       boolean isAttempted = false;
       String language;
+      // TODO language should be passed in from frontend (a user will select
+      // which language to code in before the game page is loaded)
       try (ChallengeDatabase cd = new ChallengeDatabase(Main.dbLoc)) {
         language = cd.getLanguagesSupported(challengeID).get(0);
       } catch (SQLException e) {
@@ -140,8 +142,7 @@ public final class GamePageHandlers {
         isAttempted =
           ld.isChallengeAttempedByUser(challengeID, username, language);
         // language = ld.getUserChallengeLanguage(challengeID, username);
-        // TODO what if a user solved a challenge in multiple different
-        // languages? -Dan
+
       } catch (SQLException e) {
         e.printStackTrace();
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",

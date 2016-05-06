@@ -24,7 +24,7 @@
             <ul class="sidebar-nav">
                 <li class="sidebar-brand">
                     <a href="#">
-                        Codegolf
+                        DeetCode
                     </a>
                 </li>
                 <li>
