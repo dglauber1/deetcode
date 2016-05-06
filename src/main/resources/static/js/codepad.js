@@ -14,6 +14,9 @@ var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("codepad"), {
 // default language is Python
 var lang = "python";
 
+// set to true if it's the first time a user is attempting the problem, false otherwise
+var isFirstTime = false;
+
 // load the page
 loadPage();
 
@@ -45,11 +48,32 @@ function loadPage() {
 					var loadParameters = {"challengeID" : challengeID, "language" : lang};
 					$.post("/load", loadParameters, function (responseJSON) {
 						var responseObject = JSON.parse(responseJSON);
+						// set isFirstTime flag
+						console.log(isFirstTime);
+						isFirstTime = responseObject.isFirstTime;
+						console.log(isFirstTime);
 						if (responseObject.status != "SUCCESS") {
 							vex.dialog.alert("Error: " + responseObject.message);
 						} else {
+							// change indicator on screen
+							console.log("success status")
+							if (!isFirstTime) {
+								console.log("changing indicator");
+								$("#indicator")[0].innerHTML = 
+									"<a id=\"indicator\">This isn't your first attempt</a>";
+							}
+							// get stub code or user code
 							var stubOrUserSolution = responseObject.code;
-							console.log("Setting CodeMirror mode to: " + lang);
+							// filler values
+							var leaderboardParameters = {"input" : stubOrUserSolution,
+									"language" : lang,
+									"challengeID" : challengeID,
+									"passed" : false,
+									"efficiency" : -1,
+									"numLines" : -1,
+									"timeToSolve" : -1, 
+									"aggregate" : -1};
+							saveSolution(leaderboardParameters, false);
 							myCodeMirror.setOption("mode", lang);
 							myCodeMirror.getDoc().setValue(stubOrUserSolution);
 							vex.close();
@@ -63,12 +87,75 @@ function loadPage() {
 };
 
 /*
+ * displayDialog
+ *  - a boolean that indicating whether or not to display modal dialogs after save
+ * leaderboardParameters must contain the following keys:
+ * 	(1) input - the user's code
+ * 	(2) challengeID - the challenge ID
+ * 	(3) passed - boolean indicating whether or not the user passed the test
+ * 	(4) efficiency - the time it took to compile the user's code
+ * 	(5) numLines - the number of lines in the user's solution
+ * 	(6) timeToSolve - the time it took the user to solve the challenge
+ * 	(7) aggregate - some type of composite score TODO clarify this
+ */
+function saveSolution(leaderboardParameters, displayDialog) {
+	var msg = "";
+	if (isFirstTime) {
+		msg = "Successfully added your solution to the leaderboard.";
+	} else {
+		msg = "Successfully saved your solution. " +
+				"Try another question, or continue optimizing this solution!";
+	}
+	
+	$.post("/save", leaderboardParameters, function(responseJSON) {
+		responseObject = JSON.parse(responseJSON);
+		if (responseObject.status === "SUCCESS") {
+			if (displayDialog) {
+				vex.dialog.alert({
+					message: msg,
+					buttons: [
+						$.extend({}, vex.dialog.buttons.YES, {
+							text: "Let's do another question!"
+						})
+					],
+					callback: function() {
+						isSubmitted = true;
+						window.location.href = "/categories";
+					}
+				});
+			}
+		} else {
+			console.log("Something went wrong while saving.");
+			console.log(responseObject.message);
+			if (displayDialog) {
+				vex.dialog.alert({
+					message: responseObject.message,
+					buttons: [
+						$.extend({}, vex.dialog.buttons.YES, {
+							text: "Close"
+						})
+					]
+				});
+			}
+		}
+	});
+}
+
+var isSubmitted = false;
+/*
  * Warning message that executes when user tries to leave page.
  */
 $(window).on('beforeunload', function () {
-	return "You've attempted to leave or refresh this page. " +
- 		"If you do choose to leave, you won't be able to " +
- 		"submit your solution to this question's leaderboard. ";
+	console.log(isFirstTime);
+	if (isFirstTime && !isSubmitted) {
+		return "This is your first attempt at this problem. " +
+ 		"If you navigate away, you won't be able to submit your solution to the leaderboard. " +
+ 		"You are, however, allowed to continue working on the problem.";
+	}
+	
+	if (!isSubmitted) {
+		return "You haven't yet saved. You'll lose your work if you navigate away.";
+	}
 });
 
 
@@ -78,7 +165,6 @@ $("#run-button").click(function(e) {
    	var timeLeft = $("#CountDownTimer").TimeCircles().getTime();
    	var isTimeOver = (timeLeft <= 0);
         
-   	// note: separate on new line?
    	var userTests = $("#userInput")[0].value;
    	var userCode = myCodeMirror.getValue();
    	
@@ -90,7 +176,10 @@ $("#run-button").click(function(e) {
 		overlayClosesOnClick: false,
 		buttons: []
 	})
+	
+	$("#CountDownTimer").TimeCircles().stop();
 	$.post("/game/usertests", postParameters, function(responseJSON) {
+		$("#CountDownTimer").TimeCircles().start();
 		vex.close();
 		var userResultString = "<b>User Test Results</b><br/>";
 		var responseObject = JSON.parse(responseJSON);
@@ -179,64 +268,49 @@ $("#run-button").click(function(e) {
 						}
 					});
 				} else {
-					// allow user to submit to the leaderboard
-					vex.dialog.open({
-						message: userResultString + "<br/><br/>" + deetResultString,
-						buttons: [
-							$.extend({}, vex.dialog.buttons.YES, {
-							    text: "Submit to leaderboard!"
-							}),
-							$.extend({}, vex.dialog.buttons.NO, {
-							    text: "Don't submit."
-							    /* TODO insert some sort of prompt that tells the user that he can
-							    	either keep working on the problem for a better score or 
-							    	do a different problem */
-							})
-						],
-						afterClose: function() {
-							$("#CountDownTimer").TimeCircles().start();
-						},
-						callback: function(value) { 
-							if (value) {
-								var leaderboardParameters = {"input" : userCode,
-										"language" : lang,
-										"challengeID" : challengeID,
-										"passed" : true,
-										"efficiency" : responseObject.timeToTest,
-										"numLines" : responseObject.numLines,
-										"timeToSolve" : 120 - currentTime, 
-										//Change 120 to whatever initial time was
-										"aggregate" : 100};
-								console.log(leaderboardParameters);
-								$.post("/save", leaderboardParameters, function(responseJSON) {
-									responseObject = JSON.parse(responseJSON);
-									if (responseObject.status === "SUCCESS") {
-										vex.dialog.alert({
-											message: "Succesfully added your solution to the leaderboard.",
-											buttons: [
-												$.extend({}, vex.dialog.buttons.YES, {
-													text: "Let's do another question!"
-												})
-											],
-											callback: function() {
-												window.location.href = "/categories";
-											}
-										});
-									} else {
-										vex.dialog.alert({
-											message: responseObject.message,
-											buttons: [
-												$.extend({}, vex.dialog.buttons.YES, {
-													text: "Close"
-												})
-											]
-										});
-										
-									}
-								});
+					var leaderboardParameters = {"input" : userCode,
+							"language" : lang,
+							"challengeID" : challengeID,
+							"passed" : true,
+							"efficiency" : responseObject.timeToTest,
+							"numLines" : responseObject.numLines,
+							"timeToSolve" : 120 - currentTime, 
+							//Change 120 to whatever initial time was
+							"aggregate" : 100};
+					
+					if (!isFirstTime) {
+						vex.dialog.alert(userResultString + "<br/><br/>" + deetResultString);
+						saveSolution(leaderboardParameters, false);
+						$("#CountDownTimer").TimeCircles().start();
+					} else 
+				    	// TODO only submit if they're better than the people on the leaderboard.
+						// allow user to submit to the leaderboard
+						vex.dialog.open({
+							message: userResultString + "<br/><br/>" + deetResultString +
+								"You can either submit this result to the leaderboard or continue " +
+								"optimizing your solution",
+							buttons: [
+								$.extend({}, vex.dialog.buttons.YES, {
+								    text: "Submit to leaderboard!"
+								}),
+								$.extend({}, vex.dialog.buttons.NO, {
+								    text: "Don't submit."
+								    /* TODO insert some sort of prompt that tells the user that he can
+								    	either keep working on the problem for a better score or 
+								    	do a different problem */
+								})
+							],
+							afterClose: function() {
+								$("#CountDownTimer").TimeCircles().start();
+							},
+							callback: function(value) { 
+								if (value) {
+									saveSolution(leaderboardParameters, true);
+								}
 							}
-						}
-					});
+						});
+					
+
 				}
 			} else {
 				vex.dialog.alert(userResultString + "<br/><br/>" + deetResultString);
@@ -244,21 +318,4 @@ $("#run-button").click(function(e) {
 			
 		});
 	});
-
-   	// determine whether or not this is the user has solved this problem
-   	// or has attempted to run it
-    // note: dan's code could do this
-//   	var isRepeatedAttempt = false;
-//   	
-//   	if (isTimeOver || isRepeatedAttempt) {
-//   		
-//   		// communicate with back end to run code 
-//   		// determine whether or not code passed or failed 
-//   		// don't let the user submit to the leaderboard 	
-//   		vex.dialog.alert("<b>Ran your code! Unfortunately, you can't submit to the leaderboard.</b>");
-//   	} else {
-//   		// communicate with back end to run code 
-//   		// determine whether or not code passed or failed 
-//   		vex.dialog.alert("<b>Ran your code! Submitting to the leaderboard.</b>");
-//   	}
 });

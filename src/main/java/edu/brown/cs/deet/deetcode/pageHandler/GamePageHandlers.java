@@ -127,15 +127,17 @@ public final class GamePageHandlers {
 						"message", e.getMessage()));
 			}
 			assert (username != null);
-			// username = "el13"; // TODO fix hardcode
 			QueryParamsMap qm = req.queryMap();
 			String challengeID = qm.value("challengeID");
 			boolean isAttempted = false;
+			boolean isAttemptedLang = false;
 			String language = qm.value("language");
 			// Solution is only available if the user has successfully solved
 			// the problem or if time has run out. TODO clarify with group
 			try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
 				isAttempted = ld.isChallengeAttempedByUser(challengeID,
+						username);
+				isAttemptedLang = ld.isChallengeAttempedByUser(challengeID,
 						username, language);
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -143,7 +145,7 @@ public final class GamePageHandlers {
 						"message", e.getMessage()));
 			}
 
-			if (isAttempted) {
+			if (isAttempted && isAttemptedLang) {
 				StringBuilder userCode = new StringBuilder();
 				String fileType;
 				switch (language) {
@@ -154,7 +156,7 @@ public final class GamePageHandlers {
 					fileType = ".js";
 					break;
 				default:
-					String msg = "Error in SaveSolutionHandler: "
+					String msg = "Error in LoadSolutionHandler: "
 							+ "language must be either python, ruby, or javascript";
 					Map<String, Object> variables = ImmutableMap.of("status",
 							"FAILURE", "message", msg);
@@ -178,8 +180,10 @@ public final class GamePageHandlers {
 					return GSON.toJson(ImmutableMap.of("status", "FAILURE",
 							"message", e.getMessage()));
 				}
+				System.out.println("Load: subsequentf attempt");
 				return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
-						userCode.toString(), "language", language));
+						userCode.toString(), "language", language,
+						"isFirstTime", !isAttempted));
 			} else {
 				StringBuilder stubCode = new StringBuilder();
 				File file = new File(String.format("challenges/%s/%s/stub.txt",
@@ -198,8 +202,10 @@ public final class GamePageHandlers {
 					return GSON.toJson(ImmutableMap.of("status", "FAILURE",
 							"message", e.getMessage()));
 				}
+				System.out.println("Load: first attempt");
 				return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
-						stubCode.toString(), "language", language));
+						stubCode.toString(), "language", language,
+						"isFirstTime", !isAttempted));
 			}
 
 		}
@@ -222,23 +228,26 @@ public final class GamePageHandlers {
 				return GSON.toJson(ImmutableMap.of("status", "FAILURE",
 						"message", e.getMessage()));
 			}
-			// assert (username != null);
-			// TODO currently hardcoding a username because tyler hasn't yet
-			// written
-			// the code to populate the user table
-			username = "el13";
+			assert (username != null);
+
 			String language = qm.value("language");
 			boolean passed = Boolean.parseBoolean(qm.value("passed"));
 			double efficiency = Double.parseDouble(qm.value("efficiency"));
 			int numLines = Integer.parseInt(qm.value("numLines"));
 			double timeToSolve = Double.parseDouble(qm.value("timeToSolve"));
 			int aggregate = Integer.parseInt(qm.value("aggregate"));
-			// TODO Currently set to the test database.
 			try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
-				ld.addSolution(challengeID, username, passed, efficiency,
-						numLines, timeToSolve, aggregate, language, 2.0); // TODO
-																			// REMOVE
-																			// TIMESTSAMP
+				// TODO DON'T HARDCODE TIMESTSAMP
+				if (ld.isChallengeAttempedByUser(challengeID, username,
+						language)) {
+					ld.updateSolution(challengeID, username, passed,
+							efficiency, numLines, timeToSolve, aggregate,
+							language, 2.0);
+				} else {
+					ld.addSolution(challengeID, username, passed, efficiency,
+							numLines, timeToSolve, aggregate, language, 2.0);
+				}
+
 			} catch (SQLException e) {
 				return GSON.toJson(ImmutableMap.of("status", "FAILURE",
 						"message", e.getMessage()));
@@ -247,6 +256,9 @@ public final class GamePageHandlers {
 			switch (language) {
 			case "python":
 				fileType = ".py";
+				break;
+			case "javascript":
+				fileType = ".js";
 				break;
 			default:
 				String msg = "Error in SaveSolutionHandler: "
@@ -264,6 +276,7 @@ public final class GamePageHandlers {
 				printWriter.print(code);
 				printWriter.close();
 			} catch (FileNotFoundException e) {
+				System.out.println(file.getAbsolutePath());
 				String msg = "Error in SaveSolutionHandler: File not found.";
 				Map<String, Object> variables = ImmutableMap.of("status",
 						"FAILURE", "message", msg);
@@ -330,7 +343,6 @@ public final class GamePageHandlers {
 				long start = System.currentTimeMillis();
 				Collection<List<String>> testResults = Tester.test(
 						file.getPath(), testDir, myRunner);
-				System.out.println("hi1");
 				long finish = System.currentTimeMillis();
 				long time = finish - start; /* in milliseconds */
 				Map<String, Object> variables = new ImmutableMap.Builder()
@@ -420,7 +432,6 @@ public final class GamePageHandlers {
 					return GSON.toJson(variables);
 				}
 
-				System.out.println("here0");
 				String testInputs = qm.value("userTest");
 				List<String> testInputList = Lists.newArrayList(Splitter
 						.on(System.getProperty("line.separator")).trimResults()
@@ -428,12 +439,9 @@ public final class GamePageHandlers {
 				Map<String, String> runResults = myRunner.run(file.getPath(),
 						testInputList);
 
-				System.out.println("here1");
 				Map<String, Object> variables = new ImmutableMap.Builder()
 						.put("error", false).put("compiled", "success")
 						.put("runResults", runResults).build();
-
-				System.out.println("here2");
 
 				return GSON.toJson(variables);
 

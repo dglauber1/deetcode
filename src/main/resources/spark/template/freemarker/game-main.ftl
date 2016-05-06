@@ -12,9 +12,10 @@
 	<link href="/css/simple-sidebar.css" rel="stylesheet">       
     <link rel="stylesheet" href="/css/TimeCircles.css" />
 	<link rel="stylesheet" href="/codemirror/lib/codemirror.css">
-    <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/vex-2.2.1/css/vex.css"/>
   	<link rel="stylesheet" href="/vex-2.2.1/css/vex-theme-os.css"/>
+  	<link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/game.css">
   </head>
   
   <body>
