@@ -91,6 +91,7 @@ public final class REPL {
           System.out.println();
           continue;
         } catch (Exception e) {
+          e.printStackTrace();
           System.out.println(String.format(
             "ERROR: error occurred running %s on test directory %s",
             solutionPath, testDir));
