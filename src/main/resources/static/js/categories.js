@@ -63,6 +63,11 @@ $(function() {
     window.location.href = $(e.target).prop('href');
   });
 
+  $("#newChallengeButton").click(function(e) {
+    e.preventDefault();
+    window.location.href = "http://localhost:4567/admin/add";
+  });
+
   $('#filters').change(function() {
     var filter = $(this).val();
     var $solved = $(".questions a.list-group-item").has(".leaderboard-button");

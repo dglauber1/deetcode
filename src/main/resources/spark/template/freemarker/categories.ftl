@@ -37,6 +37,9 @@
                     <option>No Filter</option>
                   </select>
                 </div>
+              <#else>
+                <small style="font-size:16px">Admin Mode</small>
+                <button class="pull-right btn btn-default" id="newChallengeButton">New Challenge</button>
               </#if>
             </h2>
           </div>
