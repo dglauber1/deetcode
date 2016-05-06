@@ -12,6 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -19,11 +25,6 @@ import com.google.gson.reflect.TypeToken;
 import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.deetcode.Main;
-import spark.ModelAndView;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
 
 public final class LoginHandlers {
 
@@ -47,9 +48,8 @@ public final class LoginHandlers {
           List<String> categories = cd.getAllCategories();
 
           // map from categories to lists of challenge maps
-          Map<String, List<Map<String, String>>> categoryToChallengeMap =
-              new HashMap<>();
-          
+          Map<String, List<Map<String, String>>> categoryToChallengeMap = new HashMap<>();
+
           if (ud.doesUserExistWithID(id)) {
             username = ud.getUsernameFromID(id);
             addingNewUser = false;
@@ -57,24 +57,25 @@ public final class LoginHandlers {
 
           for (String category : categories) {
             // get all the challenges for a given category
-            List<Map<String, String>> challengeMap =
-                cd.categoryToChallenges(category);
+            List<Map<String, String>> challengeMap = cd
+                .categoryToChallenges(category);
             for (Map<String, String> challenge : challengeMap) {
               if (addingNewUser) {
                 challenge.put("solved", "false");
               } else {
                 challenge.put("solved",
-                  cd.hasUserSolvedChallenge(username, challenge.get("id")).toString());
+                    cd.hasUserSolvedChallenge(username, challenge.get("id"))
+                        .toString());
               }
             }
             categoryToChallengeMap.put(category, challengeMap);
           }
-          
+
           Boolean isAdmin = ud.isUserAdmin(id);
-          
-          Map<String, Object> variables = ImmutableMap.of("title", "Categories",
-              "name", req.cookie("name"), "username", username, "data",
-              categoryToChallengeMap, "isAdmin", isAdmin);
+
+          Map<String, Object> variables = ImmutableMap.of("title",
+              "Categories", "name", req.cookie("name"), "username", username,
+              "data", categoryToChallengeMap, "isAdmin", isAdmin);
           return new ModelAndView(variables, "categories.ftl");
         } catch (SQLException e) {
           e.printStackTrace();
@@ -105,7 +106,7 @@ public final class LoginHandlers {
         System.out.println(e.getMessage());
         System.exit(1);
       }
-      return new ModelAndView(variables, "landing.ftl");
+      return new ModelAndView(variables, "index.ftl");
     }
   }
 
@@ -169,12 +170,10 @@ public final class LoginHandlers {
 
   /**
    * Handles FB requests for logins and registrations.
-   * @param code
-   *          the code returned from the initial authentication step
-   * @param req
-   *          the request object
-   * @param res
-   *          the response object
+   * 
+   * @param code the code returned from the initial authentication step
+   * @param req the request object
+   * @param res the response object
    * @return the string representing the desired response
    */
   static String handleFB(String code, Request req, Response res) {
@@ -208,7 +207,7 @@ public final class LoginHandlers {
     try (UserDatabase ud = new UserDatabase(dbPath)) {
       try {
         Boolean alreadyExists = ud.doesUserExistWithID(fbID);
-        
+
         res.cookie("name", name);
         res.cookie("user", fbID);
 
@@ -247,8 +246,8 @@ public final class LoginHandlers {
   /**
    * Takes a url, makes a get request, and then returns the JSON response in the
    * form of a Map
-   * @param urlString
-   *          the string of the url you want to hit
+   * 
+   * @param urlString the string of the url you want to hit
    * @return the JSON response as a Map<String, String>
    */
   static Map<String, String> getJSONFromURL(String urlString) {
@@ -271,6 +270,5 @@ public final class LoginHandlers {
       return ImmutableMap.of("error", e.getMessage());
     }
   }
-  
 
 }
