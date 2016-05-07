@@ -184,13 +184,13 @@ $("#run-button").click(function(e) {
    	var userCode = myCodeMirror.getValue();
    	
    	// testing against user input
-	console.log("submitting to usertests with language: " + lang)
+	console.log("submitting to usertests with language: " + lang);
    	var postParameters = {"language" : lang, "input" : userCode, "userTest" : userTests};
 	vex.dialog.alert({
 		message: "Compiling, please wait...",
 		overlayClosesOnClick: false,
 		buttons: []
-	})
+	});
 	
 	$("#CountDownTimer").TimeCircles().stop();
 	$.post("/game/usertests", postParameters, function(responseJSON) {
@@ -219,8 +219,8 @@ $("#run-button").click(function(e) {
 			}
 		}
 		
-		console.log("submitting to deettests with language: " + lang)
-	   	postParameters = {"language" : lang, "input" : userCode, "challengeID" : challengeID}
+		console.log("submitting to deettests with language: " + lang);
+	   	postParameters = {"language" : lang, "input" : userCode, "challengeID" : challengeID};
 		$.post("/game/deettests", postParameters, function(responseJSON) {
 			console.log("here");
 			var passedAllTests = true;
@@ -297,7 +297,7 @@ $("#run-button").click(function(e) {
 						vex.dialog.alert(userResultString + "<br/><br/>" + deetResultString);
 						saveSolution(leaderboardParameters, false);
 						$("#CountDownTimer").TimeCircles().start();
-					} else 
+					} else {
 				    	// TODO only submit if they're better than the people on the leaderboard.
 						// allow user to submit to the leaderboard
 						vex.dialog.open({
@@ -324,11 +324,11 @@ $("#run-button").click(function(e) {
 								}
 							}
 						});
-				}
+					}
+				} 	
 			} else {
 				vex.dialog.alert(userResultString + "<br/><br/>" + deetResultString);
 			}
-			
 		});
 	});
 });
