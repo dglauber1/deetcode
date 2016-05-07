@@ -11,14 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import spark.ExceptionHandler;
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
-
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -26,6 +18,13 @@ import com.google.gson.Gson;
 import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
+import spark.ExceptionHandler;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
 
 /**
  * Class that handles all Leaderboard-related requests.
@@ -79,7 +78,7 @@ public final class LeaderboardHandler {
         leaderboardInfo =
             getLeaderboardInfo(currUserUsername, challengeId, "aggregate",
               primary);
-
+        
         name = challenge.getNameFromId(challengeId);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);
@@ -246,9 +245,10 @@ public final class LeaderboardHandler {
         // get the solution if necessary
         if (leaderboard.isChallengeAttempedByUser(res.get(CHALLENGE_ID),
           currUser)) {
+          String suffix = (res.get(LANGUAGE).equals("python")) ? "py" : "js";
           String solutionPath =
               "challenges/" + res.get(CHALLENGE_ID) + "/" + res.get(LANGUAGE)
-              + "/solutions/" + res.get(USERNAME) + "." + res.get(LANGUAGE);
+              + "/solutions/" + res.get(USERNAME) + "." + suffix;
 
           byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
           String code = new String(encoded, Charsets.UTF_8);
@@ -260,7 +260,6 @@ public final class LeaderboardHandler {
         leaderboardInfo.add(newInfo);
       }
     }
-
     return leaderboardInfo;
   }
 }
