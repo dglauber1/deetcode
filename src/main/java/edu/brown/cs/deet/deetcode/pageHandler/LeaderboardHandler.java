@@ -58,12 +58,13 @@ public final class LeaderboardHandler {
       List<List<String>> leaderboardInfo = null;
       List<String> languages = null;
       String name = "";
+      String currUserUsername = null;
 
       try {
         // get challenge
         String challengeId = req.params(":challengeid");
         // get user viewing the page
-        String currUserUsername = user.getUsernameFromID(req.cookie("user"));
+        currUserUsername = user.getUsernameFromID(req.cookie("user"));
         // get languages supported for this challenge
         languages = challenge.getLanguagesSupported(challengeId);
 
@@ -92,6 +93,7 @@ public final class LeaderboardHandler {
       variables.put("info", leaderboardInfo);
       variables.put("languages", languages);
       variables.put("name", name);
+      variables.put("username", currUserUsername);
 
       return new ModelAndView(variables, "leaderboard.ftl");
     }

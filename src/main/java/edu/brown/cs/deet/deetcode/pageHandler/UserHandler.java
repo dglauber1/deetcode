@@ -77,6 +77,7 @@ public class UserHandler {
         variables.put("title", username);
         variables.put("name", name);
         variables.put("results", results);
+        variables.put("username", currUserUsername);
 
         return new ModelAndView(variables, "user.ftl");
       } catch (SQLException e) {

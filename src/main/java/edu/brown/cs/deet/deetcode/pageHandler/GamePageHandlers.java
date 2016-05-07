@@ -14,13 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -37,6 +30,12 @@ import edu.brown.cs.deet.execution.javascript.JSCompiler;
 import edu.brown.cs.deet.execution.javascript.JSRunner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
 	private static final MyCompiler pyCompiler = new PyCompiler();
@@ -53,8 +52,8 @@ public final class GamePageHandlers {
 	public static class GamePageHandler implements TemplateViewRoute {
 		@Override
 		public ModelAndView handle(Request req, Response res) {
-			try (ChallengeDatabase challenges = new ChallengeDatabase(
-					Main.dbLoc)) {
+			try (ChallengeDatabase challenges = new ChallengeDatabase(Main.dbLoc);
+			  UserDatabase user = new UserDatabase(Main.dbLoc)) {
 				String challengeId = req.params(":challenge-id");
 				// String challengeName = "test";
 				String promptPath = null;
@@ -96,14 +95,13 @@ public final class GamePageHandlers {
 					System.exit(1);
 				}
 				Map<String, Object> variables = ImmutableMap.of("title",
-						"Game", "prompt", prompt);
+						"Game", "prompt", prompt, "username",
+						user.getUsernameFromID(req.cookie("user")));
 				return new ModelAndView(variables, "game.ftl");
 			} catch (SQLException e1) {
-				// Eddie added this, but code shouldn't get here either way
 				System.out.println("GamePageHandler ChallengeDatabase");
 				System.exit(1);
-
-				return null; // ?
+				return null;
 			}
 		}
 	}

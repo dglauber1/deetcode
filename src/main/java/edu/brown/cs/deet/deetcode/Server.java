@@ -14,7 +14,6 @@ import edu.brown.cs.deet.deetcode.pageHandler.LeaderboardHandler;
 import edu.brown.cs.deet.deetcode.pageHandler.LoginHandlers;
 import edu.brown.cs.deet.deetcode.pageHandler.UserHandler;
 import freemarker.template.Configuration;
-import spark.ModelAndView;
 import spark.Request;
 import spark.Spark;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -85,10 +84,6 @@ final class Server {
     Spark.post("/leaderboard/:challengeid/getInfo",
       new LeaderboardHandler.ChangeLeaderboardHandler());
     Spark.post("/add-user", new LoginHandlers.AddUserHandler());
-    
-    Spark.get("/bug-test", (request, response) -> {
-      return new ModelAndView(null, "bug-test.ftl");
-    }, freeMarker);
 
     // check authentication before every request
     Spark.before((request, response) -> {
