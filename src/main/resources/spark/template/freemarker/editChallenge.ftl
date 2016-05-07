@@ -3,10 +3,10 @@
   <div class="container">
     <ul class="nav nav-tabs">
       <h3>Edit Challenge</h3>
-    <li class="descTab active disabled"><a href="#basic">Description</a></li>
-    <li class="langTab disabled"><a href="#java">Java</a></li>
+    <li class="descTab active" disabled><a href="#basic">Description</a></li>
+    <#-- <li class="langTab disabled"><a href="#java" >Java</a></li> -->
     <li class="langTab disabled"><a href="#python">Python</a></li>
-    <li class="langTab disabled"><a href="#ruby">Ruby</a></li>
+    <#-- <li class="langTab disabled"><a href="#ruby">Ruby</a></li> -->
     <li class="langTab disabled"><a href="#javascript">Javascript</a></li>
     <li class="submitTab disabled"><a href="#submitChallenge">Submit</a></li>
     </ul>
@@ -49,6 +49,26 @@
             <input type="text" id="newCategory" class="form-control" placeholder="New Challenge Category" aria-describedby="basic-addon1">
           </div>
           <div class="col-xs-6 col-md-6" id="newCategoryError"></div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12 col-md-12">
+            <h4>Challenge Difficulty</h4>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-6 col-md-6">
+            <div class="dropdown">
+              <select class="form-control" id="difficultyLevel">
+                <option value="unpicked">Pick a Difficulty Level</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-xs-6 col-md-6" id="difficultyError"></div>
         </div>
 
         <div class="row">
