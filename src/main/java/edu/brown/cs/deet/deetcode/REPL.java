@@ -36,7 +36,7 @@ public final class REPL {
       inputReader = new InputStreamReader(System.in, "UTF-8");
     } catch (UnsupportedEncodingException e1) {
       System.out.println("ERROR: Encoding excpetion during read from "
-          + "standard input.");
+        + "standard input.");
       return;
     }
     String input = "";
@@ -45,16 +45,17 @@ public final class REPL {
     MyCompiler jsCompiler = new JSCompiler();
     Runner jsRunner = new JSRunner();
     try (BufferedReader reader = new BufferedReader(inputReader)) {
+      System.out.println("ready");
       while ((input = reader.readLine()) != null) {
         if (input.length() == 0) {
           break;
         }
         List<String> parsedInput =
-            Lists.newArrayList(Splitter.onPattern("\\s").trimResults()
-              .omitEmptyStrings().split(input));
+          Lists.newArrayList(Splitter.onPattern("\\s").trimResults()
+            .omitEmptyStrings().split(input));
         if (parsedInput.size() != 3) {
           System.out.println("Please enter an input of the following form: "
-              + "language path/to/solution.file path/to/test/directory");
+            + "language path/to/solution.file path/to/test/directory");
           System.out.println();
           continue;
         }
@@ -72,7 +73,7 @@ public final class REPL {
           break;
         default:
           System.out
-            .println("language must be either python, ruby, or javascript");
+          .println("language must be either python, ruby, or javascript");
           System.out.println();
           continue;
         }
