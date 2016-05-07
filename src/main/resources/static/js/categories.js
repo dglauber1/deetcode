@@ -1,6 +1,6 @@
 $(function() {
 
-  var bugs = new SpiderController();
+  // var bugs = new SpiderController();
         
   $('.category').on('click', function() {
     $('.glyphicon', this)
