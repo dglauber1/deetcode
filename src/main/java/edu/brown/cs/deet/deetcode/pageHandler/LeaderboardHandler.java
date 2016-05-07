@@ -79,8 +79,6 @@ public final class LeaderboardHandler {
             getLeaderboardInfo(currUserUsername, challengeId, "aggregate",
               primary);
         
-        System.out.println("leaderboardinfo: " + leaderboardInfo);
-
         name = challenge.getNameFromId(challengeId);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);

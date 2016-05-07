@@ -93,7 +93,7 @@
               <h4 class="modal-title text-center">Welcome to DeetCode!</h4>
           </div>
           <div class="modal-body">
-            <p>Some super fun text goes here.</p>
+            <p>Welcome to LeetCode!</p>
             <p>Before you begin, we just need to know what to call you:</p>
             <form id="usernameForm" action="#" method="POST" autocomplete="off">       
               <div class="form-group">
