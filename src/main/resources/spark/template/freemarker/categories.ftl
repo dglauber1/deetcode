@@ -69,6 +69,13 @@
                       </span>
                     </#if>
                     ${challenge.name?capitalize}
+                    <#if challenge.difficulty == "easy">
+                      <div class="easy">Easy</div>
+                    <#elseif challenge.difficulty == "medium">
+                      <div class="medium">Medium</div>
+                    <#else>
+                      <div class="hard">Hard</div>
+                    </#if>
                   </a>
                 </#list>
               </div>
