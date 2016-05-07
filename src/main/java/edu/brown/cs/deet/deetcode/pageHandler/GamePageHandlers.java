@@ -109,6 +109,30 @@ public final class GamePageHandlers {
 	}
 
 	/**
+	 * Loads available language options for a particular challenge.
+	 *
+	 * @author el51
+	 */
+	public static class LoadLanguageHandler implements Route {
+		@Override
+		public Object handle(Request req, Response res) {
+			QueryParamsMap qm = req.queryMap();
+			String challengeID = qm.value("challengeID");
+			List<String> langs = null;
+			try (ChallengeDatabase cd = new ChallengeDatabase(Main.dbLoc)) {
+				langs = cd.getLanguagesSupported(challengeID);
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return GSON.toJson(ImmutableMap.of("status", "FAILURE",
+						"message", e.getMessage()));
+			}
+			assert (langs != null);
+			return GSON.toJson(ImmutableMap.of("status", "SUCCESS",
+					"langs", langs));
+		}
+	}
+	
+	/**
 	 * Loads user solutions, if available, into the CodeMirror window. Else,
 	 * loads in the challenge stub.
 	 *

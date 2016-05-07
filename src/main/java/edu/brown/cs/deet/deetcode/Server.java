@@ -75,6 +75,7 @@ final class Server {
     Spark.post("/game/deettests", new GamePageHandlers.DeetTestsHandler());
     Spark.post("/load", new GamePageHandlers.LoadSolutionHandler());
     Spark.post("/save", new GamePageHandlers.SaveSolutionHandler());
+    Spark.post("/loadlang", new GamePageHandlers.LoadLanguageHandler());
     Spark.get("/categories", new LoginHandlers.CategoriesHandler(), freeMarker);
     Spark.get("/", new LoginHandlers.HomePageHandler(), freeMarker);
     Spark.get("/fblogin", new LoginHandlers.FBHandler());

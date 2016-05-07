@@ -14,77 +14,110 @@ var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("codepad"), {
 // default language is Python
 var lang = "python";
 
-// set to true if it's the first time a user is attempting the problem, false otherwise
+// true if it's the user's first time attempting the problem. false otherwise.
 var isFirstTime = false;
 
-// load the page
-loadPage();
+// true if the user has submitted to the database already. false otherwise.
+var isSubmitted = false;
+
+/*
+ * Warning message that executes when user tries to leave page.
+ */
+$(window).on('beforeunload', function () {
+	console.log(isFirstTime);
+	if (isFirstTime && !isSubmitted) {
+		return "This is your first attempt at this problem. " +
+ 		"If you navigate away, you won't be able to submit your solution to the leaderboard. " +
+ 		"You are, however, allowed to continue working on the problem.";
+	}
+	
+	if (!isSubmitted) {
+		return "You haven't yet saved. You'll lose your work if you navigate away.";
+	}
+});
 
 /*
  * Loads the page and applies the user's chosen language setting.
  */
-function loadPage() {
-	console.log("loading page ...")
-	vex.dialog.prompt({
-		message: "Select a language from the menu.",
-		input: "<select id=\"lang-select\">" +
-				"	<option selected value=\"python\">Python</option>" +
-				"	<option value=\"javascript\">Javascript</option>" +
-				"</select>",
-		buttons: [
-			$.extend({}, vex.dialog.buttons.YES, {
-			    text: "Let's get started!"
-			})
-		],
-		overlayClosesOnClick: false,
-		callback: function() {
-			vex.dialog.alert({
-				message: "Loading the editor...",
-				buttons: [],
+(function(){
+		console.log("loading page ...");
+	// Retrieve available language options
+	$.post("/loadlang", {"challengeID" : challengeID}, function(responseJSON) {
+		var responseObject = JSON.parse(responseJSON);
+		if (responseObject.status != "SUCCESS") {
+			// There was an error
+			vex.dialog.alert("Error: " + responseObject.message);
+		} else {
+			var langs = responseObject.langs;
+			var langsString = "";
+			for (i = 0; i < langs.length; i++) {
+				langsString += ("<option value=\"" + langs[i] + "\">" 
+					+ langs[i].toUpperCase() + "</option>");
+			}
+			// Offer language options to user
+			vex.dialog.prompt({
 				overlayClosesOnClick: false,
-				afterOpen: function() {
-					lang = $("#lang-select").val();
-					console.log("Language selected: " + lang);
-					var loadParameters = {"challengeID" : challengeID, "language" : lang};
-					$.post("/load", loadParameters, function (responseJSON) {
-						var responseObject = JSON.parse(responseJSON);
-						// set isFirstTime flag
-						console.log(isFirstTime);
-						isFirstTime = responseObject.isFirstTime;
-						console.log(isFirstTime);
-						if (responseObject.status != "SUCCESS") {
-							vex.dialog.alert("Error: " + responseObject.message);
-						} else {
-							// change indicator on screen
-							console.log("success status")
-							if (!isFirstTime) {
-								console.log("changing indicator");
-								$("#indicator")[0].innerHTML = 
-									"<a id=\"indicator\">This isn't your first attempt</a>";
-							}
-							// get stub code or user code
-							var stubOrUserSolution = responseObject.code;
-							// filler values
-							var leaderboardParameters = {"input" : stubOrUserSolution,
-									"language" : lang,
-									"challengeID" : challengeID,
-									"passed" : false,
-									"efficiency" : -1,
-									"numLines" : -1,
-									"timeToSolve" : -1, 
-									"aggregate" : -1};
-							saveSolution(leaderboardParameters, false);
-							myCodeMirror.setOption("mode", lang);
-							myCodeMirror.getDoc().setValue(stubOrUserSolution);
-							vex.close();
-							$("#CountDownTimer").TimeCircles().start();
+				message: "Select a language from the menu.",
+				input: "<select id=\"lang-select\">" +
+						langsString + 
+						"</select>",
+				buttons: [
+					$.extend({}, vex.dialog.buttons.YES, {
+					    text: "Let's get started!"
+					})
+				],
+				callback: function() {
+					// Retrieve stub code or user code fromd database
+					vex.dialog.alert({
+						message: "Loading the editor...",
+						buttons: [],
+						overlayClosesOnClick: false,
+						afterOpen: function() {
+							lang = $("#lang-select").val();
+							console.log("Language selected: " + lang);
+							var loadParameters = {"challengeID" : challengeID, "language" : lang};
+							$.post("/load", loadParameters, function (responseJSON) {
+								responseObject = JSON.parse(responseJSON);
+								// set isFirstTime flag
+								isFirstTime = responseObject.isFirstTime;
+								if (responseObject.status != "SUCCESS") {
+									vex.dialog.alert("Error: " + responseObject.message);
+								} else {
+									// change indicator on screen
+									if (!isFirstTime) {
+										console.log("changing indicator");
+										$("#indicator")[0].innerHTML = 
+											"<a id=\"indicator\">This isn't your first attempt</a>";
+									}
+									// get stub code or user code
+									var stubOrUserSolution = responseObject.code;
+									// filler values
+									var leaderboardParameters = {"input" : stubOrUserSolution,
+											"language" : lang,
+											"challengeID" : challengeID,
+											"passed" : false,
+											"efficiency" : -1,
+											"numLines" : -1,
+											"timeToSolve" : -1, 
+											"aggregate" : -1};
+									saveSolution(leaderboardParameters, false);
+									myCodeMirror.setOption("mode", lang);
+									myCodeMirror.getDoc().setValue(stubOrUserSolution);
+									// close modal window
+									vex.close();
+									// display prompt
+									$("#promptContent").show();
+									// start timer
+									$("#CountDownTimer").TimeCircles().start();
+								}
+							});
 						}
-					});
+					})
 				}
-			})
+			});
 		}
-	})
-};
+	});
+})();
 
 /*
  * displayDialog
@@ -140,24 +173,6 @@ function saveSolution(leaderboardParameters, displayDialog) {
 		}
 	});
 }
-
-var isSubmitted = false;
-/*
- * Warning message that executes when user tries to leave page.
- */
-$(window).on('beforeunload', function () {
-	console.log(isFirstTime);
-	if (isFirstTime && !isSubmitted) {
-		return "This is your first attempt at this problem. " +
- 		"If you navigate away, you won't be able to submit your solution to the leaderboard. " +
- 		"You are, however, allowed to continue working on the problem.";
-	}
-	
-	if (!isSubmitted) {
-		return "You haven't yet saved. You'll lose your work if you navigate away.";
-	}
-});
-
 
 //Run Code Script
 $("#run-button").click(function(e) {
@@ -248,10 +263,10 @@ $("#run-button").click(function(e) {
 				var currentTime = $("#CountDownTimer").TimeCircles().getTime();
 				var isTimeUp = currentTime <= 0;
 				deetResultString = "<b>Official Test Results</b><br/>" +
-				"Congratulations! You passed all of the official tests!<br><br>" +
+				"Congratulations! You passed all of the official tests!<br>" +
 				"<i>Completed tests in " + responseObject.timeToTest + " milliseconds<br>" +
 				"Brevity: " + responseObject.numLines + " total lines<br>" + 
-				"Time to solve: " +  (120 - currentTime) + " seconds</i>"; 
+				"Time to solve: " +  (120 - currentTime) + " seconds</i><br/><br/>"; 
 				//TODO change 120 to whatever initial time was
 
 				if (isTimeUp) {
@@ -286,9 +301,9 @@ $("#run-button").click(function(e) {
 				    	// TODO only submit if they're better than the people on the leaderboard.
 						// allow user to submit to the leaderboard
 						vex.dialog.open({
-							message: userResultString + "<br/><br/>" + deetResultString +
-								"You can either submit this result to the leaderboard or continue " +
-								"optimizing your solution",
+							message: userResultString + "<br/>" + deetResultString +
+								"<b>You can either submit this result to the leaderboard or continue " +
+								"optimizing your solution<b>",
 							buttons: [
 								$.extend({}, vex.dialog.buttons.YES, {
 								    text: "Submit to leaderboard!"
@@ -309,8 +324,6 @@ $("#run-button").click(function(e) {
 								}
 							}
 						});
-					
-
 				}
 			} else {
 				vex.dialog.alert(userResultString + "<br/><br/>" + deetResultString);
