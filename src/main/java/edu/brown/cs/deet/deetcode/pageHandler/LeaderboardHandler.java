@@ -218,9 +218,7 @@ public final class LeaderboardHandler {
     List<List<String>> leaderboardInfo = new ArrayList<>();
     List<List<String>> sqlRes;
     if (infoType.equals("aggregate")) {
-      System.out.println("1");
       sqlRes = leaderboard.topTwentyOfChallengeLanguage(challengeId, language);
-      System.out.println(sqlRes);
     } else if (infoType.equals("efficiency")) {
       sqlRes =
           leaderboard.topTwentyOfChallengeLanguageEfficiency(challengeId,
@@ -240,7 +238,6 @@ public final class LeaderboardHandler {
     if (sqlRes == null) { // just return null if the res is null
       return sqlRes;
     } else {
-      System.out.println("2");
       for (List<String> res : sqlRes) {
         List<String> newInfo = new ArrayList<>();
         newInfo.add(res.get(USERNAME));
@@ -265,8 +262,6 @@ public final class LeaderboardHandler {
         leaderboardInfo.add(newInfo);
       }
     }
-    System.out.println("leaderboardInfo: " + leaderboardInfo);
-
     return leaderboardInfo;
   }
 }
