@@ -356,15 +356,7 @@ $("#run-button").click(function(e) {
 										},
 										callback: function(value) { 
 											if (value) {
-												$.post("/game/remove", leaderboardParameters, function(responseJSON) {
-													var responseObject = JSON.parse(responseJSON);
-													if (responseObject.status != "SUCCESS") {
-														// something went wrong on the back end
-														vex.dialog.alert(responseObject.message);
-													} else {
-														saveSolution(saveParameters, true);
-													}
-												});
+												saveSolution(saveParameters, true);
 											}
 										}
 									});
