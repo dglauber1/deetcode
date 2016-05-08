@@ -3,4 +3,4 @@ def run(func, args):
 	try:
 		return func(*args)
 	except:
-		return traceback.format_exc(1)
+		raise Exception(traceback.format_exc(1))

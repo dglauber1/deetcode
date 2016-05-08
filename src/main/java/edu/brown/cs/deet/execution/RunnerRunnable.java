@@ -32,46 +32,46 @@ public class RunnerRunnable implements Runnable {
 
   @Override
   public void run() {
-    CodeSource nullSource;
+    // CodeSource nullSource;
+    // try {
+    // nullSource =
+    // new CodeSource(new URL(
+    // "file:/Users/Daniel/cs/cs032/deetcode/target/classes/"),
+    // (CodeSigner[]) null);
+    // } catch (MalformedURLException e1) {
+    // // TODO Auto-generated catch block
+    // e1.printStackTrace();
+    // return;
+    // }
+    // PermissionCollection perms = new Permissions();
+    // perms.add(new RuntimePermission("createClassLoader"));
+    // perms.add(new RuntimePermission("getProtectionDomain"));
+    // perms.add(new FilePermission(System.getProperty("user.dir"), "read"));
+    // perms.add(new FilePermission("testdata/add_one.js", "read"));
+    // perms.add(new PropertyPermission("java.vm.name", "read"));
+    // perms.add(new PropertyPermission("java.vm.vendor", "read"));
+    // perms.add(new PropertyPermission("os.name", "read"));
+    // perms.add(new PropertyPermission("os.arch", "read"));
+    // perms.add(new PropertyPermission("user.dir", "read"));
+    // perms.add(new PropertyPermission("line.seperator", "read"));
+    // ProtectionDomain domain = new ProtectionDomain(nullSource, perms);
+    // AccessControlContext safeContext =
+    // new AccessControlContext(new ProtectionDomain[] { domain });
+    SecurityManager old = System.getSecurityManager();
+    SecurityManager sm = new MySecurityManager();
+    System.setSecurityManager(sm);
+    // AccessController.doPrivileged(new PrivilegedAction() {
+    // @Override
+    // public Object run() {
     try {
-      nullSource =
-          new CodeSource(
-            new URL(
-                "file:/Users/Daniel/.m2/repository/org/python/jython-standalone/2.7.1b3/jython-standalone-2.7.1b3.pom"),
-                (CodeSigner[]) null);
-    } catch (MalformedURLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return;
+      runOutputs = runner.run(solutionPath, inputs);
+    } catch (Exception e) {
+      toThrow = e;
     }
-    // SecurityManager sm = new SecurityManager();
-    // System.setSecurityManager(sm);
-    PermissionCollection perms = new Permissions();
-    perms.add(new RuntimePermission("exitVM.1"));
-    perms.add(new RuntimePermission("createClassLoader"));
-    perms.add(new RuntimePermission("getProtectionDomain"));
-    perms.add(new FilePermission("${user.dir}/*", "read"));
-    perms.add(new PropertyPermission("java.vm.name", "read"));
-    perms.add(new PropertyPermission("java.vm.vendor", "read"));
-    perms.add(new PropertyPermission("os.name", "read"));
-    perms.add(new PropertyPermission("os.arch", "read"));
-    perms.add(new PropertyPermission("user.dir", "read"));
-    perms.add(new PropertyPermission("line.seperator", "read"));
-    ProtectionDomain domain = new ProtectionDomain(nullSource, perms);
-    AccessControlContext safeContext =
-        new AccessControlContext(new ProtectionDomain[] { domain });
-
-    AccessController.doPrivileged(new PrivilegedAction() {
-      @Override
-      public Object run() {
-        try {
-          runOutputs = runner.run(solutionPath, inputs);
-        } catch (Exception e) {
-          toThrow = e;
-        }
-        return null;
-      }
-    }, safeContext);
+    System.setSecurityManager(old);
+    // return null;
+    // }
+    // }, safeContext);
   }
 
   public Map<String, String> getRunOutputs() throws Exception {
