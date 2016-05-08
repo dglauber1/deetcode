@@ -1,1 +1,1 @@
-blah
+Write code that outputs "blah," no matter what the input is!
