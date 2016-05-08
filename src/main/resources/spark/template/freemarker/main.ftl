@@ -10,46 +10,36 @@
     <link rel="stylesheet" href="/css/normalize.css">
     <link rel="stylesheet" href="/css/html5bp.css">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
-	<link rel="stylesheet" href="/css/simple-sidebar.css">       
-    <link rel="stylesheet" href="/css/TimeCircles.css" />
+<!-- 	<link rel="stylesheet" href="/css/simple-sidebar.css">       
+ -->    <link rel="stylesheet" href="/css/TimeCircles.css" />
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/newChallenge.css">
     <link rel="stylesheet" href="/css/leaderboard.css">
     <link rel="stylesheet" type="text/css" href="http://w2ui.com/src/w2ui-1.4.2.min.css"/>
   </head>
   <body>
-         <div id="wrapper">
+     <div id="wrapper">
 
         <!-- Sidebar -->
-        <div id="sidebar-wrapper">
-            <ul class="sidebar-nav">
-                <li class="sidebar-brand">
-                    <a href="#">
-                        DeetCode
-                    </a>
-                </li>
-                <li>
-                    <a href="#">Homepage</a>
-                </li>
-                <li>
-                    <a href="#">Categories</a>
-                </li>
-                <li>
-                    <a href="#">Your Profile</a>
-                </li>
-                <li>
-                    <a href="#">About</a>
-                </li>
-            </ul>
-        </div>
+        <nav class="navbar navbar-default navbar-static-top" id="main-nav">
+          <div class="container">
+            <a class="navbar-brand" href="#">DEETCode</a>
+            <div id="navbar" class="navbar-collapse">
+              <ul class="nav navbar-nav header-right-navbar" id="links">
+                <li><a href="/categories">Home</a></li>
+                <li><a href="/user/${username}">${username}</a></li>
+                <li><a href="/logout">Logout</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
         <!-- /#sidebar-wrapper -->
 	
         <!-- Page Content -->
         <div id="page-content-wrapper">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-lg-12">
-                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a>               	
+                    <div class="col-lg-12 main-content">
                     	${content}
                     </div>
                 </div>
@@ -74,14 +64,6 @@
      <script src="/js/codemirror-5.14.2/mode/python/python.js"></script>
      <script src="/js/codemirror-5.14.2/mode/ruby/ruby.js"></script>
      <script src="/js/codemirror-5.14.2/mode/clike/clike.js"></script>
-     
-     <!-- Menu Toggle Script -->
-     <script>
-	     $("#menu-toggle").click(function(e) {
-	         e.preventDefault();
-	         $("#wrapper").toggleClass("toggled");
-	     });
-     </script>
      
      <script src="/js/main.js"></script>
      <script src="/js/timer.js"></script>

@@ -9,16 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import spark.ModelAndView;
-import spark.Request;
-import spark.Response;
-import spark.TemplateViewRoute;
-
 import com.google.common.base.Charsets;
 
 import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.deetcode.pageHandler.AdminHandler.ExceptionPrinter;
+import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
+import spark.TemplateViewRoute;
 
 public class UserHandler {
   private static LeaderboardDatabase leaderboard;
@@ -69,7 +68,6 @@ public class UserHandler {
       try {
         // Get the username of user viewing page to determine what to show
         String currUserUsername = user.getUsernameFromID(req.cookie("user"));
-        // String currUserUsername = "dglauber";
         List<List<String>> results =
             getChallengeInfoForUser(username, currUserUsername);
         String name = getNameFromUsername(username);
@@ -79,6 +77,7 @@ public class UserHandler {
         variables.put("title", username);
         variables.put("name", name);
         variables.put("results", results);
+        variables.put("username", currUserUsername);
 
         return new ModelAndView(variables, "user.ftl");
       } catch (SQLException e) {
@@ -147,10 +146,12 @@ public class UserHandler {
         // challenge
         if (leaderboard.isChallengeAttempedByUser(solution.get(CHALLENGE_NAME),
           currUser)) {
+          String suffix = (solution.get(CHALLENGE_LANGUAGE).equals("python")) ?
+            "py" : "js";
           String solutionPath =
               "challenges/" + solution.get(CHALLENGE_NAME) + "/"
                   + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName + "."
-                  + solution.get(CHALLENGE_LANGUAGE);
+                  + suffix;
 
           byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
           String code = new String(encoded, Charsets.UTF_8);

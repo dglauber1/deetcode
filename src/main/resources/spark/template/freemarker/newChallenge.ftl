@@ -3,9 +3,9 @@
   <ul class="nav nav-tabs">
     <h3>New Challenge</h3>
     <li class="descTab active" disabled><a href="#basic">Description</a></li>
-    <li class="langTab disabled"><a href="#java" >Java</a></li>
+    <#-- <li class="langTab disabled"><a href="#java" >Java</a></li> -->
     <li class="langTab disabled"><a href="#python">Python</a></li>
-    <li class="langTab disabled"><a href="#ruby">Ruby</a></li>
+    <#-- <li class="langTab disabled"><a href="#ruby">Ruby</a></li> -->
     <li class="langTab disabled"><a href="#javascript">Javascript</a></li>
     <li class="submitTab disabled"><a href="#submitChallenge">Submit</a></li>
   </ul>
@@ -13,13 +13,13 @@
   <div class="tab-content">
     <div id="basic" class="tab-pane fade in active">
       <div class="row">
-        <div class="col-xs-12 col-md-6">
+        <div class="col-xs-12 col-md-12">
           <h4>Challenge Category</h4>
         </div>
       </div>
 
       <div class="row">
-        <div class="col-xs-12 col-md-6">
+        <div class="col-xs-6 col-md-6">
           <div class="dropdown">
             <select class="form-control" id="challengeSelect"></select>
           </div>
@@ -34,10 +34,30 @@
       </div>
 
       <div class="row" id="newCategoryDiv">
-        <div class="col-xs-12 col-md-6">
+        <div class="col-xs-6 col-md-6">
           <input type="text" id="newCategory" class="form-control" placeholder="New Challenge Category" aria-describedby="basic-addon1">
         </div>
         <div class="col-xs-6 col-md-6" id="newCategoryError"></div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12 col-md-12">
+          <h4>Challenge Difficulty</h4>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-6 col-md-6">
+          <div class="dropdown">
+            <select class="form-control" id="difficultyLevel">
+              <option value="unpicked">Pick a Difficulty Level</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-xs-6 col-md-6" id="difficultyError"></div>
       </div>
 
       <div class="row">
@@ -86,15 +106,15 @@
       <div class="row">
         <div class="col-xs-4 col-md-4">
             <h4>Test Name (one per line):</h4>
-            <textarea class="form-control" id="pythonTestName" rows="4"></textarea>
+            <textarea class="form-control" id="pythonTestName" rows="4" placeholder="Format: Just the name of each test, one per line."></textarea>
         </div>
         <div class="col-xs-4 col-md-4">
             <h4>Test Input (one per line):</h4>
-            <textarea class="form-control" id="pythonInput" rows="4"></textarea>
+            <textarea class="form-control" id="pythonInput" rows="4" placeholder="Format: function_name, [args, go, here]"></textarea>
         </div>
         <div class="col-xs-4 col-md-4">
             <h4>Test Output (one per line):</h4>
-            <textarea class="form-control" id="pythonOutput" rows="4"></textarea>
+            <textarea class="form-control" id="pythonOutput" rows="4" placeholder="Format: Just the outputs, one per line."></textarea>
         </div>
       </div>
 
@@ -148,15 +168,15 @@
       <div class="row">
         <div class="col-xs-4 col-md-4">
             <h4>Test Name (one per line):</h4>
-            <textarea class="form-control" id="jsTestName" rows="4"></textarea>
+            <textarea class="form-control" id="jsTestName" rows="4" placeholder="Format: Just the name of each test, one per line."></textarea>
         </div>
         <div class="col-xs-4 col-md-4">
             <h4>Test Input (one per line):</h4>
-            <textarea class="form-control" id="jsInput" rows="4"></textarea>
+            <textarea class="form-control" id="jsInput" rows="4" placeholder="Format: function_name, [args, go, here]"></textarea>
         </div>
         <div class="col-xs-4 col-md-4">
             <h4>Test Output (one per line):</h4>
-            <textarea class="form-control" id="jsOutput" rows="4"></textarea>
+            <textarea class="form-control" id="jsOutput" rows="4" placeholder="Format: Just the outputs, one per line."></textarea>
         </div>
       </div>
 

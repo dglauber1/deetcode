@@ -56,6 +56,15 @@ $("#challengeSelect").change(function() {
 	}
 });
 
+// detect if difficulty is picked or not
+$("#difficultyLevel").change(function() {
+	if ($(this).val() == "unpicked") {
+		document.getElementById("difficultyError").innerHTML = "Please pick a difficulty level.";
+	} else {
+		document.getElementById("difficultyError").innerHTML = "";
+	}
+});
+
 // detect if name is empty or not
 $("#name").on('input', function(){
 	var name = $("#name")[0];
@@ -210,6 +219,7 @@ $("#submit").click(function() {
 
 	var postParameters = {
 	    category: JSON.stringify(cat),
+	    difficulty: JSON.stringify($("#difficultyLevel :selected").val()),
 	    name: JSON.stringify($("#name")[0].value),
 	    pName: JSON.stringify($("#pName")[0].value),
 	    description: JSON.stringify($("#description").val()),
@@ -247,6 +257,7 @@ $("#submit").click(function() {
     	$("#jsTestName").val("");
     	$("#jsInput").val("");
     	$("#jsOutput").val("");
+    	alert("Successfully added the challenge!");
     	location.reload();
     });
 });
@@ -262,6 +273,7 @@ $("#editSubmit").click(function() {
 
 	var postParameters = {
 	    category: JSON.stringify(cat),
+	    difficulty: JSON.stringify($("#difficultyLevel :selected").val()),
 	    name: JSON.stringify($("#name")[0].value),
 	    origPName: JSON.stringify(ORIG_CHALLENGE_DIR_NAME),
 	    pName: JSON.stringify($("#pName")[0].value),
@@ -287,8 +299,10 @@ $("#editSubmit").click(function() {
     $.post("/admin/edit/results", postParameters, function(responseJSON){
     	// unlike admin/add/results, does not clear every field
     	if ($("#pName")[0].value === ORIG_CHALLENGE_DIR_NAME) {
+    		alert("Successfully edited the challenge!");
     		location.reload();
     	} else {
+    		alert("Successfully edited the challenge!");
     		window.location.href = "http://localhost:4567/admin/edit/" + $("#pName")[0].value;
     	}
     });
@@ -334,6 +348,11 @@ function isBad(whichTab) {
 
 		if ($("#challengeSelect").val() === "Pick a Category") {
 			document.getElementById("categoryError").innerHTML = "Please pick a category.";
+			bad = true;
+		}
+
+		if ($("#difficultyLevel").val() === "unpicked") {
+			document.getElementById("difficultyError").innerHTML = "Please pick a difficulty level.";
 			bad = true;
 		}
 	} else if (whichTab === "#java") {

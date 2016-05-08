@@ -86,11 +86,12 @@ public final class AdminHandler {
       String pName = GSON.fromJson(qm.value("pName"), String.class);
       String name = GSON.fromJson(qm.value("name"), String.class);
       String description = GSON.fromJson(qm.value("description"), String.class);
+      String difficulty = GSON.fromJson(qm.value("difficulty"), String.class);
 
       Boolean success = false;
 
       try {
-        success = newBasicInfo(category, pName, name, description);
+        success = newBasicInfo(category, pName, name, description, difficulty);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);
       } catch (IOException e) {
@@ -213,11 +214,13 @@ public final class AdminHandler {
       String origPName = GSON.fromJson(qm.value("origPName"), String.class);
       String name = GSON.fromJson(qm.value("name"), String.class);
       String description = GSON.fromJson(qm.value("description"), String.class);
+      String difficulty = GSON.fromJson(qm.value("difficulty"), String.class);
 
       Boolean success = false;
 
       try {
-        success = editBasicInfo(category, pName, name, description, origPName);
+        success = editBasicInfo(category, pName, name, description, origPName,
+            difficulty);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);
       } catch (IOException e) {
@@ -416,16 +419,19 @@ public final class AdminHandler {
    * @param challengeId The "path name" of the challenge
    * @param name The new name
    * @param description The new description
+   * @param difficulty The difficulty level of the challenge
    * @return True if the information was successfully edited, false otherwise
    * @throws SQLException if the database is messed up somehow
    * @throws IOException If an I/O error occurred with creating a file
    */
   public static boolean newBasicInfo(String category, String challengeId,
-      String name, String description) throws SQLException, IOException {
+      String name, String description, String difficulty) throws SQLException,
+      IOException {
     String path = "challenges/" + challengeId;
 
     // check if an insert to the database is successful
-    if (challenges.insertNewChallenge(challengeId, name, path, category)) {
+    if (challenges.insertNewChallenge(challengeId, name, path, category,
+        difficulty)) {
       // make the directory for the challenge
       File challengeDir = new File(path);
       challengeDir.mkdir();
@@ -549,6 +555,7 @@ public final class AdminHandler {
    * @param name The (new) name
    * @param description The (new) description
    * @param originalChallengeId The old challengeId
+   * @param difficulty The difficulty level of the challenge
    * @return True if successfully edited, false otherwise.
    * @throws IOException when there is an issue writing to the description.txt
    *           file
@@ -556,12 +563,12 @@ public final class AdminHandler {
    *           the challenge
    */
   public static boolean editBasicInfo(String category, String challengeId,
-      String name, String description, String originalChallengeId)
-      throws IOException, SQLException {
+      String name, String description, String originalChallengeId,
+      String difficulty) throws IOException, SQLException {
     String newChallengeDir = "challenges/" + challengeId;
 
     if (challenges.editChallenge(originalChallengeId, challengeId, name,
-        newChallengeDir, category)) {
+        newChallengeDir, category, difficulty)) {
       // rename to new name (does this even if the id name is the same as
       // before)
       String origChallengeDir = "challenges/" + originalChallengeId;

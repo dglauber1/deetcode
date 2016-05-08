@@ -6,6 +6,10 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import spark.ModelAndView;
+import spark.Request;
+import spark.Spark;
+import spark.template.freemarker.FreeMarkerEngine;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.deetcode.pageHandler.AdminHandler;
 import edu.brown.cs.deet.deetcode.pageHandler.AdminHandler.ExceptionPrinter;
@@ -14,7 +18,6 @@ import edu.brown.cs.deet.deetcode.pageHandler.LeaderboardHandler;
 import edu.brown.cs.deet.deetcode.pageHandler.LoginHandlers;
 import edu.brown.cs.deet.deetcode.pageHandler.UserHandler;
 import freemarker.template.Configuration;
-import spark.ModelAndView;
 import spark.Request;
 import spark.Spark;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -73,21 +76,23 @@ final class Server {
     Spark.post("/getallcategories", new AdminHandler.AllCategoriesHandler());
     Spark.post("/game/usertests", new GamePageHandlers.UserTestsHandler());
     Spark.post("/game/deettests", new GamePageHandlers.DeetTestsHandler());
-    Spark.post("/load", new GamePageHandlers.LoadSolutionHandler());
-    Spark.post("/save", new GamePageHandlers.SaveSolutionHandler());
+    Spark.post("/game/load", new GamePageHandlers.LoadSolutionHandler());
+    Spark.post("/game/save", new GamePageHandlers.SaveSolutionHandler());
+    Spark.post("/game/loadlang", new GamePageHandlers.LoadLanguageHandler());
+    Spark.post("/game/compare",
+        new GamePageHandlers.CompareToLeaderboardHandler());
+    Spark.post("/game/remove",
+        new GamePageHandlers.RemoveWorstFromLeaderboardHandler());
+
     Spark.get("/categories", new LoginHandlers.CategoriesHandler(), freeMarker);
     Spark.get("/", new LoginHandlers.HomePageHandler(), freeMarker);
     Spark.get("/fblogin", new LoginHandlers.FBHandler());
     Spark.get("/logout", new LoginHandlers.LogoutHandler());
     Spark.get("/leaderboard/:challengeid",
-      new LeaderboardHandler.ShowLeaderboardHandler(), freeMarker);
+        new LeaderboardHandler.ShowLeaderboardHandler(), freeMarker);
     Spark.post("/leaderboard/:challengeid/getInfo",
-      new LeaderboardHandler.ChangeLeaderboardHandler());
+        new LeaderboardHandler.ChangeLeaderboardHandler());
     Spark.post("/add-user", new LoginHandlers.AddUserHandler());
-    
-    Spark.get("/bug-test", (request, response) -> {
-      return new ModelAndView(null, "bug-test.ftl");
-    }, freeMarker);
 
     // check authentication before every request
     Spark.before((request, response) -> {

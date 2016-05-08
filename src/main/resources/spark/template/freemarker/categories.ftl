@@ -11,11 +11,11 @@
 
     <nav class="navbar navbar-default navbar-static-top" id="main-nav">
       <div class="container">
-        <a class="navbar-brand" href="#">DeetCode</a>
+        <a class="navbar-brand" href="#">DEETCode</a>
         <div id="navbar" class="navbar-collapse">
           <ul class="nav navbar-nav header-right-navbar" id="links">
             <li class="active"><a href="#">Home</a></li>
-            <li><a href="/user/${username}">Me</a></li>
+            <li><a href="/user/${username}">${username}</a></li>
             <li><a href="/logout">Logout</a></li>
           </ul>
         </div>
@@ -69,6 +69,13 @@
                       </span>
                     </#if>
                     ${challenge.name?capitalize}
+                    <#if challenge.difficulty == "easy">
+                      <div class="easy">Easy</div>
+                    <#elseif challenge.difficulty == "medium">
+                      <div class="medium">Medium</div>
+                    <#else>
+                      <div class="hard">Hard</div>
+                    </#if>
                   </a>
                 </#list>
               </div>
@@ -86,7 +93,7 @@
               <h4 class="modal-title text-center">Welcome to DeetCode!</h4>
           </div>
           <div class="modal-body">
-            <p>Some super fun text goes here.</p>
+            <p>Welcome to LeetCode!</p>
             <p>Before you begin, we just need to know what to call you:</p>
             <form id="usernameForm" action="#" method="POST" autocomplete="off">       
               <div class="form-group">

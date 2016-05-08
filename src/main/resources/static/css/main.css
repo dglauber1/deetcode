@@ -1,3 +1,16 @@
 input[type="number"] {
   width: 3em;
 }
+
+#links {
+  float: right;
+  height: 50px;
+}
+
+#main-nav.navbar-brand {
+  padding-left: 0px;
+}
+
+.main-content {
+  margin-top: 10px;
+}

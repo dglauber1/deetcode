@@ -14,13 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -30,6 +23,7 @@ import edu.brown.cs.deet.database.ChallengeDatabase;
 import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.deetcode.Main;
+import edu.brown.cs.deet.deetcode.pageHandler.LeaderboardHandler.ExceptionPrinter;
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.Tester;
@@ -37,6 +31,12 @@ import edu.brown.cs.deet.execution.javascript.JSCompiler;
 import edu.brown.cs.deet.execution.javascript.JSRunner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
   private static final MyCompiler pyCompiler = new PyCompiler();
@@ -53,7 +53,8 @@ public final class GamePageHandlers {
   public static class GamePageHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
-      try (ChallengeDatabase challenges = new ChallengeDatabase(Main.dbLoc)) {
+      try (ChallengeDatabase challenges = new ChallengeDatabase(Main.dbLoc);
+        UserDatabase user = new UserDatabase(Main.dbLoc)) {
         String challengeId = req.params(":challenge-id");
         // String challengeName = "test";
         String promptPath = null;
@@ -91,22 +92,44 @@ public final class GamePageHandlers {
           System.exit(1);
         }
         Map<String, Object> variables =
-          ImmutableMap.of("title", "Game", "prompt", prompt);
+          ImmutableMap.of("title", "Game", "prompt", prompt, "username",
+            user.getUsernameFromID(req.cookie("user")));
         return new ModelAndView(variables, "game.ftl");
       } catch (SQLException e1) {
-        // Eddie added this, but code shouldn't get here either way
         System.out.println("GamePageHandler ChallengeDatabase");
         System.exit(1);
-
-        return null; // ?
+        return null;
       }
+    }
+  }
+
+  /**
+   * Loads available language options for a particular challenge.
+   * 
+   * @author el51
+   */
+  public static class LoadLanguageHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String challengeID = qm.value("challengeID");
+      List<String> langs = null;
+      try (ChallengeDatabase cd = new ChallengeDatabase(Main.dbLoc)) {
+        langs = cd.getLanguagesSupported(challengeID);
+      } catch (SQLException e) {
+        e.printStackTrace();
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
+      }
+      assert (langs != null);
+      return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "langs", langs));
     }
   }
 
   /**
    * Loads user solutions, if available, into the CodeMirror window. Else, loads
    * in the challenge stub.
-   *
+   * 
    * @author el51
    */
   public static class LoadSolutionHandler implements Route {
@@ -206,8 +229,88 @@ public final class GamePageHandlers {
   }
 
   /**
+   * Removes the entry associated with the worst score in the leaderboard.
+   * 
+   * @author el51
+   */
+  public static class RemoveWorstFromLeaderboardHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String language = qm.value("language");
+      String challengeID = qm.value("challengeID");
+
+      try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
+        List<List<String>> aggScores =
+          ld.topTwentyOfChallengeLanguage(challengeID, language);
+        if (!aggScores.isEmpty()) {
+          int worstIndex = aggScores.size() - 1;
+          String worstUser = aggScores.get(worstIndex).get(1);
+          ld.deleteSolution(challengeID, worstUser, language);
+        }
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
+      }
+      return GSON.toJson(ImmutableMap.of("status", "SUCCESS"));
+    }
+  }
+
+  /**
+   * Compares user stats to leaderboard stats.
+   * 
+   * @author el51
+   */
+  public static class CompareToLeaderboardHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      // Obtain username from Facebook id
+      String username = null;
+      try (UserDatabase ud = new UserDatabase(Main.dbLoc)) {
+        username = ud.getUsernameFromID(req.cookie("user"));
+      } catch (SQLException e) {
+        e.printStackTrace();
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
+      }
+      assert (username != null);
+
+      QueryParamsMap qm = req.queryMap();
+      String language = qm.value("language");
+      String challengeID = qm.value("challengeID");
+      double aggregate = Double.parseDouble(qm.value("aggregate"));
+      boolean isBetterAggScore = false;
+
+      try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
+        List<List<String>> aggScores =
+          ld.topTwentyOfChallengeLanguage(challengeID, language);
+        if (aggScores.size() < LeaderboardDatabase.LEADERBOARD_SIZE) {
+          // leaderboard has room for more entries
+          isBetterAggScore = true;
+        } else {
+          int worstIndex = aggScores.size() - 1;
+          double worstScore =
+            Double.parseDouble(aggScores.get(worstIndex).get(2));
+          if (aggregate > worstScore) {
+            // user beat the worst score
+            isBetterAggScore = true;
+          }
+        }
+      } catch (SQLException e) {
+        new ExceptionPrinter().handle(e, req, res);
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
+      }
+
+      return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "isBetter",
+        isBetterAggScore));
+    }
+  }
+
+  /**
    * Handles saving the contents of the game page.
-   *
+   * 
    * @author el51
    */
   public static class SaveSolutionHandler implements Route {
@@ -241,6 +344,7 @@ public final class GamePageHandlers {
         }
 
       } catch (SQLException e) {
+        e.printStackTrace();
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
           e.getMessage()));
       }
@@ -376,7 +480,7 @@ public final class GamePageHandlers {
   /**
    * Runs a user's code on user-provided input and posts the corresponding
    * output.
-   *
+   * 
    * @author dglauber
    */
   public static class UserTestsHandler implements Route {
@@ -442,11 +546,6 @@ public final class GamePageHandlers {
         Map<String, Object> variables =
           new ImmutableMap.Builder().put("error", true).build();
         return GSON.toJson(variables);
-      } catch (RuntimeException e) {
-        Map<String, Object> variables =
-          new ImmutableMap.Builder().put("error", false)
-            .put("compiled", e.getMessage()).build();
-        return GSON.toJson(variables);
       } finally {
         for (File f : tempDir.listFiles()) {
           f.delete();
@@ -455,7 +554,7 @@ public final class GamePageHandlers {
           Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-            .println("error deleting temporary directory in UserTestsHandler");
+          .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }

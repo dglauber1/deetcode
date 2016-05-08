@@ -110,3 +110,44 @@ input[name=username] {
 .delete-button:focus, .edit-button:hover {
   outline: none;  
 }
+
+.easy, .medium, .hard {
+  font-size: 12px;
+  padding: 1px 6px;
+  margin-left: 20px;
+  color: #fff;
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  background-image: none;
+  -webkit-user-select: none;
+}
+
+.easy {
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
+
+.medium {
+  background-color: #ec971f;
+  border-color: #d58512;
+}
+
+.hard {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+}
+
+a.list-group-item.category {
+  background-color: #f5f5f5!important;
+}
+
+
+
+
+
+
+
