@@ -56,19 +56,23 @@ public final class GamePageHandlers {
     @Override
     public ModelAndView handle(Request req, Response res) {
       try (ChallengeDatabase challenges = new ChallengeDatabase(Main.dbLoc);
-          UserDatabase user = new UserDatabase(Main.dbLoc)) {
+        UserDatabase user = new UserDatabase(Main.dbLoc)) {
         String challengeId = req.params(":challenge-id");
         // String challengeName = "test";
         String promptPath = null;
+        String difficulty = "easy";
+        String questionName = null;
         String prompt =
-            String.format("No challenge exists for %s!", challengeId);
+          String.format("No challenge exists for %s!", challengeId);
         try {
           if (challenges.doesChallengeExist(challengeId)) {
             List<String> challengeData = challenges.getChallenge(challengeId);
             promptPath = challengeData.get(2).concat("/description.txt");
+            difficulty = challengeData.get(4);
+            questionName = challengeData.get(1);
             StringBuilder promptBuilder = new StringBuilder();
             try (BufferedReader r =
-                new BufferedReader(new FileReader(promptPath))) {
+              new BufferedReader(new FileReader(promptPath))) {
               String line = r.readLine();
               while (line != null) {
                 promptBuilder.append(line).append("\n");
@@ -84,8 +88,8 @@ public final class GamePageHandlers {
             }
           } else {
             Map<String, Object> variables =
-                ImmutableMap.of("errorMessage",
-                  String.format("No challenge exists for %s!", challengeId));
+              ImmutableMap.of("errorMessage",
+                String.format("No challenge exists for %s!", challengeId));
             return new ModelAndView(variables, "not-found.ftl");
           }
         } catch (SQLException e) {
@@ -93,9 +97,21 @@ public final class GamePageHandlers {
           System.out.println(e.getMessage());
           System.exit(1);
         }
+        String time = "0";
+        if (difficulty.equals("easy")) {
+          time = "300";
+        } else if (difficulty.equals("medium")) {
+          time = "600";
+        } else if (difficulty.equals("hard")) {
+          time = "900";
+        } else {
+          System.out
+          .println("ERROR: (in GamePageHandler) the difficulty was not set properly");
+        }
         Map<String, Object> variables =
-            ImmutableMap.of("title", "Game", "prompt", prompt, "username",
-              user.getUsernameFromID(req.cookie("user")));
+          ImmutableMap.of("title", "Game", "prompt", prompt, "username",
+            user.getUsernameFromID(req.cookie("user")), "questionName",
+            questionName, "time", time);
         return new ModelAndView(variables, "game.ftl");
       } catch (SQLException e1) {
         System.out.println("GamePageHandler ChallengeDatabase");
@@ -157,7 +173,7 @@ public final class GamePageHandlers {
       try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
         isAttempted = ld.isChallengeAttempedByUser(challengeID, username);
         isAttemptedLang =
-            ld.isChallengeAttempedByUser(challengeID, username, language);
+          ld.isChallengeAttempedByUser(challengeID, username, language);
       } catch (SQLException e) {
         e.printStackTrace();
         return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
@@ -176,15 +192,15 @@ public final class GamePageHandlers {
           break;
         default:
           String msg =
-          "Error in LoadSolutionHandler: "
+            "Error in LoadSolutionHandler: "
               + "language must be either python, ruby, or javascript";
           Map<String, Object> variables =
-              ImmutableMap.of("status", "FAILURE", "message", msg);
+            ImmutableMap.of("status", "FAILURE", "message", msg);
           return GSON.toJson(variables);
         }
         File file =
-            new File(String.format("challenges/%s/%s/solutions/%s", challengeID,
-              language, username + fileType));
+          new File(String.format("challenges/%s/%s/solutions/%s", challengeID,
+            language, username + fileType));
 
         try (BufferedReader rd = new BufferedReader(new FileReader(file))) {
           String line = rd.readLine();
@@ -206,8 +222,8 @@ public final class GamePageHandlers {
       } else {
         StringBuilder stubCode = new StringBuilder();
         File file =
-            new File(String.format("challenges/%s/%s/stub.txt", challengeID,
-              language));
+          new File(String.format("challenges/%s/%s/stub.txt", challengeID,
+            language));
         try (BufferedReader rd = new BufferedReader(new FileReader(file))) {
           String line = rd.readLine();
           while (line != null) {
@@ -244,7 +260,7 @@ public final class GamePageHandlers {
 
       try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
         List<List<String>> aggScores =
-            ld.topTwentyOfChallengeLanguage(challengeID, language);
+          ld.topTwentyOfChallengeLanguage(challengeID, language);
         if (!aggScores.isEmpty()) {
           int worstIndex = aggScores.size() - 1;
           String worstUser = aggScores.get(worstIndex).get(1);
@@ -286,14 +302,14 @@ public final class GamePageHandlers {
 
       try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
         List<List<String>> aggScores =
-            ld.topTwentyOfChallengeLanguage(challengeID, language);
+          ld.topTwentyOfChallengeLanguage(challengeID, language);
         if (aggScores.size() < LeaderboardDatabase.LEADERBOARD_SIZE) {
           // leaderboard has room for more entries
           isBetterAggScore = true;
         } else {
           int worstIndex = aggScores.size() - 1;
           double worstScore =
-              Double.parseDouble(aggScores.get(worstIndex).get(2));
+            Double.parseDouble(aggScores.get(worstIndex).get(2));
           if (aggregate > worstScore) {
             // user beat the worst score
             isBetterAggScore = true;
@@ -360,17 +376,17 @@ public final class GamePageHandlers {
         break;
       default:
         String msg =
-        "Error in SaveSolutionHandler: "
+          "Error in SaveSolutionHandler: "
             + "language must be either python, ruby, or javascript";
         Map<String, Object> variables =
-            ImmutableMap.of("status", "FAILURE", "message", msg);
+          ImmutableMap.of("status", "FAILURE", "message", msg);
         return GSON.toJson(variables);
       }
 
       String fileName = username + fileType;
       File file =
-          new File(String.format("challenges/%s/%s/solutions/%s", challengeID,
-            language, fileName));
+        new File(String.format("challenges/%s/%s/solutions/%s", challengeID,
+          language, fileName));
       try (PrintWriter printWriter = new PrintWriter(file)) {
         String code = qm.value("input");
         printWriter.print(code);
@@ -379,7 +395,7 @@ public final class GamePageHandlers {
         System.out.println(file.getAbsolutePath());
         String msg = "Error in SaveSolutionHandler: File not found.";
         Map<String, Object> variables =
-            ImmutableMap.of("status", "FAILURE", "message", msg);
+          ImmutableMap.of("status", "FAILURE", "message", msg);
         return GSON.toJson(variables);
       }
 
@@ -411,9 +427,9 @@ public final class GamePageHandlers {
         break;
       default:
         System.out
-        .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", true).build();
+          new ImmutableMap.Builder().put("error", true).build();
         return GSON.toJson(variables);
       }
       Integer random = (int) (Math.random() * 1000000);
@@ -430,54 +446,54 @@ public final class GamePageHandlers {
         int numLines = lnr.getLineNumber() + 1;
         lnr.close();
         CompilerRunnable compilerRunnable =
-            new CompilerRunnable(file.getPath(), myCompiler);
+          new CompilerRunnable(file.getPath(), myCompiler);
         Thread compilerThread = new Thread(compilerRunnable);
         compilerThread.start();
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 3000
-            && compilerThread.isAlive()) {
+          && compilerThread.isAlive()) {
         }
         if (compilerThread.isAlive()) {
           compilerThread.stop();
           Map<String, Object> variables =
-              new ImmutableMap.Builder().put("error", false)
+            new ImmutableMap.Builder().put("error", false)
               .put("compiled", "Infinite loop detected").build();
           return GSON.toJson(variables);
         }
         String errorMessage = compilerRunnable.getCompilerOutput();
         if (errorMessage != null) {
           Map<String, Object> variables =
-              new ImmutableMap.Builder().put("error", false)
+            new ImmutableMap.Builder().put("error", false)
               .put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
         String testDir =
-            String.format("challenges/%s/%s", challengeID, language);
+          String.format("challenges/%s/%s", challengeID, language);
         start = System.currentTimeMillis();
         Collection<List<String>> testResults =
-            Tester.test(file.getPath(), testDir, myRunner);
+          Tester.test(file.getPath(), testDir, myRunner);
         long finish = System.currentTimeMillis();
         long time = finish - start; /* in milliseconds */
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", false)
+          new ImmutableMap.Builder().put("error", false)
             .put("compiled", "success").put("numLines", numLines)
             .put("testResults", testResults).put("timeToTest", time).build();
         return GSON.toJson(variables);
       } catch (IOException e) {
         System.out.println("ERROR: IOException in DeetTestsHandler");
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", true).build();
+          new ImmutableMap.Builder().put("error", true).build();
         return GSON.toJson(variables);
       } catch (TimeoutException e) {
         String message = e.getMessage();
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", false)
+          new ImmutableMap.Builder().put("error", false)
             .put("compiled", message).build();
         return GSON.toJson(variables);
       } catch (Exception e) {
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", false)
+          new ImmutableMap.Builder().put("error", false)
             .put("compiled", e.getMessage()).build();
         return GSON.toJson(variables);
       } finally {
@@ -488,7 +504,7 @@ public final class GamePageHandlers {
           Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-          .println("error deleting temporary directory in UserTestsHandler");
+            .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }
@@ -522,9 +538,9 @@ public final class GamePageHandlers {
         break;
       default:
         System.out
-        .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", true).build();
+          new ImmutableMap.Builder().put("error", true).build();
         return GSON.toJson(variables);
       }
       Integer random = (int) (Math.random() * 1000000);
@@ -538,40 +554,40 @@ public final class GamePageHandlers {
         printWriter.print(code);
         printWriter.close();
         CompilerRunnable compilerRunnable =
-          new CompilerRunnable(file.getPath(), myCompiler);
+            new CompilerRunnable(file.getPath(), myCompiler);
         Thread compilerThread = new Thread(compilerRunnable);
         compilerThread.start();
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 3000
-          && compilerThread.isAlive()) {
+            && compilerThread.isAlive()) {
         }
         if (compilerThread.isAlive()) {
           compilerThread.stop();
           Map<String, Object> variables =
-              new ImmutableMap.Builder().put("error", false)
+            new ImmutableMap.Builder().put("error", false)
               .put("compiled", "Infinite loop detected").build();
           return GSON.toJson(variables);
         }
         String errorMessage = compilerRunnable.getCompilerOutput();
         if (errorMessage != null) {
           Map<String, Object> variables =
-              new ImmutableMap.Builder().put("error", false)
+            new ImmutableMap.Builder().put("error", false)
               .put("compiled", errorMessage).build();
           return GSON.toJson(variables);
         }
 
         String testInputs = qm.value("userTest");
         List<String> testInputList =
-            Lists.newArrayList(Splitter.on(System.getProperty("line.separator"))
-              .trimResults().omitEmptyStrings().split(testInputs));
+          Lists.newArrayList(Splitter.on(System.getProperty("line.separator"))
+            .trimResults().omitEmptyStrings().split(testInputs));
 
         RunnerRunnable runnerRunnable =
-          new RunnerRunnable(file.getPath(), testInputList, myRunner);
+            new RunnerRunnable(file.getPath(), testInputList, myRunner);
         Thread runnerThread = new Thread(runnerRunnable);
         runnerThread.start();
         start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 3000
-          && runnerThread.isAlive()) {
+            && runnerThread.isAlive()) {
         }
         if (runnerThread.isAlive()) {
           runnerThread.stop();
@@ -580,7 +596,7 @@ public final class GamePageHandlers {
         Map<String, String> runResults = runnerRunnable.getRunOutputs();
 
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", false)
+          new ImmutableMap.Builder().put("error", false)
             .put("compiled", "success").put("runResults", runResults).build();
 
         return GSON.toJson(variables);
@@ -588,11 +604,11 @@ public final class GamePageHandlers {
       } catch (IOException e) {
         System.out.println("IOException in UserTestsHandler");
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", true).build();
+          new ImmutableMap.Builder().put("error", true).build();
         return GSON.toJson(variables);
       } catch (Exception e) {
         Map<String, Object> variables =
-            new ImmutableMap.Builder().put("error", false)
+          new ImmutableMap.Builder().put("error", false)
             .put("compiled", e.getMessage()).build();
         return GSON.toJson(variables);
       } finally {
@@ -603,7 +619,7 @@ public final class GamePageHandlers {
           Files.delete(tempDir.toPath());
         } catch (IOException e) {
           System.out
-            .println("error deleting temporary directory in UserTestsHandler");
+          .println("error deleting temporary directory in UserTestsHandler");
         }
       }
     }

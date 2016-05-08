@@ -47,8 +47,8 @@ public class MySecurityManager extends SecurityManager {
 
   @Override
   public void checkExit(int status) {
-    if (enabled == true)
-      return;
+    // if (enabled == true)
+    // return;
     throw new SecurityException();
   }
 
@@ -61,8 +61,8 @@ public class MySecurityManager extends SecurityManager {
 
   @Override
   public void checkLink(String lib) {
-    if (enabled == true)
-      return;
+    // if (enabled == true)
+    // return;
     throw new SecurityException();
   }
 
@@ -166,8 +166,8 @@ public class MySecurityManager extends SecurityManager {
 
   @Override
   public void checkPrintJobAccess() {
-    if (enabled == true)
-      return;
+    // if (enabled == true)
+    // return;
     throw new SecurityException();
   }
 

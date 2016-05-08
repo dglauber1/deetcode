@@ -117,6 +117,7 @@ $(window).on('beforeunload', function () {
 											// display prompt
 											$("#promptContent").show();
 											// start timer
+											$("#CountDownTimer").attr("data-timer", "900");
 											$("#CountDownTimer").TimeCircles().start();
 										}
 									});
