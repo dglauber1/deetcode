@@ -4,6 +4,7 @@ public class CompilerRunnable implements Runnable {
   private String filePath;
   private MyCompiler compiler;
   private String compilerOutput;
+  private Exception toThrow;
 
   public CompilerRunnable(String filePath, MyCompiler compiler) {
     this.filePath = filePath;
@@ -12,10 +13,17 @@ public class CompilerRunnable implements Runnable {
 
   @Override
   public void run() {
-    compilerOutput = compiler.compile(filePath);
+    try {
+      compilerOutput = compiler.compile(filePath);
+    } catch (Exception e) {
+      toThrow = e;
+    }
   }
 
-  public String getCompilerOutput() {
+  public String getCompilerOutput() throws Exception {
+    if (toThrow != null) {
+      throw toThrow;
+    }
     return compilerOutput;
   }
 

@@ -25,7 +25,7 @@ public class JSRunner implements Runner {
 
   @Override
   public Map<String, String>
-    run(String solutionPath, Collection<String> inputs) {
+  run(String solutionPath, Collection<String> inputs) {
     Map<String, String> toReturn = new HashMap<>();
     try {
       engine.eval(new FileReader(solutionPath));
@@ -36,7 +36,7 @@ public class JSRunner implements Runner {
         Object returned;
         try {
           returned =
-            engine.eval(String.format("%s.apply(null, %s)", func, args));
+              engine.eval(String.format("%s.apply(null, %s)", func, args));
         } catch (ScriptException e) {
           toReturn.put(input, e.getMessage());
           continue;

@@ -21,6 +21,7 @@ public class RunnerRunnable implements Runnable {
   private String solutionPath;
   private Collection<String> inputs;
   private Map<String, String> runOutputs;
+  private Exception toThrow;
 
   public RunnerRunnable(String solutionPath, Collection<String> inputs,
     Runner runner) {
@@ -34,10 +35,10 @@ public class RunnerRunnable implements Runnable {
     CodeSource nullSource;
     try {
       nullSource =
-        new CodeSource(
-          new URL(
-            "file:/Users/Daniel/.m2/repository/org/python/jython-standalone/2.7.1b3/jython-standalone-2.7.1b3.pom"),
-          (CodeSigner[]) null);
+          new CodeSource(
+            new URL(
+                "file:/Users/Daniel/.m2/repository/org/python/jython-standalone/2.7.1b3/jython-standalone-2.7.1b3.pom"),
+                (CodeSigner[]) null);
     } catch (MalformedURLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -58,19 +59,25 @@ public class RunnerRunnable implements Runnable {
     perms.add(new PropertyPermission("line.seperator", "read"));
     ProtectionDomain domain = new ProtectionDomain(nullSource, perms);
     AccessControlContext safeContext =
-      new AccessControlContext(new ProtectionDomain[] { domain });
+        new AccessControlContext(new ProtectionDomain[] { domain });
 
     AccessController.doPrivileged(new PrivilegedAction() {
       @Override
       public Object run() {
-        runOutputs = runner.run(solutionPath, inputs);
-        notify();
+        try {
+          runOutputs = runner.run(solutionPath, inputs);
+        } catch (Exception e) {
+          toThrow = e;
+        }
         return null;
       }
     }, safeContext);
   }
 
-  public Map<String, String> getRunOutputs() {
+  public Map<String, String> getRunOutputs() throws Exception {
+    if (toThrow != null) {
+      throw toThrow;
+    }
     return runOutputs;
   }
 

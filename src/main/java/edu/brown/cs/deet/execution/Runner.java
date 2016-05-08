@@ -20,9 +20,11 @@ public interface Runner {
    * @param inputs
    *          Collection of inputs.
    * @return A map of each input to its corresponding test output.
+   * @throws Exception
    * @throws TimeoutException
    *           If there is an infinite loop in user code.
    */
-  Map<String, String> run(String solutionPath, Collection<String> inputs);
+  Map<String, String> run(String solutionPath, Collection<String> inputs)
+    throws Exception;
 
 }

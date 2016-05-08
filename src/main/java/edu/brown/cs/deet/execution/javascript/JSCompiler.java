@@ -38,9 +38,6 @@ public class JSCompiler implements MyCompiler {
       return null;
     } catch (ScriptException e) {
       return e.getMessage();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return String.format("Exception caught: ", e.getMessage());
     }
   }
 
