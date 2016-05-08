@@ -1,1 +1,1 @@
-Given asdlfkaj
+Given an input string, return a new string saying "hello [input string]"
