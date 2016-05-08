@@ -24,6 +24,7 @@ import edu.brown.cs.deet.database.LeaderboardDatabase;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.deetcode.Main;
 import edu.brown.cs.deet.deetcode.pageHandler.LeaderboardHandler.ExceptionPrinter;
+import edu.brown.cs.deet.execution.CompilerRunnable;
 import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.Tester;
@@ -105,7 +106,7 @@ public final class GamePageHandlers {
 
   /**
    * Loads available language options for a particular challenge.
-   * 
+   *
    * @author el51
    */
   public static class LoadLanguageHandler implements Route {
@@ -129,7 +130,7 @@ public final class GamePageHandlers {
   /**
    * Loads user solutions, if available, into the CodeMirror window. Else, loads
    * in the challenge stub.
-   * 
+   *
    * @author el51
    */
   public static class LoadSolutionHandler implements Route {
@@ -230,7 +231,7 @@ public final class GamePageHandlers {
 
   /**
    * Removes the entry associated with the worst score in the leaderboard.
-   * 
+   *
    * @author el51
    */
   public static class RemoveWorstFromLeaderboardHandler implements Route {
@@ -259,7 +260,7 @@ public final class GamePageHandlers {
 
   /**
    * Compares user stats to leaderboard stats.
-   * 
+   *
    * @author el51
    */
   public static class CompareToLeaderboardHandler implements Route {
@@ -310,7 +311,7 @@ public final class GamePageHandlers {
 
   /**
    * Handles saving the contents of the game page.
-   * 
+   *
    * @author el51
    */
   public static class SaveSolutionHandler implements Route {
@@ -480,7 +481,7 @@ public final class GamePageHandlers {
   /**
    * Runs a user's code on user-provided input and posts the corresponding
    * output.
-   * 
+   *
    * @author dglauber
    */
   public static class UserTestsHandler implements Route {
@@ -520,7 +521,22 @@ public final class GamePageHandlers {
         String code = qm.value("input");
         printWriter.print(code);
         printWriter.close();
-        String errorMessage = myCompiler.compile(file.getPath());
+        CompilerRunnable runnable =
+            new CompilerRunnable(file.getPath(), myCompiler);
+        Thread compilerThread = new Thread(runnable);
+        compilerThread.start();
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < 3000
+            && compilerThread.isAlive()) {
+        }
+        if (compilerThread.isAlive()) {
+          compilerThread.stop();
+          Map<String, Object> variables =
+            new ImmutableMap.Builder().put("error", false)
+              .put("compiled", "Infinite loop detected").build();
+          return GSON.toJson(variables);
+        }
+        String errorMessage = runnable.getCompilerOutput();
         if (errorMessage != null) {
           Map<String, Object> variables =
             new ImmutableMap.Builder().put("error", false)
