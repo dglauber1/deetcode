@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="/css/normalize.css">
     <link rel="stylesheet" href="/css/html5bp.css">
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-	<link href="/css/simple-sidebar.css" rel="stylesheet">       
+	 <link href="/css/simple-sidebar.css" rel="stylesheet">       
     <link rel="stylesheet" href="/css/TimeCircles.css" />
-	<link rel="stylesheet" href="/codemirror/lib/codemirror.css">
+	 <link rel="stylesheet" href="/codemirror/lib/codemirror.css">
     <link rel="stylesheet" href="/vex-2.2.1/css/vex.css"/>
   	<link rel="stylesheet" href="/vex-2.2.1/css/vex-theme-os.css"/>
   	<link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/game.css">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
   </head>
   
   <body>
@@ -40,7 +41,8 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <input type="submit" id="run-button" class="btn btn-default" value="Run code">	 	                           
+                        <input type="submit" id="run-button" class="btn btn-default" value="Run code">	 	
+                          <input type="checkbox" class="pull-right" id="spider-toggle" checked data-toggle="toggle" data-style="spider" data-on="Spiders On" data-off="Spiders Off">
                     </div>
                     <div class="col-lg-12">
                          ${content}
@@ -60,6 +62,8 @@
    	 <script src="/codemirror/mode/javascript/javascript.js"></script>
    	 <script src="/vex-2.2.1/js/vex.combined.min.js"></script>
   	 <script>vex.defaultOptions.className = 'vex-theme-os';</script>
+     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
      
      <!-- Load stub into the code editor -->
      <script>
@@ -73,6 +77,7 @@
      
    	 <script src="/js/main.js"></script>
      <script src="/js/timer.js"></script>
+     <script src="/js/Bug/bug.js"></script>
      <script src="/js/codepad.js"></script>
   </body>
 </html>

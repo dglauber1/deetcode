@@ -20,6 +20,31 @@ var isFirstTime = false;
 // true if the user has submitted to the database already. false otherwise.
 var isSubmitted = false;
 
+var totalTime = parseInt($("#CountDownTimer").attr("data-timer"));
+var numSpidersToAdd = 9;
+var currSpiders = 2;
+var spiderIncrements = Math.floor(totalTime / numSpidersToAdd);
+var spiderController = new SpiderController();
+var spidersOn = true;
+window.setInterval(function() {
+	// spiderController.options.minBugs += 1;
+	// spiderController.options.maxBugs += 1;
+	spiderController.addOne();
+	currSpiders += 1;
+}, spiderIncrements * 1000);
+
+$("#spider-toggle").change(function(e) {
+	if (spidersOn) {
+		spiderController.end();
+		spidersOn = false;
+	} else {
+		for (var i = 0; i < currSpiders; i++) {
+			spiderController.addOne();
+		}
+		spidersOn = true;
+	}
+});
+
 /*
  * Warning message that executes when user tries to leave page.
  */
@@ -117,7 +142,6 @@ $(window).on('beforeunload', function () {
 											// display prompt
 											$("#promptContent").show();
 											// start timer
-											$("#CountDownTimer").attr("data-timer", "900");
 											$("#CountDownTimer").TimeCircles().start();
 										}
 									});
