@@ -5,8 +5,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
 import com.google.common.collect.Lists;
@@ -38,7 +42,7 @@ public class Tester {
    *           against the tests.
    */
   public static Collection<List<String>> test(String solutionPath,
-    String testDir, Runner runner) throws TimeoutException, Exception {
+    String testDir, Runner runner) throws Exception {
     List<String> inputs;
     List<String> outputs;
     List<String> testNames;
@@ -56,14 +60,22 @@ public class Tester {
       throw new Exception();
     }
     Collection<List<String>> toReturn = new ArrayList<>();
-    Map<String, String> runOutputs;
-    try {
-      runOutputs = runner.run(solutionPath, inputs);
-      RunnerRunnable runnable =
-        new RunnerRunnable(solutionPath, inputs, runner);
-    } catch (TimeoutException e) {
-      throw e;
+    // try {
+    // runOutputs = runner.run(solutionPath, inputs);
+    RunnerRunnable runnable = new RunnerRunnable(solutionPath, inputs, runner);
+    Thread runnerThread = new Thread(runnable);
+    runnerThread.start();
+    long start = System.currentTimeMillis();
+    while (System.currentTimeMillis() - start < 3000 && runnerThread.isAlive()) {
     }
+    if (runnerThread.isAlive()) {
+      runnerThread.stop();
+      throw new TimeoutException("Infinite loop detected!");
+    }
+    Map<String, String> runOutputs = runnable.getRunOutputs();
+    // } catch (TimeoutException e) {
+    // throw e;
+    // }
     for (int i = 0; i < inputs.size(); i++) {
       String testInput = inputs.get(i);
       String testOutput = outputs.get(i);

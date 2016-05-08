@@ -34,7 +34,7 @@ public class PyRunner implements Runner {
 
   @Override
   public Map<String, String>
-  run(String solutionPath, Collection<String> inputs) throws TimeoutException {
+    run(String solutionPath, Collection<String> inputs) {
     Path userInputFile = Paths.get(solutionPath);
     String file = userInputFile.getFileName().toString();
     String module = file.replaceAll("\\..*", "");
@@ -44,13 +44,12 @@ public class PyRunner implements Runner {
 
     Map<String, String> toReturn = new HashMap<>();
     for (String input : inputs) {
-      System.out.println(input);
       PyObject runOutput;
       try {
         runOutput = interpreter.eval("run(" + input + ")");
       } catch (Exception e) {
-        throw new TimeoutException(
-            "Test input was formatted incorrectly!\nProper format:\n     function_name, [args, go, here]");
+        throw new RuntimeException(
+          "Test input was formatted incorrectly!\nProper format:\n     function_name, [args, go, here]");
       }
       toReturn.put(input, runOutput.toString());
     }

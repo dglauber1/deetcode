@@ -23,7 +23,6 @@ public interface Runner {
    * @throws TimeoutException
    *           If there is an infinite loop in user code.
    */
-  Map<String, String> run(String solutionPath, Collection<String> inputs)
-    throws TimeoutException;
+  Map<String, String> run(String solutionPath, Collection<String> inputs);
 
 }

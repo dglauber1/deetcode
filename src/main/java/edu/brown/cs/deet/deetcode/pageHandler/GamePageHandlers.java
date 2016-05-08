@@ -39,434 +39,426 @@ import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
 
 public final class GamePageHandlers {
-	private static final MyCompiler pyCompiler = new PyCompiler();
-	private static final Runner pyRunner = new PyRunner();
-	private static final MyCompiler jsCompiler = new JSCompiler();
-	private static final Runner jsRunner = new JSRunner();
-	private static final Gson GSON = new Gson();
+  private static final MyCompiler pyCompiler = new PyCompiler();
+  private static final Runner pyRunner = new PyRunner();
+  private static final MyCompiler jsCompiler = new JSCompiler();
+  private static final Runner jsRunner = new JSRunner();
+  private static final Gson GSON = new Gson();
 
-	/**
-	 * Handles loading the game page.
-	 *
-	 * @author el51
-	 */
-	public static class GamePageHandler implements TemplateViewRoute {
-		@Override
-		public ModelAndView handle(Request req, Response res) {
-			try (ChallengeDatabase challenges = new ChallengeDatabase(
-					Main.dbLoc)) {
-				String challengeId = req.params(":challenge-id");
-				// String challengeName = "test";
-				String promptPath = null;
-				String prompt = String.format("No challenge exists for %s!",
-						challengeId);
-				try {
-					if (challenges.doesChallengeExist(challengeId)) {
-						List<String> challengeData = challenges
-								.getChallenge(challengeId);
-						promptPath = challengeData.get(2).concat(
-								"/description.txt");
-						StringBuilder promptBuilder = new StringBuilder();
-						try (BufferedReader r = new BufferedReader(
-								new FileReader(promptPath))) {
-							String line = r.readLine();
-							while (line != null) {
-								promptBuilder.append(line).append("\n");
-								line = r.readLine();
-							}
-							prompt = promptBuilder.toString();
-						} catch (FileNotFoundException e) {
-							System.out.println("File not found: " + promptPath);
-							System.exit(1);
-						} catch (IOException e) {
-							System.out.println("I/O Exception at: "
-									+ promptPath);
-							System.exit(1);
-						}
-					} else {
-						Map<String, Object> variables = ImmutableMap.of(
-								"errorMessage", String.format(
-										"No challenge exists for %s!",
-										challengeId));
-						return new ModelAndView(variables, "not-found.ftl");
-					}
-				} catch (SQLException e) {
-					System.out.println("GamePageHandler");
-					System.out.println(e.getMessage());
-					System.exit(1);
-				}
-				Map<String, Object> variables = ImmutableMap.of("title",
-						"Game", "prompt", prompt);
-				return new ModelAndView(variables, "game.ftl");
-			} catch (SQLException e1) {
-				// Eddie added this, but code shouldn't get here either way
-				System.out.println("GamePageHandler ChallengeDatabase");
-				System.exit(1);
+  /**
+   * Handles loading the game page.
+   *
+   * @author el51
+   */
+  public static class GamePageHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      try (ChallengeDatabase challenges = new ChallengeDatabase(Main.dbLoc)) {
+        String challengeId = req.params(":challenge-id");
+        // String challengeName = "test";
+        String promptPath = null;
+        String prompt =
+          String.format("No challenge exists for %s!", challengeId);
+        try {
+          if (challenges.doesChallengeExist(challengeId)) {
+            List<String> challengeData = challenges.getChallenge(challengeId);
+            promptPath = challengeData.get(2).concat("/description.txt");
+            StringBuilder promptBuilder = new StringBuilder();
+            try (BufferedReader r =
+              new BufferedReader(new FileReader(promptPath))) {
+              String line = r.readLine();
+              while (line != null) {
+                promptBuilder.append(line).append("\n");
+                line = r.readLine();
+              }
+              prompt = promptBuilder.toString();
+            } catch (FileNotFoundException e) {
+              System.out.println("File not found: " + promptPath);
+              System.exit(1);
+            } catch (IOException e) {
+              System.out.println("I/O Exception at: " + promptPath);
+              System.exit(1);
+            }
+          } else {
+            Map<String, Object> variables =
+              ImmutableMap.of("errorMessage",
+                String.format("No challenge exists for %s!", challengeId));
+            return new ModelAndView(variables, "not-found.ftl");
+          }
+        } catch (SQLException e) {
+          System.out.println("GamePageHandler");
+          System.out.println(e.getMessage());
+          System.exit(1);
+        }
+        Map<String, Object> variables =
+          ImmutableMap.of("title", "Game", "prompt", prompt);
+        return new ModelAndView(variables, "game.ftl");
+      } catch (SQLException e1) {
+        // Eddie added this, but code shouldn't get here either way
+        System.out.println("GamePageHandler ChallengeDatabase");
+        System.exit(1);
 
-				return null; // ?
-			}
-		}
-	}
+        return null; // ?
+      }
+    }
+  }
 
-	/**
-	 * Loads user solutions, if available, into the CodeMirror window. Else,
-	 * loads in the challenge stub.
-	 *
-	 * @author el51
-	 */
-	public static class LoadSolutionHandler implements Route {
-		@Override
-		public Object handle(Request req, Response res) {
-			// Obtain username from Facebook id
-			String username = null;
-			try (UserDatabase ud = new UserDatabase(Main.dbLoc)) {
-				username = ud.getUsernameFromID(req.cookie("user"));
-			} catch (SQLException e) {
-				e.printStackTrace();
-				return GSON.toJson(ImmutableMap.of("status", "FAILURE",
-						"message", e.getMessage()));
-			}
-			assert (username != null);
-			QueryParamsMap qm = req.queryMap();
-			String challengeID = qm.value("challengeID");
-			boolean isAttempted = false;
-			boolean isAttemptedLang = false;
-			String language = qm.value("language");
-			// Solution is only available if the user has successfully solved
-			// the problem or if time has run out. TODO clarify with group
-			try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
-				isAttempted = ld.isChallengeAttempedByUser(challengeID,
-						username);
-				isAttemptedLang = ld.isChallengeAttempedByUser(challengeID,
-						username, language);
-			} catch (SQLException e) {
-				e.printStackTrace();
-				return GSON.toJson(ImmutableMap.of("status", "FAILURE",
-						"message", e.getMessage()));
-			}
+  /**
+   * Loads user solutions, if available, into the CodeMirror window. Else, loads
+   * in the challenge stub.
+   *
+   * @author el51
+   */
+  public static class LoadSolutionHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      // Obtain username from Facebook id
+      String username = null;
+      try (UserDatabase ud = new UserDatabase(Main.dbLoc)) {
+        username = ud.getUsernameFromID(req.cookie("user"));
+      } catch (SQLException e) {
+        e.printStackTrace();
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
+      }
+      assert (username != null);
+      QueryParamsMap qm = req.queryMap();
+      String challengeID = qm.value("challengeID");
+      boolean isAttempted = false;
+      boolean isAttemptedLang = false;
+      String language = qm.value("language");
+      // Solution is only available if the user has successfully solved
+      // the problem or if time has run out. TODO clarify with group
+      try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
+        isAttempted = ld.isChallengeAttempedByUser(challengeID, username);
+        isAttemptedLang =
+          ld.isChallengeAttempedByUser(challengeID, username, language);
+      } catch (SQLException e) {
+        e.printStackTrace();
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
+      }
 
-			if (isAttempted && isAttemptedLang) {
-				StringBuilder userCode = new StringBuilder();
-				String fileType;
-				switch (language) {
-				case "python":
-					fileType = ".py";
-					break;
-				case "javascript":
-					fileType = ".js";
-					break;
-				default:
-					String msg = "Error in LoadSolutionHandler: "
-							+ "language must be either python, ruby, or javascript";
-					Map<String, Object> variables = ImmutableMap.of("status",
-							"FAILURE", "message", msg);
-					return GSON.toJson(variables);
-				}
-				File file = new File(String.format(
-						"challenges/%s/%s/solutions/%s", challengeID, language,
-						username + fileType));
+      if (isAttempted && isAttemptedLang) {
+        StringBuilder userCode = new StringBuilder();
+        String fileType;
+        switch (language) {
+        case "python":
+          fileType = ".py";
+          break;
+        case "javascript":
+          fileType = ".js";
+          break;
+        default:
+          String msg =
+            "Error in LoadSolutionHandler: "
+              + "language must be either python, ruby, or javascript";
+          Map<String, Object> variables =
+            ImmutableMap.of("status", "FAILURE", "message", msg);
+          return GSON.toJson(variables);
+        }
+        File file =
+          new File(String.format("challenges/%s/%s/solutions/%s", challengeID,
+            language, username + fileType));
 
-				try (BufferedReader rd = new BufferedReader(
-						new FileReader(file))) {
-					String line = rd.readLine();
-					while (line != null) {
-						userCode.append(line).append("\n");
-						line = rd.readLine();
-					}
-				} catch (FileNotFoundException e) {
-					return GSON.toJson(ImmutableMap.of("status", "FAILURE",
-							"message", e.getMessage()));
-				} catch (IOException e) {
-					return GSON.toJson(ImmutableMap.of("status", "FAILURE",
-							"message", e.getMessage()));
-				}
-				System.out.println("Load: subsequentf attempt");
-				return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
-						userCode.toString(), "language", language,
-						"isFirstTime", !isAttempted));
-			} else {
-				StringBuilder stubCode = new StringBuilder();
-				File file = new File(String.format("challenges/%s/%s/stub.txt",
-						challengeID, language));
-				try (BufferedReader rd = new BufferedReader(
-						new FileReader(file))) {
-					String line = rd.readLine();
-					while (line != null) {
-						stubCode.append(line).append("\n");
-						line = rd.readLine();
-					}
-				} catch (FileNotFoundException e) {
-					return GSON.toJson(ImmutableMap.of("status", "FAILURE",
-							"message", e.getMessage()));
-				} catch (IOException e) {
-					return GSON.toJson(ImmutableMap.of("status", "FAILURE",
-							"message", e.getMessage()));
-				}
-				System.out.println("Load: first attempt");
-				return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
-						stubCode.toString(), "language", language,
-						"isFirstTime", !isAttempted));
-			}
+        try (BufferedReader rd = new BufferedReader(new FileReader(file))) {
+          String line = rd.readLine();
+          while (line != null) {
+            userCode.append(line).append("\n");
+            line = rd.readLine();
+          }
+        } catch (FileNotFoundException e) {
+          return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+        } catch (IOException e) {
+          return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+        }
+        System.out.println("Load: subsequentf attempt");
+        return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
+          userCode.toString(), "language", language, "isFirstTime",
+          !isAttempted));
+      } else {
+        StringBuilder stubCode = new StringBuilder();
+        File file =
+          new File(String.format("challenges/%s/%s/stub.txt", challengeID,
+            language));
+        try (BufferedReader rd = new BufferedReader(new FileReader(file))) {
+          String line = rd.readLine();
+          while (line != null) {
+            stubCode.append(line).append("\n");
+            line = rd.readLine();
+          }
+        } catch (FileNotFoundException e) {
+          return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+        } catch (IOException e) {
+          return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+            e.getMessage()));
+        }
+        System.out.println("Load: first attempt");
+        return GSON.toJson(ImmutableMap.of("status", "SUCCESS", "code",
+          stubCode.toString(), "language", language, "isFirstTime",
+          !isAttempted));
+      }
 
-		}
-	}
+    }
+  }
 
-	/**
-	 * Handles saving the contents of the game page.
-	 *
-	 * @author el51
-	 */
-	public static class SaveSolutionHandler implements Route {
-		@Override
-		public Object handle(Request req, Response res) {
-			QueryParamsMap qm = req.queryMap();
-			String challengeID = qm.value("challengeID");
-			String username = null;
-			try (UserDatabase ud = new UserDatabase(Main.dbLoc)) {
-				username = ud.getUsernameFromID(req.cookie("user"));
-			} catch (SQLException e) {
-				return GSON.toJson(ImmutableMap.of("status", "FAILURE",
-						"message", e.getMessage()));
-			}
-			assert (username != null);
+  /**
+   * Handles saving the contents of the game page.
+   *
+   * @author el51
+   */
+  public static class SaveSolutionHandler implements Route {
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String challengeID = qm.value("challengeID");
+      String username = null;
+      try (UserDatabase ud = new UserDatabase(Main.dbLoc)) {
+        username = ud.getUsernameFromID(req.cookie("user"));
+      } catch (SQLException e) {
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
+      }
+      assert (username != null);
 
-			String language = qm.value("language");
-			boolean passed = Boolean.parseBoolean(qm.value("passed"));
-			double efficiency = Double.parseDouble(qm.value("efficiency"));
-			int numLines = Integer.parseInt(qm.value("numLines"));
-			double timeToSolve = Double.parseDouble(qm.value("timeToSolve"));
-			int aggregate = Integer.parseInt(qm.value("aggregate"));
-			try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
-				// TODO DON'T HARDCODE TIMESTSAMP
-				if (ld.isChallengeAttempedByUser(challengeID, username,
-						language)) {
-					ld.updateSolution(challengeID, username, passed,
-							efficiency, numLines, timeToSolve, aggregate,
-							language, 2.0);
-				} else {
-					ld.addSolution(challengeID, username, passed, efficiency,
-							numLines, timeToSolve, aggregate, language, 2.0);
-				}
+      String language = qm.value("language");
+      boolean passed = Boolean.parseBoolean(qm.value("passed"));
+      double efficiency = Double.parseDouble(qm.value("efficiency"));
+      int numLines = Integer.parseInt(qm.value("numLines"));
+      double timeToSolve = Double.parseDouble(qm.value("timeToSolve"));
+      int aggregate = Integer.parseInt(qm.value("aggregate"));
+      try (LeaderboardDatabase ld = new LeaderboardDatabase(Main.dbLoc)) {
+        // TODO DON'T HARDCODE TIMESTSAMP
+        if (ld.isChallengeAttempedByUser(challengeID, username, language)) {
+          ld.updateSolution(challengeID, username, passed, efficiency,
+            numLines, timeToSolve, aggregate, language, 2.0);
+        } else {
+          ld.addSolution(challengeID, username, passed, efficiency, numLines,
+            timeToSolve, aggregate, language, 2.0);
+        }
 
-			} catch (SQLException e) {
-				return GSON.toJson(ImmutableMap.of("status", "FAILURE",
-						"message", e.getMessage()));
-			}
-			String fileType;
-			switch (language) {
-			case "python":
-				fileType = ".py";
-				break;
-			case "javascript":
-				fileType = ".js";
-				break;
-			default:
-				String msg = "Error in SaveSolutionHandler: "
-						+ "language must be either python, ruby, or javascript";
-				Map<String, Object> variables = ImmutableMap.of("status",
-						"FAILURE", "message", msg);
-				return GSON.toJson(variables);
-			}
+      } catch (SQLException e) {
+        return GSON.toJson(ImmutableMap.of("status", "FAILURE", "message",
+          e.getMessage()));
+      }
+      String fileType;
+      switch (language) {
+      case "python":
+        fileType = ".py";
+        break;
+      case "javascript":
+        fileType = ".js";
+        break;
+      default:
+        String msg =
+          "Error in SaveSolutionHandler: "
+            + "language must be either python, ruby, or javascript";
+        Map<String, Object> variables =
+          ImmutableMap.of("status", "FAILURE", "message", msg);
+        return GSON.toJson(variables);
+      }
 
-			String fileName = username + fileType;
-			File file = new File(String.format("challenges/%s/%s/solutions/%s",
-					challengeID, language, fileName));
-			try (PrintWriter printWriter = new PrintWriter(file)) {
-				String code = qm.value("input");
-				printWriter.print(code);
-				printWriter.close();
-			} catch (FileNotFoundException e) {
-				System.out.println(file.getAbsolutePath());
-				String msg = "Error in SaveSolutionHandler: File not found.";
-				Map<String, Object> variables = ImmutableMap.of("status",
-						"FAILURE", "message", msg);
-				return GSON.toJson(variables);
-			}
+      String fileName = username + fileType;
+      File file =
+        new File(String.format("challenges/%s/%s/solutions/%s", challengeID,
+          language, fileName));
+      try (PrintWriter printWriter = new PrintWriter(file)) {
+        String code = qm.value("input");
+        printWriter.print(code);
+        printWriter.close();
+      } catch (FileNotFoundException e) {
+        System.out.println(file.getAbsolutePath());
+        String msg = "Error in SaveSolutionHandler: File not found.";
+        Map<String, Object> variables =
+          ImmutableMap.of("status", "FAILURE", "message", msg);
+        return GSON.toJson(variables);
+      }
 
-			return GSON.toJson(ImmutableMap.of("status", "SUCCESS"));
-		}
-	}
+      return GSON.toJson(ImmutableMap.of("status", "SUCCESS"));
+    }
+  }
 
-	public static class DeetTestsHandler implements Route {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public Object handle(Request req, Response res) {
-			QueryParamsMap qm = req.queryMap();
-			String challengeID = qm.value("challengeID");
-			String language = qm.value("language");
+  public static class DeetTestsHandler implements Route {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String challengeID = qm.value("challengeID");
+      String language = qm.value("language");
 
-			String fileType;
-			Runner myRunner;
-			MyCompiler myCompiler;
-			switch (language) {
-			case "python":
-				fileType = ".py";
-				myRunner = pyRunner;
-				myCompiler = pyCompiler;
-				break;
-			case "javascript":
-				fileType = ".js";
-				myRunner = jsRunner;
-				myCompiler = jsCompiler;
-				break;
-			default:
-				System.out
-						.println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
-				Map<String, Object> variables = new ImmutableMap.Builder().put(
-						"error", true).build();
-				return GSON.toJson(variables);
-			}
-			Integer random = (int) (Math.random() * 1000000);
-			String randomFileName = "temp" + random.toString() + fileType;
-			File tempDir = new File("temporary");
-			tempDir.mkdir();
-			File file = new File("temporary/" + randomFileName);
-			try (PrintWriter printWriter = new PrintWriter(file)) {
-				String code = qm.value("input");
-				printWriter.print(code);
-				printWriter.close();
-				LineNumberReader lnr = new LineNumberReader(
-						new FileReader(file));
-				lnr.skip(Long.MAX_VALUE);
-				int numLines = lnr.getLineNumber() + 1;
-				lnr.close();
-				String errorMessage = myCompiler.compile(file.getPath());
-				if (errorMessage != null) {
-					Map<String, Object> variables = new ImmutableMap.Builder()
-							.put("error", false).put("compiled", errorMessage)
-							.build();
-					return GSON.toJson(variables);
-				}
+      String fileType;
+      Runner myRunner;
+      MyCompiler myCompiler;
+      switch (language) {
+      case "python":
+        fileType = ".py";
+        myRunner = pyRunner;
+        myCompiler = pyCompiler;
+        break;
+      case "javascript":
+        fileType = ".js";
+        myRunner = jsRunner;
+        myCompiler = jsCompiler;
+        break;
+      default:
+        System.out
+          .println("Error in DeetTestsHandler: language must be either python, ruby, or javascript");
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
+        return GSON.toJson(variables);
+      }
+      Integer random = (int) (Math.random() * 1000000);
+      String randomFileName = "temp" + random.toString() + fileType;
+      File tempDir = new File("temporary");
+      tempDir.mkdir();
+      File file = new File("temporary/" + randomFileName);
+      try (PrintWriter printWriter = new PrintWriter(file)) {
+        String code = qm.value("input");
+        printWriter.print(code);
+        printWriter.close();
+        LineNumberReader lnr = new LineNumberReader(new FileReader(file));
+        lnr.skip(Long.MAX_VALUE);
+        int numLines = lnr.getLineNumber() + 1;
+        lnr.close();
+        String errorMessage = myCompiler.compile(file.getPath());
+        if (errorMessage != null) {
+          Map<String, Object> variables =
+            new ImmutableMap.Builder().put("error", false)
+              .put("compiled", errorMessage).build();
+          return GSON.toJson(variables);
+        }
 
-				String testDir = String.format("challenges/%s/%s", challengeID,
-						language);
-				long start = System.currentTimeMillis();
-				Collection<List<String>> testResults = Tester.test(
-						file.getPath(), testDir, myRunner);
-				long finish = System.currentTimeMillis();
-				long time = finish - start; /* in milliseconds */
-				Map<String, Object> variables = new ImmutableMap.Builder()
-						.put("error", false).put("compiled", "success")
-						.put("numLines", numLines)
-						.put("testResults", testResults)
-						.put("timeToTest", time).build();
-				return GSON.toJson(variables);
-			} catch (IOException e) {
-				System.out.println("ERROR: IOException in DeetTestsHandler");
-				Map<String, Object> variables = new ImmutableMap.Builder().put(
-						"error", true).build();
-				return GSON.toJson(variables);
-			} catch (TimeoutException e) {
-				String message = e.getMessage();
-				Map<String, Object> variables = new ImmutableMap.Builder()
-						.put("error", false).put("compiled", message).build();
-				return GSON.toJson(variables);
-			} catch (Exception e) {
-				System.out
-						.println("ERROR: Tester error occurred in DeetTestsHandler");
-				Map<String, Object> variables = new ImmutableMap.Builder().put(
-						"error", true).build();
-				return GSON.toJson(variables);
-			} finally {
-				for (File f : tempDir.listFiles()) {
-					f.delete();
-				}
-				try {
-					Files.delete(tempDir.toPath());
-				} catch (IOException e) {
-					System.out
-							.println("error deleting temporary directory in UserTestsHandler");
-				}
-			}
-		}
-	}
+        String testDir =
+          String.format("challenges/%s/%s", challengeID, language);
+        long start = System.currentTimeMillis();
+        Collection<List<String>> testResults =
+          Tester.test(file.getPath(), testDir, myRunner);
+        long finish = System.currentTimeMillis();
+        long time = finish - start; /* in milliseconds */
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", false)
+            .put("compiled", "success").put("numLines", numLines)
+            .put("testResults", testResults).put("timeToTest", time).build();
+        return GSON.toJson(variables);
+      } catch (IOException e) {
+        System.out.println("ERROR: IOException in DeetTestsHandler");
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
+        return GSON.toJson(variables);
+      } catch (TimeoutException e) {
+        String message = e.getMessage();
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", false)
+            .put("compiled", message).build();
+        return GSON.toJson(variables);
+      } catch (Exception e) {
+        System.out.println("ERROR: Tester error occurred in DeetTestsHandler");
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
+        return GSON.toJson(variables);
+      } finally {
+        for (File f : tempDir.listFiles()) {
+          f.delete();
+        }
+        try {
+          Files.delete(tempDir.toPath());
+        } catch (IOException e) {
+          System.out
+            .println("error deleting temporary directory in UserTestsHandler");
+        }
+      }
+    }
+  }
 
-	/**
-	 * Runs a user's code on user-provided input and posts the corresponding
-	 * output.
-	 *
-	 * @author dglauber
-	 */
-	public static class UserTestsHandler implements Route {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public Object handle(Request req, Response res) {
-			QueryParamsMap qm = req.queryMap();
-			String language = qm.value("language");
-			String fileType;
-			Runner myRunner;
-			MyCompiler myCompiler;
-			switch (language) {
-			case "python":
-				fileType = ".py";
-				myRunner = pyRunner;
-				myCompiler = pyCompiler;
-				break;
-			case "javascript":
-				fileType = ".js";
-				myRunner = jsRunner;
-				myCompiler = jsCompiler;
-				break;
-			default:
-				System.out
-						.println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
-				Map<String, Object> variables = new ImmutableMap.Builder().put(
-						"error", true).build();
-				return GSON.toJson(variables);
-			}
-			Integer random = (int) (Math.random() * 1000000);
-			String randomFileName = "temp" + random.toString() + fileType;
-			File tempDir = new File("temporary");
-			tempDir.mkdir();
-			File file = new File("temporary/" + randomFileName);
+  /**
+   * Runs a user's code on user-provided input and posts the corresponding
+   * output.
+   *
+   * @author dglauber
+   */
+  public static class UserTestsHandler implements Route {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Object handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String language = qm.value("language");
+      String fileType;
+      Runner myRunner;
+      MyCompiler myCompiler;
+      switch (language) {
+      case "python":
+        fileType = ".py";
+        myRunner = pyRunner;
+        myCompiler = pyCompiler;
+        break;
+      case "javascript":
+        fileType = ".js";
+        myRunner = jsRunner;
+        myCompiler = jsCompiler;
+        break;
+      default:
+        System.out
+          .println("Error in UserTestsHandler: language must be either python, ruby, or javascript");
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
+        return GSON.toJson(variables);
+      }
+      Integer random = (int) (Math.random() * 1000000);
+      String randomFileName = "temp" + random.toString() + fileType;
+      File tempDir = new File("temporary");
+      tempDir.mkdir();
+      File file = new File("temporary/" + randomFileName);
 
-			try (PrintWriter printWriter = new PrintWriter(file)) {
-				String code = qm.value("input");
-				printWriter.print(code);
-				printWriter.close();
-				String errorMessage = myCompiler.compile(file.getPath());
-				if (errorMessage != null) {
-					Map<String, Object> variables = new ImmutableMap.Builder()
-							.put("error", false).put("compiled", errorMessage)
-							.build();
-					return GSON.toJson(variables);
-				}
+      try (PrintWriter printWriter = new PrintWriter(file)) {
+        String code = qm.value("input");
+        printWriter.print(code);
+        printWriter.close();
+        String errorMessage = myCompiler.compile(file.getPath());
+        if (errorMessage != null) {
+          Map<String, Object> variables =
+            new ImmutableMap.Builder().put("error", false)
+              .put("compiled", errorMessage).build();
+          return GSON.toJson(variables);
+        }
 
-				String testInputs = qm.value("userTest");
-				List<String> testInputList = Lists.newArrayList(Splitter
-						.on(System.getProperty("line.separator")).trimResults()
-						.omitEmptyStrings().split(testInputs));
-				Map<String, String> runResults = myRunner.run(file.getPath(),
-						testInputList);
+        String testInputs = qm.value("userTest");
+        List<String> testInputList =
+          Lists.newArrayList(Splitter.on(System.getProperty("line.separator"))
+            .trimResults().omitEmptyStrings().split(testInputs));
+        Map<String, String> runResults =
+          myRunner.run(file.getPath(), testInputList);
 
-				Map<String, Object> variables = new ImmutableMap.Builder()
-						.put("error", false).put("compiled", "success")
-						.put("runResults", runResults).build();
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", false)
+            .put("compiled", "success").put("runResults", runResults).build();
 
-				return GSON.toJson(variables);
+        return GSON.toJson(variables);
 
-			} catch (IOException e) {
-				System.out.println("IOException in UserTestsHandler");
-				Map<String, Object> variables = new ImmutableMap.Builder().put(
-						"error", true).build();
-				return GSON.toJson(variables);
-			} catch (TimeoutException e) {
-				Map<String, Object> variables = new ImmutableMap.Builder()
-						.put("error", false).put("compiled", e.getMessage())
-						.build();
-				return GSON.toJson(variables);
-			} finally {
-				for (File f : tempDir.listFiles()) {
-					f.delete();
-				}
-				try {
-					Files.delete(tempDir.toPath());
-				} catch (IOException e) {
-					System.out
-							.println("error deleting temporary directory in UserTestsHandler");
-				}
-			}
-		}
-	}
+      } catch (IOException e) {
+        System.out.println("IOException in UserTestsHandler");
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", true).build();
+        return GSON.toJson(variables);
+      } catch (RuntimeException e) {
+        Map<String, Object> variables =
+          new ImmutableMap.Builder().put("error", false)
+            .put("compiled", e.getMessage()).build();
+        return GSON.toJson(variables);
+      } finally {
+        for (File f : tempDir.listFiles()) {
+          f.delete();
+        }
+        try {
+          Files.delete(tempDir.toPath());
+        } catch (IOException e) {
+          System.out
+            .println("error deleting temporary directory in UserTestsHandler");
+        }
+      }
+    }
+  }
 
 }
