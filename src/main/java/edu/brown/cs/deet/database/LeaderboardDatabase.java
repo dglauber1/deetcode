@@ -527,12 +527,13 @@ public class LeaderboardDatabase implements AutoCloseable {
    * 
    * @param challengeId The challengeId of the challenge
    * @param username The username of the user
-   * @return The score
+   * @return The score. Returns -1 if the user didn't pass the challenge.
    * @throws SQLException if something goes awry with the database
    */
   public double getAggregateForUserAndChallenge(String challengeId,
       String username) throws SQLException {
-    String query = "SELECT aggregate FROM solution WHERE challenge_id = ? AND username = ?;";
+    String query = "SELECT aggregate FROM solution WHERE challenge_id = ? "
+        + "AND username = ? AND passed = 1;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
@@ -553,12 +554,13 @@ public class LeaderboardDatabase implements AutoCloseable {
    * 
    * @param challengeId The challengeId of the challenge
    * @param username The username of the user
-   * @return The score
+   * @return The score. Returns -1 if the user didn't pass the challenge.
    * @throws SQLException if something goes awry with the database
    */
   public double getEfficiencyForUserAndChallenge(String challengeId,
       String username) throws SQLException {
-    String query = "SELECT efficiency FROM solution WHERE challenge_id = ? AND username = ?;";
+    String query = "SELECT efficiency FROM solution WHERE challenge_id = ? "
+        + "AND username = ? AND passed = 1;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
@@ -579,12 +581,13 @@ public class LeaderboardDatabase implements AutoCloseable {
    * 
    * @param challengeId The challengeId of the challenge
    * @param username The username of the user
-   * @return The score
+   * @return The score. Returns -1 if the user didn't pass the challenge.
    * @throws SQLException if something goes awry with the database
    */
   public double getBrevityForUserAndChallenge(String challengeId,
       String username) throws SQLException {
-    String query = "SELECT num_lines FROM solution WHERE challenge_id = ? AND username = ?;";
+    String query = "SELECT num_lines FROM solution WHERE challenge_id = ? "
+        + "AND username = ? AND passed = 1;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
@@ -605,12 +608,13 @@ public class LeaderboardDatabase implements AutoCloseable {
    * 
    * @param challengeId The challengeId of the challenge
    * @param username The username of the user
-   * @return The score
+   * @return The score. Returns -1 if the user didn't pass the challenge.
    * @throws SQLException if something goes awry with the database
    */
   public double getTimeForUserAndChallenge(String challengeId, String username)
       throws SQLException {
-    String query = "SELECT time_to_solve FROM solution WHERE challenge_id = ? AND username = ?;";
+    String query = "SELECT time_to_solve FROM solution WHERE challenge_id = ? "
+        + "AND username = ? AND passed = 1;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
