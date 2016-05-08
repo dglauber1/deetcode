@@ -54,24 +54,26 @@
                     <th>Finished</th>
                     <th>Rank</th>
                     <th>Language</th>
+                    <th>Stats</th>
                     <th>Solution</th>
                   </tr>
                 </thead>
                 <tbody>
                   <#list results as result>
                     <tr>
-                      <td>${result[0]}</td>
-                      <#if result[1] == "true">
+                      <td><a href=${"/leaderboard/"+ result[1]}>${result[0]}</a></td>
+                      <#if result[2] == "true">
                         <td>Yes</td>
                       <#else>
                         <td>No</td>
                       </#if>
-                      <td>${result[2]}</td>
-                      <td>${result[3]?capitalize}</td>
-                      <#if result[3] != "n/a">
-                        <td><button type="button" class="btn btn-primary" value="${result[4]}" onclick="popup(this)">Solution</button></td>
+                      <td>${result[3]}</td>
+                      <td>${result[4]?capitalize}</td>
+                      <td><button type="button" class="btn btn-primary stats">Stats</button></td>
+                      <#if result[5] == "n/a">
+                        <td></td>
                       <#else>
-                        <td><td>
+                        <td><button type="button" class="btn btn-primary" value="${result[5]}" onclick="popup(this)">Solution</button></td>
                       </#if>    
                     </tr>
                   </#list>

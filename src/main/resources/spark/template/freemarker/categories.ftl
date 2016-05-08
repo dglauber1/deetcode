@@ -31,9 +31,17 @@
               Browse By Category
               <#if !isAdmin>
                 <div class="dropdown pull-right">
-                  <select class="selectpicker" data-width="150px" id="filters" title="Filter Options">
+                  <select class="selectpicker" data-width="150px" id="status-filter" title="Filter By Status">
                     <option>Solved</option>
                     <option>Unsolved</option>
+                    <option>No Filter</option>
+                  </select>
+                </div>
+                <div id="difficulty-div" class="dropdown pull-right">
+                  <select class="selectpicker" data-width="150px" id="difficulty-filter" title="Filter By Difficulty">
+                    <option>Easy</option>
+                    <option>Medium</option>
+                    <option>Hard</option>
                     <option>No Filter</option>
                   </select>
                 </div>
@@ -63,7 +71,10 @@
                       <span class="pull-right">
                         <button class="delete-button">Delete</button>
                       </span>
-                    <#elseif challenge.solved == "true">
+                      <span class="pull-right">
+                        <button class="leaderboard-button">Leaderboard</button>
+                      </span>
+                    <#elseif !isAdmin && challenge.solved == "true">
                       <span class="pull-right">
                         <button class="leaderboard-button">Leaderboard</button>
                       </span>
@@ -90,10 +101,10 @@
         <div class="modal-content">
           <div class="modal-header">
               <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
-              <h4 class="modal-title text-center">Welcome to DeetCode!</h4>
+              <h4 class="modal-title text-center">Welcome to DEETCode!</h4>
           </div>
           <div class="modal-body">
-            <p>Welcome to LeetCode!</p>
+            <p>Welcome to DEETCode!</p>
             <p>Before you begin, we just need to know what to call you:</p>
             <form id="usernameForm" action="#" method="POST" autocomplete="off">       
               <div class="form-group">

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/newChallenge.css">
     <link rel="stylesheet" href="/css/leaderboard.css">
+    <link rel="stylesheet" href="/css/user.css">
     <link rel="stylesheet" type="text/css" href="http://w2ui.com/src/w2ui-1.4.2.min.css"/>
   </head>
   <body>
@@ -51,8 +52,8 @@
     <!-- /#wrapper -->
      
      <!-- Again, we're serving up the unminified source for clarity. -->
-     <script src="/js/user.js"></script>
      <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
      <!-- <script src="/js/jquery-2.1.1.js"></script> -->
      <script type="text/javascript" src="/js/TimeCircles.js"></script>
@@ -69,5 +70,6 @@
      <script src="/js/timer.js"></script>
      <script src="/js/newChallenge.js"></script>
      <script src="/js/leaderboard.js"></script>
+     <script src="/js/user.js"></script>
   </body>
 </html>

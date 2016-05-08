@@ -92,21 +92,25 @@ $(function() {
     window.location.href = "http://localhost:4567/admin/add";
   });
 
-  $('#filters').change(function() {
-    var filter = $(this).val();
-    var $solved = $(".questions a.list-group-item").has(".leaderboard-button");
-    var $notSolved = $(".questions a.list-group-item").not($solved);
+  $('.selectpicker').change(function() {
+    var status = $("#status-filter").val();
+    var difficulty = $("#difficulty-filter").val();
+    var difficultyClass = "." + difficulty.toLowerCase();
 
-    if (filter === "No Filter") {
-      $solved.show();
-      $notSolved.show();
-    } else if (filter === "Solved") {
-      $solved.show();
-      $notSolved.hide();
-    } else if (filter === "Unsolved") {
-      $solved.hide();
-      $notSolved.show();
+    var allQuestions = $(".questions a.list-group-item");
+    var filteredQuestions = allQuestions;
+    if (status === "Solved") {
+      filteredQuestions = filteredQuestions.has(".leaderboard-button");
+    } else if (status === "Unsolved") {
+      filteredQuestions = filteredQuestions.not(filteredQuestions.has(".leaderboard-button"));
     }
+
+    if (difficulty && difficulty !== "No Filter") {
+      filteredQuestions = filteredQuestions.has(difficultyClass);
+    }
+
+    allQuestions.not(filteredQuestions).hide();
+    filteredQuestions.show();
   });
 
   var modalType = window.location.hash;

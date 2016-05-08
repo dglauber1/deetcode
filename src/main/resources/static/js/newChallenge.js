@@ -159,21 +159,64 @@ $("#pName").on('input', function(){
 $("#newCategory").on('input', function(){
 	var category = $("#newCategory")[0];
 	var categoryValue = category.value;
+	var len = categoryValue.length;
+	
+	var goodInput = true;
+	var allHyphens = true;
+	var empty = false;
+	
+	// check for non alphanumeric / non all-hyphens
+	for (var i = 0; i < len; i++) {
+		var code = categoryValue.charCodeAt(i);
 
-	var postParameters = {
-	    textValue:JSON.stringify(categoryValue),
-    };
+		if (!(code === 45) && // hyphen
+			!(code > 47 && code < 58) && // numeric 0-9
+			!(code > 64 && code < 91) && // upper alpha A-Z
+			!(code > 76 && code < 123)) { // lower alpha a-z
+			goodInput = false;
+			break;
+		} 
+	}
 
-    $.post("/categorycheck", postParameters, function(responseJSON){
-    	responseObject = JSON.parse(responseJSON);
-        var exists = responseObject.exists;
+	// check if the input is ALL hyphens
+	for (var i = 0; i < len; i++) {
+		var code = categoryValue.charCodeAt(i);
 
-        if (exists) {
-        	document.getElementById("newCategoryError").innerHTML = "This category already exists.";
-        } else {
-        	document.getElementById("newCategoryError").innerHTML = "";
-        }
-    });
+		if (!(code === 45)) {
+			allHyphens = false;
+			break;
+		} 
+	}
+
+	if (len === 0) {
+		empty = true;
+	}
+
+	if (goodInput && !allHyphens) {
+		document.getElementById("pNameError").innerHTML = "";
+
+		var postParameters = {
+	    	textValue:JSON.stringify(categoryValue),
+    	};
+
+	    $.post("/categorycheck", postParameters, function(responseJSON){
+	    	responseObject = JSON.parse(responseJSON);
+	        var exists = responseObject.exists;
+
+	        if (exists) {
+	        	document.getElementById("newCategoryError").innerHTML = "This category already exists.";
+	        } else {
+	        	document.getElementById("newCategoryError").innerHTML = "";
+	        }
+	    });
+	} else if (empty) {
+		document.getElementById("newCategoryError").innerHTML = "This field is empty.";
+	} else if (allHyphens) {
+		document.getElementById("newCategoryError").innerHTML = "Category has ONLY hyphens.";
+	} else {
+		document.getElementById("newCategoryError").innerHTML = 
+					"No non-alphanumeric character or non-hyphens.";
+	}    
 });
 
 // loads all the current categories into the dropdown
@@ -438,3 +481,6 @@ $('.btnPrevious').click(function(){
   $('.nav-tabs > .active').prev('li').find('a').tab('show');
 });
 
+$(window).on('beforeunload', function () {
+	return "Are you sure you want to leave? Your changes will not be saved.";
+});

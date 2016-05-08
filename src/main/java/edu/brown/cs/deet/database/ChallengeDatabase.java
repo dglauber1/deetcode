@@ -245,6 +245,27 @@ public class ChallengeDatabase implements AutoCloseable {
     }
   }
 
+  /**
+   * Gets the question id from the question name.
+   * 
+   * @param questionName the question name
+   * @return the question name
+   * @throws SQLException if something goes awry with the database
+   */
+  public String getIdFromName(String questionName) throws SQLException {
+    String query = "SELECT question_id FROM challenge WHERE question_name = ?;";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, questionName);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return rs.getString(1);
+        }
+      }
+      return null;
+    }
+  }
+
   public List<Map<String, String>> categoryToChallenges(String category)
       throws SQLException {
     String query = "SELECT question_id, question_name, difficulty FROM challenge WHERE "
