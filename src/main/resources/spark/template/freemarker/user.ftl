@@ -54,6 +54,7 @@
                     <th>Finished</th>
                     <th>Rank</th>
                     <th>Language</th>
+                    <th>Stats</th>
                     <th>Solution</th>
                   </tr>
                 </thead>
@@ -68,10 +69,11 @@
                       </#if>
                       <td>${result[2]}</td>
                       <td>${result[3]?capitalize}</td>
-                      <#if result[3] != "n/a">
-                        <td><button type="button" class="btn btn-primary" value="${result[4]}" onclick="popup(this)">Solution</button></td>
+                      <td><button type="button" class="btn btn-primary stats">Stats</button></td>
+                      <#if result[4] == "n/a">
+                        <td></td>
                       <#else>
-                        <td><td>
+                        <td><button type="button" class="btn btn-primary" value="${result[4]}" onclick="popup(this)">Solution</button></td>
                       </#if>    
                     </tr>
                   </#list>

@@ -6,18 +6,19 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import spark.ModelAndView;
+import spark.Request;
+import spark.Spark;
+import spark.template.freemarker.FreeMarkerEngine;
 import edu.brown.cs.deet.database.UserDatabase;
 import edu.brown.cs.deet.deetcode.pageHandler.AdminHandler;
 import edu.brown.cs.deet.deetcode.pageHandler.AdminHandler.ExceptionPrinter;
 import edu.brown.cs.deet.deetcode.pageHandler.GamePageHandlers;
 import edu.brown.cs.deet.deetcode.pageHandler.LeaderboardHandler;
 import edu.brown.cs.deet.deetcode.pageHandler.LoginHandlers;
+import edu.brown.cs.deet.deetcode.pageHandler.StatHandler;
 import edu.brown.cs.deet.deetcode.pageHandler.UserHandler;
 import freemarker.template.Configuration;
-import spark.ModelAndView;
-import spark.Request;
-import spark.Spark;
-import spark.template.freemarker.FreeMarkerEngine;
 
 final class Server {
   private static final int PORT = 4567;
@@ -35,7 +36,7 @@ final class Server {
       config.setDirectoryForTemplateLoading(templates);
     } catch (IOException ioe) {
       System.out.printf("ERROR: Unable use %s for template loading.\n",
-        templates);
+          templates);
       System.exit(1);
     }
     return new FreeMarkerEngine(config);
@@ -54,9 +55,10 @@ final class Server {
 
     // Setup Spark Routes
     Spark.get("/game/:challenge-id", new GamePageHandlers.GamePageHandler(),
-      freeMarker);
+        freeMarker);
     Spark.get("/admin/add", new AdminHandler.AdminAddHandler(), freeMarker);
     Spark.get("/user/:username", new UserHandler.UserPageHandler(), freeMarker);
+    Spark.post("/user/stats", new StatHandler.UserVsAvgVsBestHandler());
     /*
      * TODO: get leaderboard associated with a particular challenge
      * Spark.get("/leaderboard/:challengeInfo", new GetLeaderboardHandler(),
@@ -64,9 +66,9 @@ final class Server {
      */
     Spark.post("/admin/add/results", new AdminHandler.NewChallengeHandler());
     Spark.post("/admin/delete/:challengeid",
-      new AdminHandler.DeleteChallengeHandler());
+        new AdminHandler.DeleteChallengeHandler());
     Spark.get("/admin/edit/:challengeid",
-      new AdminHandler.ShowChallengeHandler(), freeMarker);
+        new AdminHandler.ShowChallengeHandler(), freeMarker);
     Spark.post("/admin/edit/results", new AdminHandler.EditChallengeHandler());
     Spark.post("/namecheck", new AdminHandler.NameCheckHandler());
     Spark.post("/categorycheck", new AdminHandler.CategoryCheckHandler());
@@ -80,11 +82,11 @@ final class Server {
     Spark.get("/fblogin", new LoginHandlers.FBHandler());
     Spark.get("/logout", new LoginHandlers.LogoutHandler());
     Spark.get("/leaderboard/:challengeid",
-      new LeaderboardHandler.ShowLeaderboardHandler(), freeMarker);
+        new LeaderboardHandler.ShowLeaderboardHandler(), freeMarker);
     Spark.post("/leaderboard/:challengeid/getInfo",
-      new LeaderboardHandler.ChangeLeaderboardHandler());
+        new LeaderboardHandler.ChangeLeaderboardHandler());
     Spark.post("/add-user", new LoginHandlers.AddUserHandler());
-    
+
     Spark.get("/bug-test", (request, response) -> {
       return new ModelAndView(null, "bug-test.ftl");
     }, freeMarker);
@@ -95,16 +97,14 @@ final class Server {
 
       Boolean validUser = validCookie(request);
 
-      Boolean staticRequest =
-        url.contains("css") || url.contains("js") || url.contains("favico");
+      Boolean staticRequest = url.contains("css") || url.contains("js")
+          || url.contains("favico");
 
-      Boolean doesntNeedLogin =
-        url.equals("http://localhost:4567/")
+      Boolean doesntNeedLogin = url.equals("http://localhost:4567/")
           || url.equals("http://localhost:4567/fblogin")
           || url.equals("http://localhost:4567/add-user");
 
-      Boolean creatingAccount =
-        url.equals("http://localhost:4567/categories")
+      Boolean creatingAccount = url.equals("http://localhost:4567/categories")
           && (request.session().attribute("adding") != null);
 
       Boolean badRequest = !validUser && !(staticRequest || doesntNeedLogin);
@@ -163,9 +163,8 @@ final class Server {
     // if they're not an admin, make sure they're not accessing restricted
     // urls
     String prefix = "http://localhost:4567";
-    String[] restricted =
-      { "/admin/edit/(.*?)", "/admin/add", "/admin/add/results",
-        "/admin/delete/(.*?)", "/admin/edit/results" };
+    String[] restricted = { "/admin/edit/(.*?)", "/admin/add",
+        "/admin/add/results", "/admin/delete/(.*?)", "/admin/edit/results" };
     List<String> restrictedList = Arrays.asList(restricted);
     for (String restrictedPattern : restrictedList) {
       if (url.matches(prefix + restrictedPattern)) {
