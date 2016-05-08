@@ -107,9 +107,9 @@ public class UserHandler {
    * @param currUser the username of the user viewing the User Page
    * @return A List of a List of Strings, where each inner list contains
    *         information for one challenge for that user. The information will
-   *         be in this order in the list: name of the challenge, whether they
-   *         passed ("true" or "false"), their rank as a String (n/a if out of
-   *         the top 20), solution language, and solution.
+   *         be in this order in the list: name of the challenge, id of the
+   *         challenge, whether they passed ("true" or "false"), their rank as a
+   *         String (n/a if out of the top 20), solution language, and solution.
    * @throws SQLException when something with the database goes awry
    * @throws IOException when there is a file read error
    */
@@ -125,6 +125,7 @@ public class UserHandler {
       List<String> oneChallengeInfo = new ArrayList<>();
       oneChallengeInfo
           .add(challenge.getNameFromId(solution.get(CHALLENGE_NAME)));
+      oneChallengeInfo.add(solution.get(CHALLENGE_NAME));
       if (solution.get(PASSED).equals("true")) {
         // add that the user has passed the challenge
         oneChallengeInfo.add("true");
@@ -154,8 +155,16 @@ public class UserHandler {
         // challenge
         if (leaderboard.isChallengeAttempedByUser(solution.get(CHALLENGE_NAME),
             currUser)) {
-          String suffix = (solution.get(CHALLENGE_LANGUAGE).equals("python")) ? "py"
-              : "js";
+          String suffix = "";
+
+          if (solution.get(CHALLENGE_LANGUAGE).equals("python")) {
+            suffix = "py";
+          } else if (solution.get(CHALLENGE_LANGUAGE).equals("javascript")) {
+            suffix = "js";
+          } else if (solution.get(CHALLENGE_LANGUAGE).equals("java")) {
+            suffix = "java";
+          }
+
           String solutionPath = "challenges/" + solution.get(CHALLENGE_NAME)
               + "/" + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName
               + "." + suffix;
