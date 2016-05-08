@@ -1,6 +1,6 @@
 $(function() {
 
-  var bugs = new SpiderController();
+  // var bugs = new SpiderController();
         
   $('.category').on('click', function() {
     $('.glyphicon', this)
@@ -52,23 +52,32 @@ $(function() {
     return false;
   });
 
+  $('.leaderboard-button').click(function(e) {
+    var link = $(e.target).parent().parent()[0].href;
+    var challenge_id = link.substr(link.lastIndexOf("/") + 1);
+    window.location.href = "http://localhost:4567/leaderboard/" + challenge_id;
+    return false;
+  });
+
   $('.delete-button').click(function(e) {
     var link = $(e.target).parent().parent()[0].href;
     var challenge_id = link.substr(link.lastIndexOf("/") + 1);
-    $.ajax({
-      type: 'POST',
-      url: "http://localhost:4567/admin/delete/" + challenge_id,
-      data: null,
-      success: function(response) {
-        alert("Delete successful!");
-        location.reload();
-      },
-      error: function(response) {
-        var error = $.parseJSON(response.responseText);
-        console.log(error);
-        alert("Unable to delete the challenge!");
-      }
-    });
+    if (confirm("Are you sure you want to delete " + challenge_id + "?")) {
+      $.ajax({
+        type: 'POST',
+        url: "http://localhost:4567/admin/delete/" + challenge_id,
+        data: null,
+        success: function(response) {
+          alert("Delete successful!");
+          location.reload();
+        },
+        error: function(response) {
+          var error = $.parseJSON(response.responseText);
+          console.log(error);
+          alert("Unable to delete the challenge!");
+        }
+      });
+    }
     return false;
   });
 

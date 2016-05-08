@@ -4,15 +4,17 @@ import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 
 import edu.brown.cs.deet.execution.MyCompiler;
+import edu.brown.cs.deet.execution.MySecurityManager;
 
 /**
  * Implementation of a MyCompiler for the python language.
- * 
+ *
  * @author dglauber
  */
 public class PyCompiler implements MyCompiler {
 
   private PythonInterpreter interpreter;
+  private MySecurityManager sm = new MySecurityManager();
 
   /**
    * Constructor for a PyCompiler.
@@ -27,8 +29,14 @@ public class PyCompiler implements MyCompiler {
 
   @Override
   public String compile(String filePath) {
+    // SecurityManager old = System.getSecurityManager();
+    // sm.disable();
+    // System.setSecurityManager(sm);
     PyObject compileOutput =
-      interpreter.eval(String.format("compile_mod('%s')", filePath));
+        interpreter.eval(String.format("compile_mod('%s')", filePath));
+    // System.out.println("na");
+    // sm.enable();
+    // System.setSecurityManager(old);
     if (compileOutput.isInteger()) {
       // compile_mod() returned 0, code successfully compiled
       return null;

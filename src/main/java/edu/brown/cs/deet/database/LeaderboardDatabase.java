@@ -10,10 +10,12 @@ import java.util.List;
 
 /**
  * A bunch of SQL Queries that deal with Leaderboard + User page information.
- *
+ * 
  * @author el13, el51
  */
 public class LeaderboardDatabase implements AutoCloseable {
+  public final static int LEADERBOARD_SIZE = 20;
+
   /**
    * The Connection to the database.
    */
@@ -190,8 +192,29 @@ public class LeaderboardDatabase implements AutoCloseable {
   }
 
   /**
+   * Deletes solution from the table.
+   * 
+   * @param challengeID - the challenge ID
+   * @param username - the username
+   * @param language - the language
+   * @throws SQLException if there's an exception
+   */
+  public void deleteSolution(String challengeID, String username,
+      String language) throws SQLException {
+    String query = "DELETE FROM solution WHERE "
+        + "challenge_id = ? AND username = ? AND language = ?;";
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setString(1, challengeID);
+      ps.setString(2, username);
+      ps.setString(3, language);
+      ps.addBatch();
+      ps.executeBatch();
+    }
+  }
+
+  /**
    * Updates a solution in the Leaderboard.
-   *
+   * 
    * @param data - the data associated with the solution. Contains challengeID,
    *          username, passed, efficiency, numLines, timeToSolve, aggregate,
    *          language, and timestamp in that order.
@@ -224,11 +247,7 @@ public class LeaderboardDatabase implements AutoCloseable {
 
   /**
    * Gets the top twenty entries of a particular challenge given a language.
-   * <<<<<<< HEAD
-   *
-   * ======= They are ordered by the aggregate score.
-   *
-   * >>>>>>> 3377c03b21386249644bd65273f97aabecf80ef1
+   * They are ordered by the aggregate score.
    *
    * @param qName the name of the challenge
    * @param qLang the language to query for
@@ -242,11 +261,12 @@ public class LeaderboardDatabase implements AutoCloseable {
       String qLang) throws SQLException {
     String query = "SELECT challenge_id, username, aggregate, language "
         + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
-        + "ORDER BY aggregate DESC LIMIT 20;";
+        + "ORDER BY aggregate DESC LIMIT ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, qName);
       ps.setString(2, qLang);
+      ps.setInt(3, LEADERBOARD_SIZE);
 
       List<List<String>> topTwenty = new ArrayList<>();
       try (ResultSet rs = ps.executeQuery()) {
@@ -281,11 +301,12 @@ public class LeaderboardDatabase implements AutoCloseable {
       String qName, String qLang) throws SQLException {
     String query = "SELECT challenge_id, username, efficiency, language "
         + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
-        + "ORDER BY efficiency ASC LIMIT 20;";
+        + "ORDER BY efficiency ASC LIMIT ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, qName);
       ps.setString(2, qLang);
+      ps.setInt(3, LEADERBOARD_SIZE);
 
       List<List<String>> topTwenty = new ArrayList<>();
       try (ResultSet rs = ps.executeQuery()) {
@@ -320,11 +341,12 @@ public class LeaderboardDatabase implements AutoCloseable {
       String qLang) throws SQLException {
     String query = "SELECT challenge_id, username, num_lines, language "
         + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
-        + "ORDER BY num_lines ASC LIMIT 20;";
+        + "ORDER BY num_lines ASC LIMIT ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, qName);
       ps.setString(2, qLang);
+      ps.setInt(3, LEADERBOARD_SIZE);
 
       List<List<String>> topTwenty = new ArrayList<>();
       try (ResultSet rs = ps.executeQuery()) {
@@ -359,11 +381,12 @@ public class LeaderboardDatabase implements AutoCloseable {
       String challengeId, String qLang) throws SQLException {
     String query = "SELECT challenge_id, username, time_to_solve, language "
         + "FROM solution WHERE challenge_id = ? AND language = ? AND passed = 1 "
-        + "ORDER BY time_to_solve ASC LIMIT 20;";
+        + "ORDER BY time_to_solve ASC LIMIT ?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
       ps.setString(2, qLang);
+      ps.setInt(3, LEADERBOARD_SIZE);
 
       List<List<String>> topTwenty = new ArrayList<>();
       try (ResultSet rs = ps.executeQuery()) {
@@ -602,14 +625,5 @@ public class LeaderboardDatabase implements AutoCloseable {
   @Override
   public void close() throws SQLException {
     conn.close();
-  }
-
-  public static void main(String[] args) {
-    try (LeaderboardDatabase db = new LeaderboardDatabase(
-        "testdata/challengeDatabaseTester.sqlite3")) {
-      System.out.println(db.getAggregateForUserAndChallenge("reverse", "el51"));
-    } catch (SQLException e) {
-      System.out.println(e);
-    }
   }
 }

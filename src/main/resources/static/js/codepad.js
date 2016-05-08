@@ -14,77 +14,121 @@ var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("codepad"), {
 // default language is Python
 var lang = "python";
 
-// set to true if it's the first time a user is attempting the problem, false otherwise
+// true if it's the user's first time attempting the problem. false otherwise.
 var isFirstTime = false;
 
-// load the page
-loadPage();
+// true if the user has submitted to the database already. false otherwise.
+var isSubmitted = false;
+
+/*
+ * Warning message that executes when user tries to leave page.
+ */
+$(window).on('beforeunload', function () {
+	console.log(isFirstTime);
+	if (isFirstTime && !isSubmitted) {
+		return "This is your first attempt at this problem. " +
+ 		"If you navigate away, you won't be able to submit your solution to the leaderboard. " +
+ 		"You are, however, allowed to continue working on the problem.";
+	}
+	
+	if (!isSubmitted) {
+		return "Wait up! You could lose your work if you navigate away.";
+	}
+});
 
 /*
  * Loads the page and applies the user's chosen language setting.
  */
-function loadPage() {
-	console.log("loading page ...")
-	vex.dialog.prompt({
-		message: "Select a language from the menu.",
-		input: "<select id=\"lang-select\">" +
-				"	<option selected value=\"python\">Python</option>" +
-				"	<option value=\"javascript\">Javascript</option>" +
-				"</select>",
-		buttons: [
-			$.extend({}, vex.dialog.buttons.YES, {
-			    text: "Let's get started!"
-			})
-		],
+(function(){
+	console.log("loading page ...");
+	vex.dialog.alert({
+		// Open loading screen
+		message: "Loading language options...",
+		buttons: [],
 		overlayClosesOnClick: false,
-		callback: function() {
-			vex.dialog.alert({
-				message: "Loading the editor...",
-				buttons: [],
-				overlayClosesOnClick: false,
-				afterOpen: function() {
-					lang = $("#lang-select").val();
-					console.log("Language selected: " + lang);
-					var loadParameters = {"challengeID" : challengeID, "language" : lang};
-					$.post("/load", loadParameters, function (responseJSON) {
-						var responseObject = JSON.parse(responseJSON);
-						// set isFirstTime flag
-						console.log(isFirstTime);
-						isFirstTime = responseObject.isFirstTime;
-						console.log(isFirstTime);
-						if (responseObject.status != "SUCCESS") {
-							vex.dialog.alert("Error: " + responseObject.message);
-						} else {
-							// change indicator on screen
-							console.log("success status")
-							if (!isFirstTime) {
-								console.log("changing indicator");
-								$("#indicator")[0].innerHTML = 
-									"<a id=\"indicator\">This isn't your first attempt</a>";
-							}
-							// get stub code or user code
-							var stubOrUserSolution = responseObject.code;
-							// filler values
-							var leaderboardParameters = {"input" : stubOrUserSolution,
-									"language" : lang,
-									"challengeID" : challengeID,
-									"passed" : false,
-									"efficiency" : -1,
-									"numLines" : -1,
-									"timeToSolve" : -1, 
-									"aggregate" : -1};
-							saveSolution(leaderboardParameters, false);
-							myCodeMirror.setOption("mode", lang);
-							myCodeMirror.getDoc().setValue(stubOrUserSolution);
-							vex.close();
-							$("#CountDownTimer").TimeCircles().start();
+		afterOpen: function() {
+			// Retrieve available language options
+			$.post("/game/loadlang", {"challengeID" : challengeID}, function(responseJSON) {
+				var responseObject = JSON.parse(responseJSON);
+				if (responseObject.status != "SUCCESS") {
+					// There was an error
+					vex.dialog.alert("Error: " + responseObject.message);
+				} else {
+					var langs = responseObject.langs;
+					var langsString = "";
+					for (i = 0; i < langs.length; i++) {
+						langsString += ("<option value=\"" + langs[i] + "\">" 
+							+ langs[i].toUpperCase() + "</option>");
+					}
+					// Close loading screen
+					vex.close();
+					// Offer language options to user
+					vex.dialog.prompt({
+						overlayClosesOnClick: false,
+						message: "Select a language from the menu.",
+						input: "<select id=\"lang-select\">" +
+								langsString + 
+								"</select>",
+						buttons: [
+							$.extend({}, vex.dialog.buttons.YES, {
+							    text: "Let's get started!"
+							})
+						],
+						callback: function() {
+							// Retrieve stub code or user code from database
+							// Open loading screen
+							vex.dialog.alert({
+								message: "Loading the editor...",
+								buttons: [],
+								overlayClosesOnClick: false,
+								afterOpen: function() {
+									lang = $("#lang-select").val();
+									console.log("Language selected: " + lang);
+									var loadParameters = {"challengeID" : challengeID, "language" : lang};
+									$.post("/game/load", loadParameters, function (responseJSON) {
+										responseObject = JSON.parse(responseJSON);
+										// set isFirstTime flag
+										isFirstTime = responseObject.isFirstTime;
+										if (responseObject.status != "SUCCESS") {
+											vex.dialog.alert("Error: " + responseObject.message);
+										} else {
+											// change indicator on screen
+											if (!isFirstTime) {
+												console.log("changing indicator");
+												$("#indicator")[0].innerHTML = 
+													"<a id=\"indicator\">This isn't your first attempt</a>";
+											}
+											// get stub code or user code
+											var stubOrUserSolution = responseObject.code;
+											// filler values
+											var leaderboardParameters = {"input" : stubOrUserSolution,
+													"language" : lang,
+													"challengeID" : challengeID,
+													"passed" : false,
+													"efficiency" : -1,
+													"numLines" : -1,
+													"timeToSolve" : -1, 
+													"aggregate" : -1};
+											saveSolution(leaderboardParameters, false);
+											myCodeMirror.setOption("mode", lang);
+											myCodeMirror.getDoc().setValue(stubOrUserSolution);
+											// close modal window
+											vex.close();
+											// display prompt
+											$("#promptContent").show();
+											// start timer
+											$("#CountDownTimer").TimeCircles().start();
+										}
+									});
+								}
+							})
 						}
 					});
 				}
-			})
+			});		
 		}
 	})
-};
+})();
 
 /*
  * displayDialog
@@ -107,11 +151,12 @@ function saveSolution(leaderboardParameters, displayDialog) {
 				"Try another question, or continue optimizing this solution!";
 	}
 	
-	$.post("/save", leaderboardParameters, function(responseJSON) {
+	$.post("/game/save", leaderboardParameters, function(responseJSON) {
 		responseObject = JSON.parse(responseJSON);
 		if (responseObject.status === "SUCCESS") {
 			if (displayDialog) {
 				vex.dialog.alert({
+					overlayClosesOnClick: false,
 					message: msg,
 					buttons: [
 						$.extend({}, vex.dialog.buttons.YES, {
@@ -141,24 +186,6 @@ function saveSolution(leaderboardParameters, displayDialog) {
 	});
 }
 
-var isSubmitted = false;
-/*
- * Warning message that executes when user tries to leave page.
- */
-$(window).on('beforeunload', function () {
-	console.log(isFirstTime);
-	if (isFirstTime && !isSubmitted) {
-		return "This is your first attempt at this problem. " +
- 		"If you navigate away, you won't be able to submit your solution to the leaderboard. " +
- 		"You are, however, allowed to continue working on the problem.";
-	}
-	
-	if (!isSubmitted) {
-		return "You haven't yet saved. You'll lose your work if you navigate away.";
-	}
-});
-
-
 //Run Code Script
 $("#run-button").click(function(e) {
 	vex.dialog.buttons.YES.text = "OK"; // Need to reinitialize this every click (sometimes it's set to "Submit to Leaderboard!")
@@ -169,13 +196,13 @@ $("#run-button").click(function(e) {
    	var userCode = myCodeMirror.getValue();
    	
    	// testing against user input
-	console.log("submitting to usertests with language: " + lang)
+	console.log("submitting to usertests with language: " + lang);
    	var postParameters = {"language" : lang, "input" : userCode, "userTest" : userTests};
 	vex.dialog.alert({
 		message: "Compiling, please wait...",
 		overlayClosesOnClick: false,
 		buttons: []
-	})
+	});
 	
 	$("#CountDownTimer").TimeCircles().stop();
 	$.post("/game/usertests", postParameters, function(responseJSON) {
@@ -204,8 +231,8 @@ $("#run-button").click(function(e) {
 			}
 		}
 		
-		console.log("submitting to deettests with language: " + lang)
-	   	postParameters = {"language" : lang, "input" : userCode, "challengeID" : challengeID}
+		console.log("submitting to deettests with language: " + lang);
+	   	postParameters = {"language" : lang, "input" : userCode, "challengeID" : challengeID};
 		$.post("/game/deettests", postParameters, function(responseJSON) {
 			console.log("here");
 			var passedAllTests = true;
@@ -244,78 +271,134 @@ $("#run-button").click(function(e) {
 			}
 			
 			if (passedAllTests) {
-				$("#CountDownTimer").TimeCircles().stop();
 				var currentTime = $("#CountDownTimer").TimeCircles().getTime();
 				var isTimeUp = currentTime <= 0;
+				var efficiency = responseObject.timeToTest;
+				var numLines = responseObject.numLines;
 				deetResultString = "<b>Official Test Results</b><br/>" +
-				"Congratulations! You passed all of the official tests!<br><br>" +
-				"<i>Completed tests in " + responseObject.timeToTest + " milliseconds<br>" +
-				"Brevity: " + responseObject.numLines + " total lines<br>" + 
-				"Time to solve: " +  (120 - currentTime) + " seconds</i>"; 
+				"Congratulations! You passed all of the official tests!<br>" +
+				"<i>Completed tests in " + efficiency + " milliseconds<br>" +
+				"Brevity: " + numLines + " total lines<br>" + 
+				"Time to solve: " +  (120 - currentTime) + " seconds</i><br/><br/>"; 
 				//TODO change 120 to whatever initial time was
+				var saveParameters = {"input" : userCode,
+						"language" : lang,
+						"challengeID" : challengeID,
+						"passed" : true,
+						"efficiency" : responseObject.timeToTest,
+						"numLines" : responseObject.numLines,
+						"timeToSolve" : 120 - currentTime, 
+						//Change 120 to whatever initial time was
+						"aggregate" : 100};
 
 				if (isTimeUp) {
-					// don't allow user to submit to the leaderboard
+					// time's up, don't allow user to submit to the leaderboard
 					vex.dialog.open({
-						message: userResultString + "<br/><br/>" + deetResultString,
+						message: userResultString + "<br/><br/>" + deetResultString +
+							"<b>You can either move on to another " +
+							"question or continue optimizing your solution.</b>",
 						buttons: [
 							$.extend({}, vex.dialog.buttons.YES, {
-							    text: "Let's do another question!"
+							    text: "Do another question!"
+							}),
+							$.extend({}, vex.dialog.buttons.NO, {
+							    text: "Stay here"
 							})
 						],
-						callback: function() {
-							window.location.href = "/categories";
+						callback: function(value) {
+							saveSolution(saveParameters, false);
+							isSubmitted = true;
+							if (value) {
+								window.location.href = "/categories";
+							}
 						}
 					});
 				} else {
-					var leaderboardParameters = {"input" : userCode,
-							"language" : lang,
-							"challengeID" : challengeID,
-							"passed" : true,
-							"efficiency" : responseObject.timeToTest,
-							"numLines" : responseObject.numLines,
-							"timeToSolve" : 120 - currentTime, 
-							//Change 120 to whatever initial time was
-							"aggregate" : 100};
-					
 					if (!isFirstTime) {
 						vex.dialog.alert(userResultString + "<br/><br/>" + deetResultString);
-						saveSolution(leaderboardParameters, false);
+						saveSolution(saveParameters, false);
 						$("#CountDownTimer").TimeCircles().start();
-					} else 
-				    	// TODO only submit if they're better than the people on the leaderboard.
-						// allow user to submit to the leaderboard
-						vex.dialog.open({
-							message: userResultString + "<br/><br/>" + deetResultString +
-								"You can either submit this result to the leaderboard or continue " +
-								"optimizing your solution",
-							buttons: [
-								$.extend({}, vex.dialog.buttons.YES, {
-								    text: "Submit to leaderboard!"
-								}),
-								$.extend({}, vex.dialog.buttons.NO, {
-								    text: "Don't submit."
-								    /* TODO insert some sort of prompt that tells the user that he can
-								    	either keep working on the problem for a better score or 
-								    	do a different problem */
-								})
-							],
-							afterClose: function() {
-								$("#CountDownTimer").TimeCircles().start();
-							},
-							callback: function(value) { 
-								if (value) {
-									saveSolution(leaderboardParameters, true);
+					} else {
+						var leaderboardParameters = {"language" : lang,
+							"challengeID" : challengeID,
+							"efficiency" : efficiency,
+							"numLines" : numLines,
+							"timeToSolve" : 120 - currentTime,
+							"aggregate" : 100 //TODO actually implement aggregate
+							// TODO add timestamp and fix on backend!
+						};
+
+						// compare user scores to leaderboard scores
+						$.post("/game/compare", leaderboardParameters, function(responseJSON) {
+							var responseObject = JSON.parse(responseJSON);
+							if (responseObject.status != "SUCCESS") {
+								// something went wrong on the back end
+								vex.dialog.alert(responseObject.message);
+							} else {
+								if (responseObject.isBetter) {
+									// if the user's score is ranked highly enough
+									vex.dialog.open({
+										message: userResultString + "<br/>" + deetResultString +
+											"<b>Great job! You managed to earn a place on the leaderboard. " + 
+											"You can either submit this result or continue " +
+											"optimizing your solution.<b>",
+										buttons: [
+											$.extend({}, vex.dialog.buttons.YES, {
+											    text: "Submit to leaderboard!"
+											}),
+											$.extend({}, vex.dialog.buttons.NO, {
+											    text: "Don't submit."
+											})
+										],
+										afterClose: function() {
+											$("#CountDownTimer").TimeCircles().start();
+										},
+										callback: function(value) { 
+											if (value) {
+												$.post("/game/remove", leaderboardParameters, function(responseJSON) {
+													var responseObject = JSON.parse(responseJSON);
+													if (responseObject.status != "SUCCESS") {
+														// something went wrong on the back end
+														vex.dialog.alert(responseObject.message);
+													} else {
+														saveSolution(saveParameters, true);
+													}
+												});
+											}
+										}
+									});
+								} else {
+									// user's score wasn't good enough to make the leaderboard
+									vex.dialog.open({
+										message: userResultString + "<br/>" + deetResultString +
+											"<b>Your score, however, wasn't good enough to qualify " + 
+											"for the leaderboard. You can either move on to another " +
+											"question or continue optimizing your solution<b>",
+										buttons: [
+											$.extend({}, vex.dialog.buttons.YES, {
+											    text: "Move on!"
+											}),
+											$.extend({}, vex.dialog.buttons.NO, {
+											    text: "Keep working."
+											})
+										],
+										afterClose: function() {
+											$("#CountDownTimer").TimeCircles().start();
+										},
+										callback: function(value) { 
+											if (value) {
+												saveSolution(saveParameters, true);
+											}
+										}
+									});
 								}
 							}
 						});
-					
-
-				}
+					}
+				} 	
 			} else {
 				vex.dialog.alert(userResultString + "<br/><br/>" + deetResultString);
 			}
-			
 		});
 	});
 });

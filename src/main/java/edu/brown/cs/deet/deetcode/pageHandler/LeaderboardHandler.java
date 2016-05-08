@@ -29,8 +29,7 @@ import edu.brown.cs.deet.database.UserDatabase;
 
 /**
  * Class that handles all Leaderboard-related requests.
- *
- * @author eddie
+ * @author el13, el51
  */
 public final class LeaderboardHandler {
   private static ChallengeDatabase challenge;
@@ -50,7 +49,6 @@ public final class LeaderboardHandler {
 
   /**
    * Shows the leaderboard page.
-   *
    * @author el13
    */
   public static class ShowLeaderboardHandler implements TemplateViewRoute {
@@ -59,12 +57,13 @@ public final class LeaderboardHandler {
       List<List<String>> leaderboardInfo = null;
       List<String> languages = null;
       String name = "";
+      String currUserUsername = null;
 
       try {
         // get challenge
         String challengeId = req.params(":challengeid");
         // get user viewing the page
-        String currUserUsername = user.getUsernameFromID(req.cookie("user"));
+        currUserUsername = user.getUsernameFromID(req.cookie("user"));
         // get languages supported for this challenge
         languages = challenge.getLanguagesSupported(challengeId);
 
@@ -76,9 +75,8 @@ public final class LeaderboardHandler {
         }
 
         // get leaderboard info
-        leaderboardInfo =
-            getLeaderboardInfo(currUserUsername, challengeId, "aggregate",
-              primary);
+        leaderboardInfo = getLeaderboardInfo(currUserUsername, challengeId,
+            "aggregate", primary);
 
         name = challenge.getNameFromId(challengeId);
       } catch (SQLException e) {
@@ -93,6 +91,7 @@ public final class LeaderboardHandler {
       variables.put("info", leaderboardInfo);
       variables.put("languages", languages);
       variables.put("name", name);
+      variables.put("username", currUserUsername);
 
       return new ModelAndView(variables, "leaderboard.ftl");
     }
@@ -100,9 +99,7 @@ public final class LeaderboardHandler {
 
   /**
    * Handler to show a new part of the leaderboard.
-   *
-   * @author eddie
-   *
+   * @author el13
    */
   public static class ChangeLeaderboardHandler implements Route {
 
@@ -117,20 +114,20 @@ public final class LeaderboardHandler {
 
         QueryParamsMap qm = req.queryMap();
         String type = GSON.fromJson(qm.value("type"), String.class);
-        String language =
-            GSON.fromJson(qm.value("language"), String.class).toLowerCase();
+        String language = GSON.fromJson(qm.value("language"), String.class)
+            .toLowerCase();
 
         // get leaderboard info
-        leaderboardInfo =
-            getLeaderboardInfo(currUserUsername, challengeId, type, language);
+        leaderboardInfo = getLeaderboardInfo(currUserUsername, challengeId,
+            type, language);
       } catch (SQLException e) {
         new ExceptionPrinter().handle(e, req, res);
       } catch (IOException e) {
         new ExceptionPrinter().handle(e, req, res);
       }
 
-      Map<String, Object> variables =
-          ImmutableMap.of("title", "Leaderboard", "info", leaderboardInfo);
+      Map<String, Object> variables = ImmutableMap.of("title", "Leaderboard",
+          "info", leaderboardInfo);
       return GSON.toJson(variables);
     }
 
@@ -138,7 +135,6 @@ public final class LeaderboardHandler {
 
   /**
    * Handles Exceptions.
-   *
    * @author el13
    */
   public static class ExceptionPrinter implements ExceptionHandler {
@@ -157,7 +153,6 @@ public final class LeaderboardHandler {
 
   /**
    * Statically changes the LeaderboardDatabase of the LeaderboardHandler.
-   *
    * @param ldb
    *          the LeaderboardDatabase
    */
@@ -167,7 +162,6 @@ public final class LeaderboardHandler {
 
   /**
    * Statically changes the UserDatabase of the LeaderboardHandler.
-   *
    * @param udb
    *          the UserDatabase
    */
@@ -177,7 +171,6 @@ public final class LeaderboardHandler {
 
   /**
    * Statically changes the ChallengeDatabase of the LeaderboardHandler.
-   *
    * @param cdb
    *          the ChallengeDatabase
    */
@@ -188,7 +181,6 @@ public final class LeaderboardHandler {
   /**
    * Gets top 20 leaderboard information based on the type of information
    * requested and the language it is being requested in.
-   *
    * @param currUser
    *          the user currently viewing the leaderboard
    * @param challengeId
@@ -212,23 +204,21 @@ public final class LeaderboardHandler {
    *           when there is an issue reading a solution file
    */
   public static List<List<String>> getLeaderboardInfo(String currUser,
-    String challengeId, String infoType, String language) throws SQLException,
-    IOException {
+      String challengeId, String infoType, String language)
+      throws SQLException, IOException {
     List<List<String>> leaderboardInfo = new ArrayList<>();
     List<List<String>> sqlRes;
     if (infoType.equals("aggregate")) {
       sqlRes = leaderboard.topTwentyOfChallengeLanguage(challengeId, language);
     } else if (infoType.equals("efficiency")) {
-      sqlRes =
-          leaderboard.topTwentyOfChallengeLanguageEfficiency(challengeId,
+      sqlRes = leaderboard.topTwentyOfChallengeLanguageEfficiency(challengeId,
           language);
     } else if (infoType.equals("brevity")) {
-      sqlRes =
-          leaderboard.topTwentyOfChallengeLanguageNumLines(challengeId, language);
+      sqlRes = leaderboard.topTwentyOfChallengeLanguageNumLines(challengeId,
+          language);
     } else if (infoType.equals("speed")) {
-      sqlRes =
-          leaderboard
-          .topTwentyOfChallengeLanguageTimeSolve(challengeId, language);
+      sqlRes = leaderboard.topTwentyOfChallengeLanguageTimeSolve(challengeId,
+          language);
     } else {
       sqlRes = null;
     }
@@ -245,22 +235,22 @@ public final class LeaderboardHandler {
 
         // get the solution if necessary
         if (leaderboard.isChallengeAttempedByUser(res.get(CHALLENGE_ID),
-          currUser)) {
-          String solutionPath =
-              "challenges/" + res.get(CHALLENGE_ID) + "/" + res.get(LANGUAGE)
-              + "/solutions/" + res.get(USERNAME) + "." + res.get(LANGUAGE);
+            currUser)) {
+          String suffix = (res.get(LANGUAGE).equals("python")) ? "py" : "js";
+          String solutionPath = "challenges/" + res.get(CHALLENGE_ID) + "/"
+              + res.get(LANGUAGE) + "/solutions/" + res.get(USERNAME) + "."
+              + suffix;
 
           byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
           String code = new String(encoded, Charsets.UTF_8);
           newInfo.add(code);
         } else {
           newInfo
-          .add("You must attempt the challenge before you can see a solution.");
+              .add("You must attempt the challenge before you can see a solution.");
         }
         leaderboardInfo.add(newInfo);
       }
     }
-
     return leaderboardInfo;
   }
 }

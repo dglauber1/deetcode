@@ -88,6 +88,7 @@ public class UserHandler {
         variables.put("title", username);
         variables.put("name", name);
         variables.put("results", results);
+        variables.put("username", currUserUsername);
 
         return new ModelAndView(variables, "user.ftl");
       } catch (SQLException e) {
@@ -153,19 +154,11 @@ public class UserHandler {
         // challenge
         if (leaderboard.isChallengeAttempedByUser(solution.get(CHALLENGE_NAME),
             currUser)) {
-
-          String fileEnding = "";
-          if (solution.get(CHALLENGE_LANGUAGE).equals("python")) {
-            fileEnding = "py";
-          } else if (solution.get(CHALLENGE_LANGUAGE).equals("javascript")) {
-            fileEnding = "js";
-          } else if (solution.get(CHALLENGE_LANGUAGE).equals("java")) {
-            fileEnding = "java";
-          }
-
+          String suffix = (solution.get(CHALLENGE_LANGUAGE).equals("python")) ? "py"
+              : "js";
           String solutionPath = "challenges/" + solution.get(CHALLENGE_NAME)
               + "/" + solution.get(CHALLENGE_LANGUAGE) + "/solutions/" + qName
-              + "." + fileEnding;
+              + "." + suffix;
 
           byte[] encoded = Files.readAllBytes(Paths.get(solutionPath));
           String code = new String(encoded, Charsets.UTF_8);

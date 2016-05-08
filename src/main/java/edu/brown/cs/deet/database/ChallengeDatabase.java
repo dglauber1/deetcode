@@ -268,7 +268,7 @@ public class ChallengeDatabase implements AutoCloseable {
 
   public List<Map<String, String>> categoryToChallenges(String category)
       throws SQLException {
-    String query = "SELECT question_id, question_name FROM challenge WHERE "
+    String query = "SELECT question_id, question_name, difficulty FROM challenge WHERE "
         + "category=?;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -279,6 +279,7 @@ public class ChallengeDatabase implements AutoCloseable {
           Map<String, String> singleChallenge = new HashMap<>();
           singleChallenge.put("id", rs.getString(1));
           singleChallenge.put("name", rs.getString(2));
+          singleChallenge.put("difficulty", rs.getString(3));
           challenges.add(singleChallenge);
         }
         return challenges;
@@ -361,6 +362,27 @@ public class ChallengeDatabase implements AutoCloseable {
       ps.execute();
     }
   }
+  
+//  /**
+//   * Get the difficulty level for a given challenge
+//   * @param challengeID the id of the challenge we're querying
+//   * @return a string representing the challenge level
+//   * @throws SQLException
+//   */
+//  public String getDifficulty(String challengeID) throws SQLException {
+//    String query = "SELECT question_name FROM challenge WHERE question_id = ?;";
+//
+//    try (PreparedStatement ps = conn.prepareStatement(query)) {
+//      ps.setString(1, challengeID);
+//      try (ResultSet rs = ps.executeQuery()) {
+//        if (rs.next()) {
+//          return rs.getString(1);
+//        }
+//      }
+//
+//      return null;
+//    }
+//  }
 
   @Override
   public void close() {
