@@ -29,6 +29,7 @@ import edu.brown.cs.deet.database.UserDatabase;
 
 /**
  * Class that handles all Leaderboard-related requests.
+ * 
  * @author el13, el51
  */
 public final class LeaderboardHandler {
@@ -49,6 +50,7 @@ public final class LeaderboardHandler {
 
   /**
    * Shows the leaderboard page.
+   * 
    * @author el13
    */
   public static class ShowLeaderboardHandler implements TemplateViewRoute {
@@ -99,6 +101,7 @@ public final class LeaderboardHandler {
 
   /**
    * Handler to show a new part of the leaderboard.
+   * 
    * @author el13
    */
   public static class ChangeLeaderboardHandler implements Route {
@@ -135,6 +138,7 @@ public final class LeaderboardHandler {
 
   /**
    * Handles Exceptions.
+   * 
    * @author el13
    */
   public static class ExceptionPrinter implements ExceptionHandler {
@@ -153,8 +157,8 @@ public final class LeaderboardHandler {
 
   /**
    * Statically changes the LeaderboardDatabase of the LeaderboardHandler.
-   * @param ldb
-   *          the LeaderboardDatabase
+   * 
+   * @param ldb the LeaderboardDatabase
    */
   public static void setLeaderboardDatabase(LeaderboardDatabase ldb) {
     leaderboard = ldb;
@@ -162,8 +166,8 @@ public final class LeaderboardHandler {
 
   /**
    * Statically changes the UserDatabase of the LeaderboardHandler.
-   * @param udb
-   *          the UserDatabase
+   * 
+   * @param udb the UserDatabase
    */
   public static void setUserDatabase(UserDatabase udb) {
     user = udb;
@@ -171,8 +175,8 @@ public final class LeaderboardHandler {
 
   /**
    * Statically changes the ChallengeDatabase of the LeaderboardHandler.
-   * @param cdb
-   *          the ChallengeDatabase
+   * 
+   * @param cdb the ChallengeDatabase
    */
   public static void setChallengeDatabase(ChallengeDatabase cdb) {
     challenge = cdb;
@@ -181,27 +185,23 @@ public final class LeaderboardHandler {
   /**
    * Gets top 20 leaderboard information based on the type of information
    * requested and the language it is being requested in.
-   * @param currUser
-   *          the user currently viewing the leaderboard
-   * @param challengeId
-   *          the challenge id of the challenge
-   * @param infoType
-   *          The info type we want. Should either be "aggregate", "efficiency",
-   *          "brevity", or "speed"
-   * @param language
-   *          The language we want to get the information for. For now, the only
-   *          supported languages are "java", "python", "javascript", and "ruby"
+   * 
+   * @param currUser the user currently viewing the leaderboard
+   * @param challengeId the challenge id of the challenge
+   * @param infoType The info type we want. Should either be "aggregate",
+   *          "efficiency", "brevity", or "speed"
+   * @param language The language we want to get the information for. For now,
+   *          the only supported languages are "java", "python", "javascript",
+   *          and "ruby"
    * @return A List of a List of Strings, where each inner List contains the
    *         following information in this order: username, language of
    *         solution, score of the solution, and the solution itself if the
    *         user has attempted the challenge. If the user has not attempted the
    *         challenge, there will be a message saying the user has not done the
    *         challenge.
-   * @throws SQLException
-   *           when there is an issue with the database at the time of
-   *           invokation of this method
-   * @throws IOException
-   *           when there is an issue reading a solution file
+   * @throws SQLException when there is an issue with the database at the time
+   *           of invokation of this method
+   * @throws IOException when there is an issue reading a solution file
    */
   public static List<List<String>> getLeaderboardInfo(String currUser,
       String challengeId, String infoType, String language)
@@ -236,7 +236,16 @@ public final class LeaderboardHandler {
         // get the solution if necessary
         if (leaderboard.isChallengeAttempedByUser(res.get(CHALLENGE_ID),
             currUser)) {
-          String suffix = (res.get(LANGUAGE).equals("python")) ? "py" : "js";
+
+          String suffix = "";
+          if (res.get(LANGUAGE).equals("python")) {
+            suffix = "py";
+          } else if (res.get(LANGUAGE).equals("javascript")) {
+            suffix = "js";
+          } else if (res.get(LANGUAGE).equals("java")) {
+            suffix = "java";
+          }
+
           String solutionPath = "challenges/" + res.get(CHALLENGE_ID) + "/"
               + res.get(LANGUAGE) + "/solutions/" + res.get(USERNAME) + "."
               + suffix;

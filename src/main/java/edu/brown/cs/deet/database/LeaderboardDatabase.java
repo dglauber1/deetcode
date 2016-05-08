@@ -417,7 +417,8 @@ public class LeaderboardDatabase implements AutoCloseable {
    */
   public double averageAggregateGivenIdLanguage(String challengeId,
       String language) throws SQLException {
-    String query = "SELECT AVG(aggregate) FROM solution WHERE challenge_id = ? AND language = ?;";
+    String query = "SELECT AVG(aggregate) FROM solution WHERE challenge_id = ? "
+        + "AND language = ? AND passed = 1;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
@@ -445,7 +446,8 @@ public class LeaderboardDatabase implements AutoCloseable {
    */
   public double averageEfficiencyGivenIdLanguage(String challengeId,
       String language) throws SQLException {
-    String query = "SELECT AVG(efficiency) FROM solution WHERE challenge_id = ? AND language = ?;";
+    String query = "SELECT AVG(efficiency) FROM solution WHERE challenge_id = ? AND language = ? "
+        + "AND passed = 1;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
@@ -473,7 +475,8 @@ public class LeaderboardDatabase implements AutoCloseable {
    */
   public double averageBrevityGivenIdLanguage(String challengeId,
       String language) throws SQLException {
-    String query = "SELECT AVG(num_lines) FROM solution WHERE challenge_id = ? AND language = ?;";
+    String query = "SELECT AVG(num_lines) FROM solution WHERE challenge_id = ? "
+        + "AND language = ? AND passed = 1;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
@@ -502,7 +505,8 @@ public class LeaderboardDatabase implements AutoCloseable {
    */
   public double averageTimeGivenIdLanguage(String challengeId, String language)
       throws SQLException {
-    String query = "SELECT AVG(time_to_solve) FROM solution WHERE challenge_id = ? AND language = ?;";
+    String query = "SELECT AVG(time_to_solve) FROM solution WHERE challenge_id = ? "
+        + "AND language = ? AND passed = 1;";
 
     try (PreparedStatement ps = conn.prepareStatement(query)) {
       ps.setString(1, challengeId);
