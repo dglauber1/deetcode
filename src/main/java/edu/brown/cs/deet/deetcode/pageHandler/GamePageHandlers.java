@@ -14,13 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import spark.ModelAndView;
-import spark.QueryParamsMap;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.TemplateViewRoute;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -38,6 +31,12 @@ import edu.brown.cs.deet.execution.javascript.JSCompiler;
 import edu.brown.cs.deet.execution.javascript.JSRunner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
 import edu.brown.cs.deet.execution.python.PyRunner;
+import spark.ModelAndView;
+import spark.QueryParamsMap;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateViewRoute;
 
 public final class GamePageHandlers {
   private static final MyCompiler pyCompiler = new PyCompiler();
@@ -46,61 +45,67 @@ public final class GamePageHandlers {
   private static final Runner jsRunner = new JSRunner();
   private static final Gson GSON = new Gson();
 
-  /**
-   * Handles loading the game page.
-   * @author el51
-   */
-  public static class GamePageHandler implements TemplateViewRoute {
-    @Override
-    public ModelAndView handle(Request req, Response res) {
-      try (ChallengeDatabase challenges = new ChallengeDatabase(Main.dbLoc)) {
-        String challengeId = req.params(":challenge-id");
-        // String challengeName = "test";
-        String promptPath = null;
-        String prompt = String.format("No challenge exists for %s!",
-            challengeId);
-        try {
-          if (challenges.doesChallengeExist(challengeId)) {
-            List<String> challengeData = challenges.getChallenge(challengeId);
-            promptPath = challengeData.get(2).concat("/description.txt");
-            StringBuilder promptBuilder = new StringBuilder();
-            try (BufferedReader r = new BufferedReader(new FileReader(
-                promptPath))) {
-              String line = r.readLine();
-              while (line != null) {
-                promptBuilder.append(line).append("\n");
-                line = r.readLine();
-              }
-              prompt = promptBuilder.toString();
-            } catch (FileNotFoundException e) {
-              System.out.println("File not found: " + promptPath);
-              System.exit(1);
-            } catch (IOException e) {
-              System.out.println("I/O Exception at: " + promptPath);
-              System.exit(1);
-            }
-          } else {
-            Map<String, Object> variables = ImmutableMap.of("errorMessage",
-                String.format("No challenge exists for %s!", challengeId));
-            return new ModelAndView(variables, "not-found.ftl");
-          }
-        } catch (SQLException e) {
-          System.out.println("GamePageHandler");
-          System.out.println(e.getMessage());
-          System.exit(1);
-        }
-        Map<String, Object> variables = ImmutableMap.of("title", "Game",
-            "prompt", prompt);
-        return new ModelAndView(variables, "game.ftl");
-      } catch (SQLException e1) {
-        // Eddie added this, but code shouldn't get here either way
-        System.out.println("GamePageHandler ChallengeDatabase");
-        System.exit(1);
-
-        return null; // ?
-      }
-    }
-  }
+	/**
+	 * Handles loading the game page.
+	 *
+	 * @author el51
+	 */
+	public static class GamePageHandler implements TemplateViewRoute {
+		@Override
+		public ModelAndView handle(Request req, Response res) {
+			try (ChallengeDatabase challenges = new ChallengeDatabase(Main.dbLoc);
+			  UserDatabase user = new UserDatabase(Main.dbLoc)) {
+				String challengeId = req.params(":challenge-id");
+				// String challengeName = "test";
+				String promptPath = null;
+				String prompt = String.format("No challenge exists for %s!",
+						challengeId);
+				try {
+					if (challenges.doesChallengeExist(challengeId)) {
+						List<String> challengeData = challenges
+								.getChallenge(challengeId);
+						promptPath = challengeData.get(2).concat(
+								"/description.txt");
+						StringBuilder promptBuilder = new StringBuilder();
+						try (BufferedReader r = new BufferedReader(
+								new FileReader(promptPath))) {
+							String line = r.readLine();
+							while (line != null) {
+								promptBuilder.append(line).append("\n");
+								line = r.readLine();
+							}
+							prompt = promptBuilder.toString();
+						} catch (FileNotFoundException e) {
+							System.out.println("File not found: " + promptPath);
+							System.exit(1);
+						} catch (IOException e) {
+							System.out.println("I/O Exception at: "
+									+ promptPath);
+							System.exit(1);
+						}
+					} else {
+						Map<String, Object> variables = ImmutableMap.of(
+								"errorMessage", String.format(
+										"No challenge exists for %s!",
+										challengeId));
+						return new ModelAndView(variables, "not-found.ftl");
+					}
+				} catch (SQLException e) {
+					System.out.println("GamePageHandler");
+					System.out.println(e.getMessage());
+					System.exit(1);
+				}
+				Map<String, Object> variables = ImmutableMap.of("title",
+						"Game", "prompt", prompt, "username",
+						user.getUsernameFromID(req.cookie("user")));
+				return new ModelAndView(variables, "game.ftl");
+			} catch (SQLException e1) {
+				System.out.println("GamePageHandler ChallengeDatabase");
+				System.exit(1);
+				return null;
+			}
+		}
+	}
 
   /**
    * Loads available language options for a particular challenge.

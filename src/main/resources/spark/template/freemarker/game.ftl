@@ -7,7 +7,7 @@
   </p>
   <br/>
   <div>
-	  <div id="CountDownTimer" data-timer="10" style="width: 300px; height: 150px; float: right"></div> 
+	  <div id="CountDownTimer" data-timer="120" style="width: 300px; height: 150px; float: right"></div> 
       <textarea id="userInput" cols="30" placeholder="function_name, [args, go, here]"></textarea>
   </div>
   <div style="width: 650px; height: 300px">

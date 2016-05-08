@@ -21,27 +21,18 @@
   <body>
   	<div id="wrapper" class="toggled">
         <!-- Sidebar -->
-        <div id="sidebar-wrapper">
-            <ul class="sidebar-nav">
-                <li class="sidebar-brand">
-                    <a href="#">
-                        DeetCode
-                    </a>
-                </li>
-                <li>
-                    <a href="#">Homepage</a>
-                </li>
-                <li>
-                    <a href="#">Categories</a>
-                </li>
-                <li>
-                    <a href="#">Your Profile</a>
-                </li>
-                <li>
-                    <a href="#">About</a>
-                </li>
-            </ul>
-        </div>
+        <nav class="navbar navbar-default navbar-static-top" id="main-nav">
+          <div class="container">
+            <a class="navbar-brand" href="#">DEETCode</a>
+            <div id="navbar" class="navbar-collapse">
+              <ul class="nav navbar-nav header-right-navbar" id="links">
+                <li><a href="/categories">Home</a></li>
+                <li><a href="/user/${username}">${username}</a></li>
+                <li><a href="/logout">Logout</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
         <!-- /#sidebar-wrapper -->
 	
         <!-- Page Content -->
@@ -49,7 +40,6 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a> 
                         <input type="submit" id="run-button" class="btn btn-default" value="Run code">	 	                           
                     </div>
                     <div class="col-lg-12">
@@ -70,14 +60,6 @@
    	 <script src="/codemirror/mode/javascript/javascript.js"></script>
    	 <script src="/vex-2.2.1/js/vex.combined.min.js"></script>
   	 <script>vex.defaultOptions.className = 'vex-theme-os';</script>
-  	 
-     <!-- Menu Toggle Script -->
-     <script>
-	     $("#menu-toggle").click(function(e) {
-	         e.preventDefault();
-	         $("#wrapper").toggleClass("toggled");
-	     });
-     </script>
      
      <!-- Load stub into the code editor -->
      <script>
