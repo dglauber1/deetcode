@@ -11,7 +11,7 @@
 
     <nav class="navbar navbar-default navbar-static-top" id="main-nav">
       <div class="container">
-        <a class="navbar-brand" href="#">DEETCode</a>
+        <a class="navbar-brand" href="#">DeetCode</a>
         <div id="navbar" class="navbar-collapse">
           <ul class="nav navbar-nav header-right-navbar" id="links">
             <li class="active"><a href="#">Home</a></li>
@@ -104,7 +104,7 @@
               <h4 class="modal-title text-center">Welcome to DEETCode!</h4>
           </div>
           <div class="modal-body">
-            <p>Welcome to DEETCode!</p>
+            <p>Welcome to DeetCode!</p>
             <p>Before you begin, we just need to know what to call you:</p>
             <form id="usernameForm" action="#" method="POST" autocomplete="off">       
               <div class="form-group">

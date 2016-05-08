@@ -23,7 +23,7 @@
         <!-- Sidebar -->
         <nav class="navbar navbar-default navbar-static-top" id="main-nav">
           <div class="container">
-            <a class="navbar-brand" href="#">DEETCode</a>
+            <a class="navbar-brand" href="#">DeetCode</a>
             <div id="navbar" class="navbar-collapse">
               <ul class="nav navbar-nav header-right-navbar" id="links">
                 <li><a href="/categories">Home</a></li>

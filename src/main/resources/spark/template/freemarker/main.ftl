@@ -10,8 +10,7 @@
     <link rel="stylesheet" href="/css/normalize.css">
     <link rel="stylesheet" href="/css/html5bp.css">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
-<!-- 	<link rel="stylesheet" href="/css/simple-sidebar.css">       
- -->    <link rel="stylesheet" href="/css/TimeCircles.css" />
+    <link rel="stylesheet" href="/css/TimeCircles.css" />
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/newChallenge.css">
     <link rel="stylesheet" href="/css/leaderboard.css">
@@ -24,7 +23,7 @@
         <!-- Sidebar -->
         <nav class="navbar navbar-default navbar-static-top" id="main-nav">
           <div class="container">
-            <a class="navbar-brand" href="#">DEETCode</a>
+            <a class="navbar-brand" href="#">DeetCode</a>
             <div id="navbar" class="navbar-collapse">
               <ul class="nav navbar-nav header-right-navbar" id="links">
                 <li><a href="/categories">Home</a></li>
