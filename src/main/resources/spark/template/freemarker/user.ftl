@@ -51,7 +51,7 @@
                 <thead>
                   <tr>
                     <th>Challenge</th>
-                    <th>Finished</th>
+                    <th>Finished on First Attempt?</th>
                     <th>Rank</th>
                     <th>Language</th>
                     <th>Stats</th>

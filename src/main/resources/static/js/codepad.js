@@ -20,6 +20,9 @@ var isFirstTime = false;
 // true if the user has submitted to the database already. false otherwise.
 var isSubmitted = false;
 
+//How much time the user has to solve the challenge
+var totalTime = $("#CountDownTimer").TimeCircles().getTime();
+
 /*
  * Warning message that executes when user tries to leave page.
  */
@@ -117,7 +120,6 @@ $(window).on('beforeunload', function () {
 											// display prompt
 											$("#promptContent").show();
 											// start timer
-											$("#CountDownTimer").attr("data-timer", "900");
 											$("#CountDownTimer").TimeCircles().start();
 										}
 									});
@@ -276,21 +278,22 @@ $("#run-button").click(function(e) {
 				var isTimeUp = currentTime <= 0;
 				var efficiency = responseObject.timeToTest;
 				var numLines = responseObject.numLines;
+				var timeToSolve = Math.round(totalTime - currentTime);
+				var aggregate = (Math.round(currentTime) + (100 - numLines) * 9 + (900 - efficiency)) * 1000;
 				deetResultString = "<b>Official Test Results</b><br/>" +
 				"Congratulations! You passed all of the official tests!<br>" +
 				"<i>Completed tests in " + efficiency + " milliseconds<br>" +
 				"Brevity: " + numLines + " total lines<br>" + 
-				"Time to solve: " +  (120 - currentTime) + " seconds</i><br/><br/>"; 
-				//TODO change 120 to whatever initial time was
+				"Time to solve: " +  timeToSolve + " seconds</i><br>" + 
+				"<b>Aggregate score: " + aggregate + "</b><br/><br/>"; 
 				var saveParameters = {"input" : userCode,
 						"language" : lang,
 						"challengeID" : challengeID,
 						"passed" : true,
 						"efficiency" : responseObject.timeToTest,
 						"numLines" : responseObject.numLines,
-						"timeToSolve" : 120 - currentTime, 
-						//Change 120 to whatever initial time was
-						"aggregate" : 100};
+						"timeToSolve" : timeToSolve, 
+						"aggregate" : aggregate};
 
 				if (isTimeUp) {
 					// time's up, don't allow user to submit to the leaderboard
@@ -324,8 +327,8 @@ $("#run-button").click(function(e) {
 							"challengeID" : challengeID,
 							"efficiency" : efficiency,
 							"numLines" : numLines,
-							"timeToSolve" : 120 - currentTime,
-							"aggregate" : 100 //TODO actually implement aggregate
+							"timeToSolve" : timeToSolve,
+							"aggregate" : aggregate
 							// TODO add timestamp and fix on backend!
 						};
 
