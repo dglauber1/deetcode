@@ -54,7 +54,8 @@ function statPopup() {
 
 $(".stats").click(function() {
 	statPopup();
-	var challengeName = $(this).parent().parent().children()[0].innerHTML;
+	var challengeName = $(this).parent().parent().children()[0].childNodes[0].innerHTML;
+	console.log(challengeName);
 	var user = $("title").text();
 	var language = $(this).parent().parent().children()[3].innerHTML;
 
@@ -72,11 +73,18 @@ $(".stats").click(function() {
         var averageStat = responseObject.average;
         var bestStat = responseObject.best;
 
-        var data = [
-        	{name: user,		value: userStat},
-        	{name: "Average",	value: averageStat},
-        	{name: "Best",		value: bestStat}
-        ];
+        if (userStat === "n/a") {
+        	var data = [
+	        	{name: "Average",	value: averageStat},
+	        	{name: "Best",		value: bestStat}
+	        ];
+        } else {
+        	var data = [
+	        	{name: user,		value: userStat},
+	        	{name: "Average",	value: averageStat},
+	        	{name: "Best",		value: bestStat}
+        	];
+        }
 
         drawStats("#aggregateChart", data);
 	});
@@ -95,11 +103,22 @@ $(".stats").click(function() {
         var averageStat = responseObject.average;
         var bestStat = responseObject.best;
 
-        var data = [
-        	{name: user,		value: userStat},
-        	{name: "Average",	value: averageStat},
-        	{name: "Best",		value: bestStat}
-        ];
+        console.log(userStat);
+        console.log(averageStat);
+        console.log(bestStat);
+
+        if (userStat === "n/a") {
+        	var data = [
+	        	{name: "Average",	value: averageStat},
+	        	{name: "Best",		value: bestStat}
+	        ];
+        } else {
+        	var data = [
+	        	{name: user,		value: userStat},
+	        	{name: "Average",	value: averageStat},
+	        	{name: "Best",		value: bestStat}
+        	];
+        }
 
         drawStats("#efficiencyChart", data);
 	});
@@ -118,11 +137,18 @@ $(".stats").click(function() {
         var averageStat = responseObject.average;
         var bestStat = responseObject.best;
 
-        var data = [
-        	{name: user,		value: userStat},
-        	{name: "Average",	value: averageStat},
-        	{name: "Best",		value: bestStat}
-        ];
+        if (userStat === "n/a") {
+        	var data = [
+	        	{name: "Average",	value: averageStat},
+	        	{name: "Best",		value: bestStat}
+	        ];
+        } else {
+        	var data = [
+	        	{name: user,		value: userStat},
+	        	{name: "Average",	value: averageStat},
+	        	{name: "Best",		value: bestStat}
+        	];
+        }
 
         drawStats("#brevityChart", data);
 	});
@@ -141,11 +167,18 @@ $(".stats").click(function() {
         var averageStat = responseObject.average;
         var bestStat = responseObject.best;
 
-        var data = [
-        	{name: user,		value: userStat},
-        	{name: "Average",	value: averageStat},
-        	{name: "Best",		value: bestStat}
-        ];
+        if (userStat === "n/a") {
+        	var data = [
+	        	{name: "Average",	value: averageStat},
+	        	{name: "Best",		value: bestStat}
+	        ];
+        } else {
+        	var data = [
+	        	{name: user,		value: userStat},
+	        	{name: "Average",	value: averageStat},
+	        	{name: "Best",		value: bestStat}
+        	];
+        }
 
         drawStats("#completionChart", data);
 	});

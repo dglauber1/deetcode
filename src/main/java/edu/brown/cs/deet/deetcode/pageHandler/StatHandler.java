@@ -123,7 +123,6 @@ public final class StatHandler {
               } else {
                 best = Double.parseDouble(topTwenty.get(0).get(2));
               }
-
               userScore = leaderboard.getAggregateForUserAndChallenge(
                   challengeId, username);
             } catch (SQLException e) {
@@ -194,7 +193,11 @@ public final class StatHandler {
           }
 
           Map<String, Object> variables = new HashMap<>();
-          variables.put("user", userScore);
+          if (userScore == -1.0) {
+            variables.put("user", "n/a");
+          } else {
+            variables.put("user", userScore);
+          }
           variables.put("average", average);
           variables.put("best", best);
 
@@ -206,6 +209,7 @@ public final class StatHandler {
           variables.put("best", "n/a");
 
           return GSON.toJson(variables);
+
         }
       } catch (NumberFormatException | SQLException e) {
         new AdminHandler.ExceptionPrinter().handle(e, req, res);
