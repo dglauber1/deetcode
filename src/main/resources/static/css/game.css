@@ -1,3 +1,27 @@
 .spider {
   float: right;
 }
+
+#run-button {
+  margin-top: 15px;
+}
+
+.time_circles {
+  margin-top: 30px;
+}
+
+#promptContent {
+  margin-top: 15px;
+}
+
+#indicator {
+  vertical-align: bottom;
+}
+
+#indicator:hover {
+
+}
+
+.CodeMirror.cm-s-default {
+  width: 100%;
+}
