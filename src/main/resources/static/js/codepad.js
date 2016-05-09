@@ -21,13 +21,13 @@ var isFirstTime = false;
 // true if the user has submitted to the database already. false otherwise.
 var isSubmitted = false;
 
-//How much time the user has to solve the challenge
-var totalTime = $("#CountDownTimer").TimeCircles().getTime();
+// true if we're counting down
+var isCountDown = true; 
 
-var initialTime = parseInt($("#CountDownTimer").attr("data-timer"));
+// var initialTime = parseInt($("#CountDownTimer").attr("data-timer"));
 var numSpidersToAdd = 9;
 var currSpiders = 2;
-var spiderIncrements = Math.floor(initialTime / numSpidersToAdd);
+var spiderIncrements = 40//Math.floor(initialTime / numSpidersToAdd);
 var spiderController = new SpiderController();
 var spidersOn = true;
 window.setInterval(function() {
@@ -49,6 +49,28 @@ $("#spider-toggle").change(function(e) {
 	}
 });
 
+$("#CountDownTimer").TimeCircles({ count_past_zero : false, time: { Days: { show: false }, Hours: { show: false } }});
+$("#CountDownTimer").TimeCircles().stop();
+var isTimeRemaining = true;
+$(function checkTimer() {
+	if (isCountDown) {
+		var timeLeft = $("#CountDownTimer").TimeCircles().getTime();
+		if (timeLeft <= 0) {
+	    	vex.dialog.alert("<b>Time's up!</b><br/>" +
+	    			"You can keep working, but your solution " +
+	    			"won't be submitted to the leaderboard.");
+	    	// spider time!
+	    	for (var i = 0; i < 150; i++) {
+	    		spiderController.addOne();
+	    	}
+		} else {
+			setTimeout(checkTimer, 1000);
+		}
+	}
+}); 
+
+//How much time the user has to solve the challenge
+var totalTime = $("#CountDownTimer").TimeCircles().getTime();
 
 /*
  * Warning message that executes when user tries to leave page.
@@ -164,7 +186,8 @@ $(window).on('beforeunload', function () {
 													        Days: { show: false },
 													        Hours: { show: false }
 													    }});
-														$("#CountUpTimer").show(); 
+														$("#CountUpTimer").show();
+														isCountDown = false; 
 													}
 													// get stub code or user code
 													var stubOrUserSolution = responseObject.code;
@@ -177,7 +200,9 @@ $(window).on('beforeunload', function () {
 															"numLines" : -1,
 															"timeToSolve" : -1, 
 															"aggregate" : -1};
-													saveSolution(leaderboardParameters, false);
+													if (isFirstTime) {
+														saveSolution(leaderboardParameters, false);
+													}
 													myCodeMirror.setOption("mode", lang);
 													myCodeMirror.getDoc().setValue(stubOrUserSolution);
 													// close modal window
@@ -366,7 +391,7 @@ $("#run-button").click(function(e) {
 						"timeToSolve" : timeToSolve, 
 						"aggregate" : aggregate};
 
-				if (isTimeUp || !isFirstTime) {
+				if (isTimeUp) {
 					// time's up, don't allow user to submit to the leaderboard
 					vex.dialog.open({
 						message: userResultString + "<br/><br/>" + deetResultString +
@@ -391,7 +416,8 @@ $("#run-button").click(function(e) {
 				} else {
 					if (!isFirstTime) {
 						vex.dialog.alert(userResultString + "<br/><br/>" + deetResultString);
-						saveSolution(saveParameters, false);
+						isSubmitted = true;
+						// saveSolution(saveParameters, false);
 						$("#CountDownTimer").TimeCircles().start();
 					} else {
 						var leaderboardParameters = {"language" : lang,
@@ -470,20 +496,3 @@ $("#run-button").click(function(e) {
 	});
 });
 
-$("#CountDownTimer").TimeCircles({ count_past_zero : false, time: { Days: { show: false }, Hours: { show: false } }});
-$("#CountDownTimer").TimeCircles().stop();
-var isTimeRemaining = true;
-$(function checkTimer() {
-	var timeLeft = $("#CountDownTimer").TimeCircles().getTime();
-	if (timeLeft <= 0) {
-    	vex.dialog.alert("<b>Time's up!</b><br/>" +
-    			"You can keep working, but your solution " +
-    			"won't be submitted to the leaderboard.");
-    	// spider time!
-    	for (var i = 0; i < 100; i++) {
-    		spiderController.addOne();
-    	}
-	} else {
-		setTimeout(checkTimer, 1000);
-	}
-}); 
