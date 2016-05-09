@@ -21,3 +21,7 @@
 #indicator:hover {
 
 }
+
+.CodeMirror.cm-s-default {
+  width: 100%;
+}
