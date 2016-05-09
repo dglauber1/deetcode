@@ -21,11 +21,13 @@ TABS = "<ul class='nav nav-tabs'> \
       <div class='row'> \
           <div class='col-xs-6 col-md-12' id='username'> \
           	The tabs show statistics based on the different metrics used to score a successful entry. \
+          	An entry is successful when the user completes the challenges on his/her first try. \
           	Each tab will compare the user's \
           	metric score to the average score of that metric over all successful submissions \
           	and to the best score of that metric. \
-          	Even if a user does not successfully complete the challenge on time, the user can \
-          	still view their stats (based on the unfinished, or later finished entry). \
+          	There will only be a bar for the user in the graph if the user successfully completed \
+          	the challenge on their first attempt. Otherwise, there will only be two bars, one \
+          	for the average stat and one for the best stat. \
           </div> \
         </div> \
     </div> \

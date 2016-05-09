@@ -2,7 +2,7 @@
 ORIG_CHALLENGE_DIR_NAME = "";
 
 // code to instantiate Code Mirror interface for stub code
-var pythonArea = $("#pythonStub")[0]; 
+var pythonArea = document.getElementById("pythonStub")
 var pythonEditor = CodeMirror.fromTextArea(pythonArea, 
 	{lineNumbers: true, 
 	 lineWrapping: false,
@@ -220,36 +220,36 @@ $("#newCategory").on('input', function(){
 });
 
 // loads all the current categories into the dropdown
-$(window).load(function() {
+// $(window).load(function() {
 	
-	var postParameters = {};
+// 	var postParameters = {};
 
-	$.post("/getallcategories", postParameters, function(responseJSON){
-    	responseObject = JSON.parse(responseJSON);
-        var categories = responseObject.categories;
+// 	$.post("/getallcategories", postParameters, function(responseJSON){
+//     	responseObject = JSON.parse(responseJSON);
+//         var categories = responseObject.categories;
 
-        var dropdown = $("#challengeSelect");
-        dropdown.find('option').remove().end();
+//         var dropdown = $("#challengeSelect");
+//         dropdown.find('option').remove().end();
 
-        // default value
-        dropdown.append($("<option></option>")
-        					.attr("value", "Pick a Category")
-        					.text("Pick a Category"));
+//         // default value
+//         dropdown.append($("<option></option>")
+//         					.attr("value", "Pick a Category")
+//         					.text("Pick a Category"));
 
-        for (var i = 0; i < categories.length; i++) {
-        	var category = categories[i];
-        	dropdown.append($("<option></option>")
-        					.attr("value", category)
-        					.text(category));
-        }
+//         for (var i = 0; i < categories.length; i++) {
+//         	var category = categories[i];
+//         	dropdown.append($("<option></option>")
+//         					.attr("value", category)
+//         					.text(category));
+//         }
 
-        dropdown.append($("<option></option>")
-        					.attr("value", "Add a new category")
-        					.text("Add a new category"));
-    });
+//         dropdown.append($("<option></option>")
+//         					.attr("value", "Add a new category")
+//         					.text("Add a new category"));
+//     });
 
-    ORIG_CHALLENGE_DIR_NAME = $("#pName")[0].value;
-});
+//     ORIG_CHALLENGE_DIR_NAME = $("#pName")[0].value;
+// });
 
 // submit for adding a challenge
 $("#submit").click(function() {

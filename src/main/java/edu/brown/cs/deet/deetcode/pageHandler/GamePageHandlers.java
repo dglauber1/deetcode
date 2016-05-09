@@ -448,6 +448,7 @@ public final class GamePageHandlers {
         CompilerRunnable compilerRunnable =
           new CompilerRunnable(file.getPath(), myCompiler, language);
         Thread compilerThread = new Thread(compilerRunnable);
+        SecurityManager old = System.getSecurityManager();
         compilerThread.start();
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 3000
@@ -455,6 +456,7 @@ public final class GamePageHandlers {
         }
         if (compilerThread.isAlive()) {
           compilerThread.stop();
+          System.setSecurityManager(old);
           Map<String, Object> variables =
             new ImmutableMap.Builder().put("error", false)
               .put("compiled", "Infinite loop detected").build();
@@ -556,6 +558,7 @@ public final class GamePageHandlers {
         CompilerRunnable compilerRunnable =
             new CompilerRunnable(file.getPath(), myCompiler, language);
         Thread compilerThread = new Thread(compilerRunnable);
+        SecurityManager old = System.getSecurityManager();
         compilerThread.start();
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 3000
@@ -563,6 +566,7 @@ public final class GamePageHandlers {
         }
         if (compilerThread.isAlive()) {
           compilerThread.stop();
+          System.setSecurityManager(old);
           Map<String, Object> variables =
             new ImmutableMap.Builder().put("error", false)
               .put("compiled", "Infinite loop detected").build();
@@ -584,12 +588,14 @@ public final class GamePageHandlers {
         RunnerRunnable runnerRunnable =
             new RunnerRunnable(file.getPath(), testInputList, myRunner);
         Thread runnerThread = new Thread(runnerRunnable);
+        old = System.getSecurityManager();
         runnerThread.start();
         start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 3000
             && runnerThread.isAlive()) {
         }
         if (runnerThread.isAlive()) {
+          System.setSecurityManager(old);
           runnerThread.stop();
           throw new TimeoutException("Infinite loop detected!");
         }

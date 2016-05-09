@@ -62,9 +62,23 @@
             <div class="dropdown">
               <select class="form-control" id="difficultyLevel">
                 <option value="unpicked">Pick a Difficulty Level</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
+                <#if info[0][3] == "easy">
+                  <option value="easy" selected>Easy</option>
+                <#else>
+                  <option value="easy">Easy</option>
+                </#if>
+                
+                <#if info[0][3] == "medium">
+                  <option value="medium" selected>Medium</option>
+                <#else>
+                  <option value="medium">Medium</option>
+                </#if>
+
+                <#if info[0][3] == "hard">
+                  <option value="hard" selected>Hard</option>
+                <#else>
+                  <option value="hard">Hard</option>
+                </#if>
               </select>
             </div>
           </div>
@@ -105,7 +119,7 @@
 
         <div class="row">
           <div class="col-xs-12 col-md-6">
-            <textarea class="form-control" id="description" rows="4">${info[0][3]}</textarea>
+            <textarea class="form-control" id="description" rows="4">${info[0][4]}</textarea>
           </div>
           <div class="col-xs-6 col-md-6" id="descriptionError"></div>
         </div>
