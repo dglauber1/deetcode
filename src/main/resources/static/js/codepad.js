@@ -9,6 +9,7 @@ var challengeID = url.substr(url.indexOf("/") + 1);
 // initial settings for CodeMirror input
 var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("codepad"), {
     lineNumbers: true,
+    indentWithTabs: true
 });
 
 // default language is Python
@@ -348,7 +349,7 @@ $("#run-button").click(function(e) {
 				var efficiency = responseObject.timeToTest;
 				var numLines = responseObject.numLines;
 				var timeToSolve = Math.round(totalTime - currentTime);
-				var aggregate = (Math.round(currentTime) + (100 - numLines) * 9 + (900 - efficiency)) * 1000;
+				var aggregate = (Math.round(currentTime) + (100 - numLines) * 9 + (900 - efficiency)) * 10;
 				deetResultString = "<b>Official Test Results</b><br/>" +
 				"Congratulations! You passed all of the official tests and exterminated the swarm!<br>" +
 				"<i>Completed tests in " + efficiency + " milliseconds<br>" +
@@ -364,7 +365,7 @@ $("#run-button").click(function(e) {
 						"timeToSolve" : timeToSolve, 
 						"aggregate" : aggregate};
 
-				if (isTimeUp) {
+				if (isTimeUp || !isFirstTime) {
 					// time's up, don't allow user to submit to the leaderboard
 					vex.dialog.open({
 						message: userResultString + "<br/><br/>" + deetResultString +
