@@ -7,6 +7,17 @@ import java.security.Permission;
 public class MySecurityManager extends SecurityManager {
 
   private boolean enabled = true;
+  private boolean java = false;
+
+  public MySecurityManager() {
+
+  }
+
+  public MySecurityManager(String language) {
+    if (language.equals("java")) {
+      java = true;
+    }
+  }
 
   public void enable() {
     enabled = true;
@@ -89,15 +100,15 @@ public class MySecurityManager extends SecurityManager {
 
   @Override
   public void checkWrite(FileDescriptor fd) {
-    // if (enabled == true)
-    // return;
+    if (java)
+      return;
     throw new SecurityException();
   }
 
   @Override
   public void checkWrite(String file) {
-    // if (enabled == true)
-    // return;
+    if (java)
+      return;
     throw new SecurityException();
   }
 

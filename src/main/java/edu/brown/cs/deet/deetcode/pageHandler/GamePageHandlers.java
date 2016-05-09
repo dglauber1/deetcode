@@ -446,7 +446,7 @@ public final class GamePageHandlers {
         int numLines = lnr.getLineNumber() + 1;
         lnr.close();
         CompilerRunnable compilerRunnable =
-          new CompilerRunnable(file.getPath(), myCompiler);
+          new CompilerRunnable(file.getPath(), myCompiler, language);
         Thread compilerThread = new Thread(compilerRunnable);
         compilerThread.start();
         long start = System.currentTimeMillis();
@@ -554,7 +554,7 @@ public final class GamePageHandlers {
         printWriter.print(code);
         printWriter.close();
         CompilerRunnable compilerRunnable =
-            new CompilerRunnable(file.getPath(), myCompiler);
+            new CompilerRunnable(file.getPath(), myCompiler, language);
         Thread compilerThread = new Thread(compilerRunnable);
         compilerThread.start();
         long start = System.currentTimeMillis();

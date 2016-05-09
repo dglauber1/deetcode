@@ -16,6 +16,7 @@ import edu.brown.cs.deet.execution.MyCompiler;
 import edu.brown.cs.deet.execution.Runner;
 import edu.brown.cs.deet.execution.RunnerRunnable;
 import edu.brown.cs.deet.execution.Tester;
+import edu.brown.cs.deet.execution.java.MyJavaCompiler;
 import edu.brown.cs.deet.execution.javascript.JSCompiler;
 import edu.brown.cs.deet.execution.javascript.JSRunner;
 import edu.brown.cs.deet.execution.python.PyCompiler;
@@ -46,6 +47,7 @@ public final class REPL {
     Runner pyRunner = new PyRunner();
     MyCompiler jsCompiler = new JSCompiler();
     Runner jsRunner = new JSRunner();
+    MyCompiler javaCompiler = new MyJavaCompiler();
     try (BufferedReader reader = new BufferedReader(inputReader)) {
       System.out.println("ready");
       while ((input = reader.readLine()) != null) {
@@ -73,6 +75,10 @@ public final class REPL {
           myCompiler = jsCompiler;
           myRunner = jsRunner;
           break;
+        case "java":
+          myCompiler = javaCompiler;
+          myRunner = null;
+          break;
         default:
           System.out
             .println("language must be either python, ruby, or javascript");
@@ -81,7 +87,7 @@ public final class REPL {
         }
         String solutionPath = parsedInput.get(1);
         CompilerRunnable runnable =
-          new CompilerRunnable(solutionPath, myCompiler);
+          new CompilerRunnable(solutionPath, myCompiler, language);
         Thread compilerThread = new Thread(runnable);
         compilerThread.start();
         long start = System.currentTimeMillis();
@@ -102,6 +108,10 @@ public final class REPL {
         }
         if (compileMessage != null) {
           System.out.println(compileMessage);
+          continue;
+        }
+        if (language.equals("java")) {
+          System.out.println("continuing");
           continue;
         }
         String testDir = parsedInput.get(2);
