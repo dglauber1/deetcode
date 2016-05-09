@@ -110,7 +110,8 @@ $(window).on('beforeunload', function () {
 			"incorrect solution and as time runs out. </p> " +
 			"<p> You can also submit your solution to the " +
 			"global leaderboard to see how you stack up against other " +
-			"bug hunters. You'll only be given this option the " +
+			"bug hunters. You'll be ranked on coding speed, coding efficiency, code brevity, " +
+			"and a special aggregate score. You'll only be given this option the " +
 			"<b>first</b> time you attempt the problem. <br>" +
 			"Don't fret, though: you'll still be allowed to fight bugs " +
 			"on subsequent attempts.</p>",
