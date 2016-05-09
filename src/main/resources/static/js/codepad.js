@@ -43,92 +43,133 @@ $(window).on('beforeunload', function () {
  * Loads the page and applies the user's chosen language setting.
  */
 (function(){
-	console.log("loading page ...");
 	vex.dialog.alert({
-		// Open loading screen
-		message: "Loading language options...",
-		buttons: [],
+		// Display instructions
 		overlayClosesOnClick: false,
-		afterOpen: function() {
-			// Retrieve available language options
-			$.post("/game/loadlang", {"challengeID" : challengeID}, function(responseJSON) {
-				var responseObject = JSON.parse(responseJSON);
-				if (responseObject.status != "SUCCESS") {
-					// There was an error
-					vex.dialog.alert("Error: " + responseObject.message);
-				} else {
-					var langs = responseObject.langs;
-					var langsString = "";
-					for (i = 0; i < langs.length; i++) {
-						langsString += ("<option value=\"" + langs[i] + "\">" 
-							+ langs[i].toUpperCase() + "</option>");
-					}
-					// Close loading screen
-					vex.close();
-					// Offer language options to user
-					vex.dialog.prompt({
-						overlayClosesOnClick: false,
-						message: "Select a language from the menu.",
-						input: "<select id=\"lang-select\">" +
-								langsString + 
-								"</select>",
-						buttons: [
-							$.extend({}, vex.dialog.buttons.YES, {
-							    text: "Let's get started!"
-							})
-						],
-						callback: function() {
-							// Retrieve stub code or user code from database
-							// Open loading screen
-							vex.dialog.alert({
-								message: "Loading the editor...",
-								buttons: [],
+		contentCSS: {
+            width: 750,
+        },
+		message: "<h1><b>Welcome to DEETcode!</b></h1>" + 
+			"<p> A swarm of bugs has taken over the world! " +
+			"You are the last line of defense, and it is up to " +
+			"you to save humanity. You'll have to solve a series " +
+			"of coding challenges to fight back. Kill those pesky " +
+			"bugs! </p> " +
+			"<h2><b>How to play:</b></h2> " +
+			"<p> Complete the coding challenge to kill the bugs. " +
+			"Be careful, though! The number of bugs will increase for every " +
+			"incorrect solution and as time runs out. </p> " +
+			"<p> You can also submit your solution to the " +
+			"global leaderboard to see how you stack up against other " +
+			"bug hunters. You'll only be given this option the " +
+			"<b>first</b> time you attempt the problem. <br>" +
+			"Don't fret, though: you'll still be allowed to fight bugs " +
+			"on subsequent attempts.</p>",
+		buttons: [
+			$.extend({}, vex.dialog.buttons.YES, {
+				text: "I'm ready!"
+			})
+		],
+		callback: function() {
+			console.log("loading page ...");
+			vex.dialog.alert({
+				// Open loading screen
+				message: "Loading language options...",
+				buttons: [],
+				overlayClosesOnClick: false,
+				afterOpen: function() {
+					// Retrieve available language options
+					$.post("/game/loadlang", {"challengeID" : challengeID}, function(responseJSON) {
+						var responseObject = JSON.parse(responseJSON);
+						if (responseObject.status != "SUCCESS") {
+							// There was an error
+							vex.dialog.alert("Error: " + responseObject.message);
+						} else {
+							var langs = responseObject.langs;
+							var langsString = "";
+							for (i = 0; i < langs.length; i++) {
+								langsString += ("<option value=\"" + langs[i] + "\">" 
+									+ langs[i].toUpperCase() + "</option>");
+							}
+							// Close loading screen
+							vex.close();
+							// Offer language options to user
+							vex.dialog.prompt({
 								overlayClosesOnClick: false,
-								afterOpen: function() {
-									lang = $("#lang-select").val();
-									console.log("Language selected: " + lang);
-									var loadParameters = {"challengeID" : challengeID, "language" : lang};
-									$.post("/game/load", loadParameters, function (responseJSON) {
-										responseObject = JSON.parse(responseJSON);
-										// set isFirstTime flag
-										isFirstTime = responseObject.isFirstTime;
-										if (responseObject.status != "SUCCESS") {
-											vex.dialog.alert("Error: " + responseObject.message);
-										} else {
-											// change indicator on screen
-											if (!isFirstTime) {
-												console.log("changing indicator");
-												$("#indicator")[0].innerHTML = 
-													"<a id=\"indicator\">This isn't your first attempt</a>";
-											}
-											// get stub code or user code
-											var stubOrUserSolution = responseObject.code;
-											// filler values
-											var leaderboardParameters = {"input" : stubOrUserSolution,
-													"language" : lang,
-													"challengeID" : challengeID,
-													"passed" : false,
-													"efficiency" : -1,
-													"numLines" : -1,
-													"timeToSolve" : -1, 
-													"aggregate" : -1};
-											saveSolution(leaderboardParameters, false);
-											myCodeMirror.setOption("mode", lang);
-											myCodeMirror.getDoc().setValue(stubOrUserSolution);
-											// close modal window
-											vex.close();
-											// display prompt
-											$("#promptContent").show();
-											// start timer
-											$("#CountDownTimer").TimeCircles().start();
+								message: "Select a language from the menu.",
+								input: "<select id=\"lang-select\">" +
+										langsString + 
+										"</select>",
+								buttons: [
+									$.extend({}, vex.dialog.buttons.YES, {
+									    text: "Let's get started!"
+									})
+								],
+								callback: function() {
+									// Retrieve stub code or user code from database
+									// Open loading screen
+									vex.dialog.alert({
+										message: "Loading the editor...",
+										buttons: [],
+										overlayClosesOnClick: false,
+										afterOpen: function() {
+											lang = $("#lang-select").val();
+											console.log("Language selected: " + lang);
+											var loadParameters = {"challengeID" : challengeID, "language" : lang};
+											$.post("/game/load", loadParameters, function (responseJSON) {
+												responseObject = JSON.parse(responseJSON);
+												// set isFirstTime flag
+												isFirstTime = responseObject.isFirstTime;
+												if (responseObject.status != "SUCCESS") {
+													vex.dialog.alert("Error: " + responseObject.message);
+												} else {
+													// change indicator on screen
+													if (!isFirstTime) {
+														console.log("changing indicators");
+														$("#indicator")[0].innerHTML = 
+															"<a id=\"indicator\">This isn't your first attempt</a>";
+														$("#timeInfo")[0].innerHTML = 
+															"<h4 id=\"timeInfo\">Time Elapsed</h4>";
+														$("#CountDownTimer").hide();
+														$("#CountDownTimer").TimeCircles().destroy();
+														$("#CountUpTimer").TimeCircles({ time: {
+													        Days: { show: false },
+													        Hours: { show: false }
+													    }});
+														$("#CountUpTimer").show(); 
+													}
+													// get stub code or user code
+													var stubOrUserSolution = responseObject.code;
+													// filler values
+													var leaderboardParameters = {"input" : stubOrUserSolution,
+															"language" : lang,
+															"challengeID" : challengeID,
+															"passed" : false,
+															"efficiency" : -1,
+															"numLines" : -1,
+															"timeToSolve" : -1, 
+															"aggregate" : -1};
+													saveSolution(leaderboardParameters, false);
+													myCodeMirror.setOption("mode", lang);
+													myCodeMirror.getDoc().setValue(stubOrUserSolution);
+													// close modal window
+													vex.close();
+													// display timer
+													$("#timers").show();
+													// display prompt
+													$("#promptContent").show();
+													// start timer
+													$("#CountDownTimer").TimeCircles().start();
+												}
+											});
 										}
-									});
+									})
 								}
-							})
+							});
 						}
-					});
+					});		
 				}
-			});		
+			})
 		}
 	})
 })();
