@@ -364,7 +364,7 @@ $("#run-button").click(function(e) {
 						"timeToSolve" : timeToSolve, 
 						"aggregate" : aggregate};
 
-				if (isTimeUp) {
+				if (isTimeUp || !isFirstTime) {
 					// time's up, don't allow user to submit to the leaderboard
 					vex.dialog.open({
 						message: userResultString + "<br/><br/>" + deetResultString +
