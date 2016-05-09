@@ -30,10 +30,10 @@ var spiderIncrements = Math.floor(initialTime / numSpidersToAdd);
 var spiderController = new SpiderController();
 var spidersOn = true;
 window.setInterval(function() {
-	// spiderController.options.minBugs += 1;
-	// spiderController.options.maxBugs += 1;
-	spiderController.addOne();
-	currSpiders += 1;
+	if (spidersOn) {
+		spiderController.addOne();
+		currSpiders += 1;
+	}
 }, spiderIncrements * 1000);
 
 $("#spider-toggle").change(function(e) {
@@ -300,6 +300,8 @@ $("#run-button").click(function(e) {
 			}
 			
 			if (passedAllTests) {
+				spiderController.killAll();
+				spidersOn = false;
 				var currentTime = $("#CountDownTimer").TimeCircles().getTime();
 				var isTimeUp = currentTime <= 0;
 				var efficiency = responseObject.timeToTest;
@@ -307,7 +309,7 @@ $("#run-button").click(function(e) {
 				var timeToSolve = Math.round(totalTime - currentTime);
 				var aggregate = (Math.round(currentTime) + (100 - numLines) * 9 + (900 - efficiency)) * 1000;
 				deetResultString = "<b>Official Test Results</b><br/>" +
-				"Congratulations! You passed all of the official tests!<br>" +
+				"Congratulations! You passed all of the official tests and exterminated the swarm!<br>" +
 				"<i>Completed tests in " + efficiency + " milliseconds<br>" +
 				"Brevity: " + numLines + " total lines<br>" + 
 				"Time to solve: " +  timeToSolve + " seconds</i><br>" + 
