@@ -1,3 +1,8 @@
 function add_one(n) {
-	return n + 1;
+	a = n
+	b = a
+	n = a
+	n *= 5
+	n /= 5
+	return a + b - n + 1
 }

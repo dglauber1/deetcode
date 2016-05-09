@@ -250,13 +250,10 @@ $("#newCategory").on('input', function(){
 
 //     ORIG_CHALLENGE_DIR_NAME = $("#pName")[0].value;
 // });
-<<<<<<< HEAD
-=======
 
 $(window).load(function() {
 	ORIG_CHALLENGE_DIR_NAME = $("#pName")[0].value;
 })
->>>>>>> 2293532d24492b73b9faf37288673aa034c7f1fd
 
 // submit for adding a challenge
 $("#submit").click(function() {
