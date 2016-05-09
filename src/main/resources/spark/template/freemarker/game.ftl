@@ -18,11 +18,11 @@
   </div>
 
   <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-8 col-md-8">
       Code editor: <br/>
       <textarea id="codepad"></textarea>
     </div>
-    <div class="col-lg-4 right-side">
+    <div class="col-lg-4 col-md-4 right-side">
       <div class="row">
         <div class="col-lg-12">
           <div id="timers" style="display: none">
