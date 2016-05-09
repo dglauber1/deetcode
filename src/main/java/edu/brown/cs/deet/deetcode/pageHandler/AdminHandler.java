@@ -231,6 +231,13 @@ public final class AdminHandler {
       String description = GSON.fromJson(qm.value("description"), String.class);
       String difficulty = GSON.fromJson(qm.value("difficulty"), String.class);
 
+      System.out.println(category);
+      System.out.println(pName);
+      System.out.println(origPName);
+      System.out.println(name);
+      System.out.println(description);
+      System.out.println(difficulty);
+
       Boolean success = false;
 
       try {
@@ -592,6 +599,7 @@ public final class AdminHandler {
 
     if (challenges.editChallenge(originalChallengeId, challengeId, name,
         newChallengeDir, category, difficulty)) {
+      System.out.println(1);
       // rename to new name (does this even if the id name is the same as
       // before)
       String origChallengeDir = "challenges/" + originalChallengeId;

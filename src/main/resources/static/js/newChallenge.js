@@ -339,6 +339,9 @@ $("#editSubmit").click(function() {
 	    jsStub: JSON.stringify(jsEditor.getValue())
     };
 
+    console.log(postParameters);
+
+
     $.post("/admin/edit/results", postParameters, function(responseJSON){
     	// unlike admin/add/results, does not clear every field
     	if ($("#pName")[0].value === ORIG_CHALLENGE_DIR_NAME) {
