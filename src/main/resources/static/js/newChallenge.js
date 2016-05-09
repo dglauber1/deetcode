@@ -251,6 +251,10 @@ $("#newCategory").on('input', function(){
 //     ORIG_CHALLENGE_DIR_NAME = $("#pName")[0].value;
 // });
 
+$(window).load(function() {
+	ORIG_CHALLENGE_DIR_NAME = $("#pName")[0].value;
+})
+
 // submit for adding a challenge
 $("#submit").click(function() {
 	// parse the rest of the input
@@ -338,6 +342,8 @@ $("#editSubmit").click(function() {
 	    jsOutput: JSON.stringify($("#jsOutput").val()),
 	    jsStub: JSON.stringify(jsEditor.getValue())
     };
+
+    console.log(postParameters);
 
     $.post("/admin/edit/results", postParameters, function(responseJSON){
     	// unlike admin/add/results, does not clear every field
@@ -479,8 +485,4 @@ $('.btnNext').click(function(){
 
 $('.btnPrevious').click(function(){
   $('.nav-tabs > .active').prev('li').find('a').tab('show');
-});
-
-$(window).on('beforeunload', function () {
-	return "Are you sure you want to leave? Your changes will not be saved.";
 });
