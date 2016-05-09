@@ -35,8 +35,8 @@ var BugDispatch = {
     options: {
         minDelay: 500,
         maxDelay: 10000,
-        minBugs: 3,
-        maxBugs: 20,
+        minBugs: 2,
+        maxBugs: 2,
         minSpeed: 6,
         maxSpeed: 10,
         maxLargeTurnDeg: 150,
@@ -169,6 +169,30 @@ var BugDispatch = {
             };
         }
 
+    },
+
+    addOne: function() {
+        var options = JSON.parse(JSON.stringify(this.options)),
+            b = SpawnBug();
+
+        options.wingsOpen = (this.options.canFly) ? ((Math.random() > 0.5) ? true : false) : true,
+            options.walkSpeed = this.random(this.options.minSpeed, this.options.maxSpeed),
+
+        b.initialize(this.transform, options);
+        this.bugs.push(b);
+
+        // fly the bug onto the page:
+        var that = this;
+        setTimeout((function(thebug) {
+            return function() {
+                if (that.options.canFly) {
+                    b.flyIn();
+                } else {
+                    b.walkIn();
+                }
+
+            };
+        }(b)), 0);
     },
 
     stop: function() {
@@ -345,8 +369,8 @@ var SpiderController = function() {
         maxDelay: 2000,
         minSpeed: 6,
         maxSpeed: 13,
-        minBugs: 3,
-        maxBugs: 10
+        minBugs: 2,
+        maxBugs: 2
     };
     this.options = mergeOptions(this.options, spiderOptions);
     this.initialize.apply(this, arguments);

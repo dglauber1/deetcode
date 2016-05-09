@@ -56,7 +56,6 @@ public final class LeaderboardHandler {
   public static class ShowLeaderboardHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
-      List<List<String>> leaderboardInfo = null;
       List<String> languages = null;
       String name = "";
       String currUserUsername = null;
@@ -69,28 +68,14 @@ public final class LeaderboardHandler {
         // get languages supported for this challenge
         languages = challenge.getLanguagesSupported(challengeId);
 
-        String primary;
-        if (languages.size() == 0) {
-          primary = "";
-        } else {
-          primary = languages.get(0);
-        }
-
-        // get leaderboard info
-        leaderboardInfo = getLeaderboardInfo(currUserUsername, challengeId,
-            "aggregate", primary);
-
         name = challenge.getNameFromId(challengeId);
       } catch (SQLException e) {
-        new ExceptionPrinter().handle(e, req, res);
-      } catch (IOException e) {
         new ExceptionPrinter().handle(e, req, res);
       }
 
       Map<String, Object> variables = new HashMap<>();
 
       variables.put("title", "Leaderboard");
-      variables.put("info", leaderboardInfo);
       variables.put("languages", languages);
       variables.put("name", name);
       variables.put("username", currUserUsername);

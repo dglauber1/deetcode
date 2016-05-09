@@ -57,5 +57,7 @@ $(".leaderboard-type").click(function(e) {
 	getLeaderboard(inputElement[0].id);
 });
 
+window.onload = getLeaderboard("aggregate");
+
 
 
