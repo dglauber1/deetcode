@@ -20,13 +20,11 @@ var isFirstTime = false;
 // true if the user has submitted to the database already. false otherwise.
 var isSubmitted = false;
 
-//How much time the user has to solve the challenge
-var totalTime = $("#CountDownTimer").TimeCircles().getTime();
-
-var initialTime = parseInt($("#CountDownTimer").attr("data-timer"));
+<<<<<<< HEAD
+var totalTime = parseInt($("#CountDownTimer").attr("data-timer"));
 var numSpidersToAdd = 9;
 var currSpiders = 2;
-var spiderIncrements = Math.floor(initialTime / numSpidersToAdd);
+var spiderIncrements = Math.floor(totalTime / numSpidersToAdd);
 var spiderController = new SpiderController();
 var spidersOn = true;
 window.setInterval(function() {
@@ -47,7 +45,10 @@ $("#spider-toggle").change(function(e) {
 		spidersOn = true;
 	}
 });
-
+=======
+//How much time the user has to solve the challenge
+var totalTime = $("#CountDownTimer").TimeCircles().getTime();
+>>>>>>> f3efb6465c6ccd3ff863d5b5154654b6bf14e630
 
 /*
  * Warning message that executes when user tries to leave page.
