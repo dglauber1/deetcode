@@ -74,8 +74,8 @@
 	
      
    	 <script src="/js/main.js"></script>
-     <script src="/js/timer.js"></script>
-     <script src="/js/Bug/bug.js"></script>
+<!--      <script src="/js/timer.js"></script>
+ -->     <script src="/js/Bug/bug.js"></script>
      <script src="/js/codepad.js"></script>
   </body>
 </html>
