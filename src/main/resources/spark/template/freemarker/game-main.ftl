@@ -40,13 +40,11 @@
         <div id="page-content-wrapper">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-lg-12">
-                        <input type="submit" id="run-button" class="btn btn-default" value="Run code">	 	
-                          <input type="checkbox" class="pull-right" id="spider-toggle" checked data-toggle="toggle" data-style="spider" data-on="Spiders On" data-off="Spiders Off">
-                    </div>
-                    <div class="col-lg-12">
-                         ${content}
-                    </div>
+                  <div class="col-lg-1"></div>
+                  <div class="col-lg-10">
+                     ${content}
+                  </div>
+                  <div class="col-lg-1"></div>
                 </div>
             </div>
         </div>

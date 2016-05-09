@@ -153,8 +153,9 @@ $(window).on('beforeunload', function () {
 													// change indicator on screen
 													if (!isFirstTime) {
 														console.log("changing indicators");
-														$("#indicator")[0].innerHTML = 
-															"<a id=\"indicator\">This isn't your first attempt</a>";
+														// $("#indicator")[0].innerHTML = 
+														// 	"<a id=\"indicator\">This isn't your first attempt</a>";
+														$("#indicator").html("This is NOT your first attempt").css("color", "#795548");
 														$("#timeInfo")[0].innerHTML = 
 															"<h4 id=\"timeInfo\">Time Elapsed</h4>";
 														$("#CountDownTimer").hide();
