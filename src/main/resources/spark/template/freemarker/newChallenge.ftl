@@ -21,7 +21,13 @@
       <div class="row">
         <div class="col-xs-6 col-md-6">
           <div class="dropdown">
-            <select class="form-control" id="challengeSelect"></select>
+            <select class="form-control" id="challengeSelect">
+              <option value="Pick a Category">Pick a Category</option>
+              <#list categories as category>
+                <option value="${category}">${category}</option>
+              </#list>
+              <option value="Add a new category">Add a new category</option>   
+            </select>
           </div>
         </div>
         <div class="col-xs-6 col-md-6" id="categoryError"></div>

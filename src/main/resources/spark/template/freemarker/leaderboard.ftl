@@ -30,8 +30,12 @@
         <div class="col-xs-12 col-md-2">
           <div class="dropdown">
             <select class="form-control" id="language">
-              <#list languages as language>
-                <option value="${language?cap_first}">${language?cap_first}</option>   
+              <#list 0..languages?size-1 as i>
+                <#if i == 0>
+                  <option value="${languages[i]?cap_first}" selected>${languages[i]?cap_first}</option>
+                <#else>
+                  <option value="${languages[i]?cap_first}">${languages[i]?cap_first}</option>
+                </#if>
               </#list>
             </select>
           </div>
@@ -50,14 +54,7 @@
           </tr>
         </thead>
         <tbody>
-          <#list info as entry>
-            <tr>
-              <td><a href=${"/user/" + entry[0]}>${entry[0]}</a></td>
-              <td>${entry[1]?cap_first}</td>
-              <td><span class="label label-success">${entry[2]}</span>
-              <td><button type="button" class="btn btn-primary" value="${entry[3]}" onclick="popup(this)">Solution</button></td>
-            </tr>  
-          </#list>
+
         </tbody>
       </table>
     </div>
