@@ -149,6 +149,9 @@ a.list-group-item.category {
   margin-right: 10px;
 }
 
-
+.glyphicon {
+  color: #4CAF50;
+  margin-right: 5px;
+}
 
 

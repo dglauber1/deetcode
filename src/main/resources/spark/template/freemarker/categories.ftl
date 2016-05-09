@@ -78,6 +78,7 @@
                       <span class="pull-right">
                         <button class="leaderboard-button">Leaderboard</button>
                       </span>
+                      <span class="glyphicon glyphicon-ok"></span>
                     </#if>
                     ${challenge.name?capitalize}
                     <#if challenge.difficulty == "easy">
