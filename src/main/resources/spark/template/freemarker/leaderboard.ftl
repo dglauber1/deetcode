@@ -63,8 +63,5 @@
       <div class="col-xs-12 col-md-12">No such challenge exists.</div>
     </div>
   </#if>
-  <script>
-    <#include "/js/leaderboard.js">
-  </script>
 </#assign>
 <#include "main.ftl">

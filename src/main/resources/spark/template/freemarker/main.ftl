@@ -70,5 +70,6 @@
      <script src="/js/newChallenge.js"></script>
      <!-- <script src="/js/leaderboard.js"></script> -->
      <script src="/js/user.js"></script>
+     <script src="/js/leaderboard.js"></script>
   </body>
 </html>

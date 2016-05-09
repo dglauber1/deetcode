@@ -250,10 +250,13 @@ $("#newCategory").on('input', function(){
 
 //     ORIG_CHALLENGE_DIR_NAME = $("#pName")[0].value;
 // });
+<<<<<<< HEAD
+=======
 
 $(window).load(function() {
 	ORIG_CHALLENGE_DIR_NAME = $("#pName")[0].value;
 })
+>>>>>>> 2293532d24492b73b9faf37288673aa034c7f1fd
 
 // submit for adding a challenge
 $("#submit").click(function() {
@@ -342,8 +345,6 @@ $("#editSubmit").click(function() {
 	    jsOutput: JSON.stringify($("#jsOutput").val()),
 	    jsStub: JSON.stringify(jsEditor.getValue())
     };
-
-    console.log(postParameters);
 
     $.post("/admin/edit/results", postParameters, function(responseJSON){
     	// unlike admin/add/results, does not clear every field

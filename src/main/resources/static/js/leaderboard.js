@@ -13,7 +13,7 @@ function getLeaderboard(id) {
 	};
 
 	$.post("/leaderboard/" + challengeId + "/getInfo", postParameters, function(responseJSON){
-		var table = $("#board");
+		var table = $("#board")[0];
 		console.log(table);
 
 		// delete current rows
