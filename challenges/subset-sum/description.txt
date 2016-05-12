@@ -1,1 +1,1 @@
-Subset sum
+Given a sum, s, and a list, l, determine whether the list contains a subset that sums to s. Return a boolean.
