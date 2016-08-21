@@ -28,7 +28,7 @@
         <div class="col-md-10 col-md-offset-1">
           <div class="page-header" id="title">
             <h2>
-              Browse By Category
+              Browse Challenges By Category
               <#if !isAdmin>
                 <div class="dropdown pull-right">
                   <select class="selectpicker" data-width="150px" id="status-filter" title="Filter By Status">
